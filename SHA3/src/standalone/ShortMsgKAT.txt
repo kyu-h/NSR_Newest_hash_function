@@ -35,7 +35,7 @@ Msg = 4C
 MD = ??
 
 Len = 8
-Msg = CC234
+Msg = 7768
 MD = ??
 
 Len = 9
@@ -67,7 +67,7 @@ Msg = CB6F
 MD = ??
 
 Len = 16
-Msg = 41FB
+Msg = 7768
 MD = ??
 
 Len = 17

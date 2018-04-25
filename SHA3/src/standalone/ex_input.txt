@@ -1,0 +1,11 @@
+Algo_ID = SHA3-224
+Message
+""
+"j"
+"who"
+"hashfunc digest"
+"ksadlknflkvlkzqwqwrepozxcvm.qewr"
+"defghijklmlasndkflnk3qelkvcxn12930809234lksvpowemlkrxcvoiwer"
+"message authentication code 12VLKNWQKLNVCLKMLASDKMLQW297319891230"
+"12345678901234567890123456789012345678901234567890123456789012345678901234567890"
+"a"

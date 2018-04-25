@@ -1,45 +1,3 @@
-/*
- Copyright (c) 2008, Lawrence E. Bassham, National Institute of Standards and Technology (NIST),
- for the original version (available at http://csrc.nist.gov/groups/ST/hash/sha-3/documents/KAT1.zip)
-
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
-    * Neither the name of the NIST nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
-
-/*
-Contributions were made by the Keccak Team, namely, Guido Bertoni, Joan Daemen,
-Michaël Peeters, Gilles Van Assche and Ronny Van Keer,
-hereby denoted as "the implementer".
-
-For more information, feedback or questions, please refer to our website:
-https://keccak.team/
-
-To the extent possible under law, the implementer has waived all copyright
-and related or neighboring rights to the contributed source code in this file.
-http://creativecommons.org/publicdomain/zero/1.0/
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -104,13 +62,16 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
     BitSequence Msg[256];
     BitSequence Squeezed[SqueezingOutputLength/8];
     FILE        *fp_in, *fp_out;
+    char string[MAX_MARKER_LEN] = {0, };
+    int Num_of_Line = 0;
+
 
     if ((squeezedOutputLength > SqueezingOutputLength) || (hashbitlen > SqueezingOutputLength)) {
         printf("Requested output length too long.\n");
         return KAT_HASH_ERROR;
     }
 
-    if ( (fp_in = fopen("C:\\Users\\kyu\\eclipse-workspace\\SHA3\\src\\standalone\\ShortMsgKAT.txt", "r")) == NULL ) {
+    if ( (fp_in = fopen("C:\\Users\\kyu\\eclipse-workspace\\SHA3\\src\\standalone\\ex_input.txt", "r")) == NULL ) {
         printf("Couldn't open <ShortMsgKAT.txt> for read\n");
         return KAT_FILE_OPEN_ERROR;
     }
@@ -121,32 +82,51 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
     }
     fprintf(fp_out, "# %s\n", description);
 
-    do {
-        if ( FindMarker(fp_in, "Len = ") )
-            fscanf(fp_in, "%d", &msglen);
-        else {
-            break;
-        }
-        msgbytelen = (msglen+7)/8;
+    if(FindMarker(fp_in, "SHA3-224")){
+		printf("SHA3-224 ");
+		description = "SHA3-224";
+	}
 
-        if ( !ReadHex(fp_in, Msg, msgbytelen, "Msg = ") ) {
-            printf("ERROR: unable to read 'Msg' from <ShortMsgKAT.txt>\n");
-            return KAT_DATA_ERROR;
-        }
-        if ((msglen % 8) == 0) {
-            fprintf(fp_out, "\nLen = %d\n", msglen);
-            fprintBstr(fp_out, "Msg = ", Msg, msgbytelen);
+	if(FindMarker(fp_in, "Message")){
+		printf("Start!!\n");
+	}
 
-            if (hashbitlen > 0) {
-                Keccak(rate, capacity, Msg, msglen/8, delimitedSuffix, Squeezed, hashbitlen/8);
-                fprintBstr(fp_out, "MD = ", Squeezed, hashbitlen/8);
-            }
-            else {
-                Keccak(rate, capacity, Msg, msglen/8, delimitedSuffix, Squeezed, squeezedOutputLength/8);
-                fprintBstr(fp_out, "Squeezed = ", Squeezed, squeezedOutputLength/8);
-            }
-        }
-    } while ( 1 );
+    while(!feof(fp_in)){
+    	int i, o;
+
+    	fgets(string, MAX_MARKER_LEN, fp_in);
+
+    	for(i = 0, o = 0 ; i < strlen(string) ; i++)
+		{   // remove " character
+			if(string[i] != '\"')
+			{
+				string[o] = string[i];
+				o++;
+			}
+		}
+		string[o-1] = '\0';   // add NULL character at the end of String
+
+    	msglen = strlen(string);
+
+    	printf("string : %s\n", string);
+
+    	if(Num_of_Line >0){
+    		fprintf(fp_out, "\nLen = %d\n", msglen * 8);
+			fprintBstr(fp_out, "Msg = ", string, msglen);
+
+			if (hashbitlen > 0) {
+				Keccak(rate, capacity, string, msglen, delimitedSuffix, Squeezed, hashbitlen/8);
+				fprintBstr(fp_out, "MD = ", Squeezed, hashbitlen/8);
+			}
+			else {
+				Keccak(rate, capacity, string, msglen, delimitedSuffix, Squeezed, squeezedOutputLength/8);
+				fprintBstr(fp_out, "Squeezed = ", Squeezed, squeezedOutputLength/8);
+			}
+    	}
+
+    	Num_of_Line++;
+    }
+
     printf("finished ShortMsgKAT for <%s>\n", fileName);
 
     fclose(fp_in);
