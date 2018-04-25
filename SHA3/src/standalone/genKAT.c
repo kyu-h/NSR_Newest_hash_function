@@ -10,7 +10,7 @@ typedef unsigned char BitSequence;
 typedef size_t BitLength;
 typedef enum { SUCCESS = 0, FAIL = 1, BAD_HASHLEN = 2 } HashReturn;
 
-#define MAX_MARKER_LEN      50
+#define MAX_MARKER_LEN      4096
 #define SUBMITTER_INFO_LEN  128
 
 typedef enum { KAT_SUCCESS = 0, KAT_FILE_OPEN_ERROR = 1, KAT_HEADER_ERROR = 2, KAT_DATA_ERROR = 3, KAT_HASH_ERROR = 4 } STATUS_CODES;
@@ -19,7 +19,7 @@ typedef enum { KAT_SUCCESS = 0, KAT_FILE_OPEN_ERROR = 1, KAT_HEADER_ERROR = 2, K
 
 #define SqueezingOutputLength 4096
 
-STATUS_CODES    genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimitedSuffix, unsigned int hashbitlen, unsigned int squeezedOutputLength, const char *fileName, const char *description);
+STATUS_CODES    genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimitedSuffix, unsigned int hashbitlen, unsigned int squeezedOutputLength, const char *inputFileName, const char *outputFileName, const char *description);
 int     FindMarker(FILE *infile, const char *marker);
 void    fprintBstr(FILE *fp, char *S, BitSequence *A, int L);
 void convertShortMsgToPureLSB(void);
@@ -37,41 +37,48 @@ genKAT_main(void)
 	FILE *fp_in;
 	char strTemp[255];
 	char *pStr;
+	char *HashName[6] = {"SHA3-224", "SHA3-256", "SHA3-384", "SHA3-512", "SHAKE128", "SHAKE256"};
+	char inputFileAddress[256], outputFileAddress[256];
 
-	if ( (fp_in = fopen("C:\\Users\\kyu\\eclipse-workspace\\SHA3\\src\\standalone\\ex_input.txt", "r")) == NULL ) {
-		printf("Couldn't open <ShortMsgKAT.txt> for read\n");
-		return KAT_FILE_OPEN_ERROR;
-	}
+	for(int i=0; i<6; i++){
+		sprintf(inputFileAddress, "Hash_testvectors/%s.txt", HashName[i]);
+		sprintf(outputFileAddress, "Hash_testvectors/%s_rsp.txt", HashName[i]);
 
-	pStr = fgets(strTemp, sizeof(strTemp), fp_in);
-	printf("%s", pStr);
+		if ( (fp_in = fopen(inputFileAddress, "r")) == NULL ) {
+			printf("Couldn't open <ShortMsgKAT.txt> for read\n");
+			return KAT_FILE_OPEN_ERROR;
+		}
 
-	if(!strcmp(pStr, "Algo_ID = SHA3-224\n")){
-		genShortMsgHash(1152, 448, 0x06, 224, 0,
-			"C:\\Users\\kyu\\eclipse-workspace\\SHA3\\src\\standalone\\ShortMsgKAT_SHA3-224.txt",
-			"Algo_ID = SHA3-224");
-	}else if(!strcmp(pStr, "Algo_ID = SHA3-256\n")){
-		genShortMsgHash(1088, 512, 0x06, 256, 0,
-			"C:\\Users\\kyu\\eclipse-workspace\\SHA3\\src\\standalone\\ShortMsgKAT_SHA3-256.txt",
-			"Algo_ID = SHA3-256");
-	}else if(!strcmp(pStr, "Algo_ID = SHA3-384\n")){
-		genShortMsgHash(832, 768, 0x06, 384, 0,
-			"C:\\Users\\kyu\\eclipse-workspace\\SHA3\\src\\standalone\\ShortMsgKAT_SHA3-384.txt",
-			"Keccak(input|01)[r=832, c=768] truncated to 384 bits, or SHA3-384 as in FIPS 202 standard");
-	}else if(!strcmp(pStr, "Algo_ID = SHA3-512\n")){
-		genShortMsgHash(576, 1024, 0x06, 512, 0,
-			"C:\\Users\\kyu\\eclipse-workspace\\SHA3\\src\\standalone\\ShortMsgKAT_SHA3-512.txt",
-			"Keccak(input|01)[r=576, c=1024] truncated to 512 bits, or SHA3-512 as in FIPS 202 standard");
-	}else if(!strcmp(pStr, "Algo_ID = SHAKE128\n")){
-		genShortMsgHash(1344, 256, 0x1F, 0, 4096,
-			"C:\\Users\\kyu\\eclipse-workspace\\SHA3\\src\\standalone\\ShortMsgKAT_SHAKE128.txt",
-			"Keccak(SakuraSequential|11)[r=1344, c=256], or SHAKE128 as in FIPS 202 standard");
-	}else if(!strcmp(pStr, "Algo_ID = SHAKE256\n")){
-		genShortMsgHash(1088, 512, 0x1F, 0, 4096,
-			"C:\\Users\\kyu\\eclipse-workspace\\SHA3\\src\\standalone\\ShortMsgKAT_SHAKE256.txt",
-			"Keccak(SakuraSequential|11)[r=1088, c=512], or SHAKE256 as in FIPS 202 standard");
-	}else {
-		printf("Error!\n");
+		pStr = fgets(strTemp, sizeof(strTemp), fp_in);
+		printf("%s", pStr);
+
+		if(!strcmp(pStr, "Algo_ID = SHA3-224\n")){
+			genShortMsgHash(1152, 448, 0x06, 224, 0,
+				inputFileAddress,outputFileAddress,
+				"Algo_ID = SHA3-224");
+		}else if(!strcmp(pStr, "Algo_ID = SHA3-256\n")){
+			genShortMsgHash(1088, 512, 0x06, 256, 0,
+				inputFileAddress,outputFileAddress,
+				"Algo_ID = SHA3-256");
+		}else if(!strcmp(pStr, "Algo_ID = SHA3-384\n")){
+			genShortMsgHash(832, 768, 0x06, 384, 0,
+					inputFileAddress,outputFileAddress,
+				"Algo_ID = SHA3-384");
+		}else if(!strcmp(pStr, "Algo_ID = SHA3-512\n")){
+			genShortMsgHash(576, 1024, 0x06, 512, 0,
+					inputFileAddress,outputFileAddress,
+				"Algo_ID = SHA3-512");
+		}else if(!strcmp(pStr, "Algo_ID = SHAKE128\n")){
+			genShortMsgHash(1344, 256, 0x1F, 0, 4096,
+					inputFileAddress,outputFileAddress,
+				"Algo_ID = SHAKE128");
+		}else if(!strcmp(pStr, "Algo_ID = SHAKE256\n")){
+			genShortMsgHash(1088, 512, 0x1F, 0, 4096,
+					inputFileAddress,outputFileAddress,
+				"Algo_ID = SHAKE256");
+		}else {
+			printf("Error!\n");
+		}
 	}
 
 	fclose(fp_in);
@@ -79,40 +86,50 @@ genKAT_main(void)
 }
 
 STATUS_CODES
-genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimitedSuffix, unsigned int hashbitlen, unsigned int squeezedOutputLength, const char *fileName, const char *description)
+genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimitedSuffix, unsigned int hashbitlen, unsigned int squeezedOutputLength, const char *inputFileName, const char *outputFileName, const char *description)
 {
     int         msglen, msgbytelen;
     BitSequence Msg[256];
     BitSequence Squeezed[SqueezingOutputLength/8];
     FILE *fp_in, *fp_out;
-    char string[MAX_MARKER_LEN] = {0, };
-    int Num_of_Line = 0;
+    char string[1000001] = {0, };
+    char strDec[255];
+    char str;
+    int nCount=0;
+    /*char *HashName[6] = {"SHA3-224", "SHA3-256", "SHA3-384", "SHA3-512", "SHAKE128", "SHAKE256"};
+    char fileAddress[256];
 
+    for(int i=0; i<6; i++){
+    	sprintf(fileAddress, "Hash_testvectors/%s.txt", HashName[i]);
+		printf("%s\n", fileAddress);
+    }*/
 
     if ((squeezedOutputLength > SqueezingOutputLength) || (hashbitlen > SqueezingOutputLength)) {
         printf("Requested output length too long.\n");
         return KAT_HASH_ERROR;
     }
 
-    if ( (fp_in = fopen("C:\\Users\\kyu\\eclipse-workspace\\SHA3\\src\\standalone\\ex_input.txt", "r")) == NULL ) {
+    if ( (fp_in = fopen(inputFileName, "r")) == NULL ) {
         printf("Couldn't open <ShortMsgKAT.txt> for read\n");
         return KAT_FILE_OPEN_ERROR;
     }
 
-    if ( (fp_out = fopen(fileName, "w")) == NULL ) {
-        printf("Couldn't open <%s> for write\n", fileName);
-        return KAT_FILE_OPEN_ERROR;
-    }
+    fp_out = fopen(outputFileName, "w");
     fprintf(fp_out, "%s\n", description);
 
 	if(FindMarker(fp_in, "Message")){
-		printf("Started ShortMsgKAT for <%s>\n", fileName);
+		printf("Started ShortMsgKAT for <%s>\n", inputFileName);
 	}
+	fscanf(fp_in, " %c %d\n", &str, &nCount);
+	//printf("count : %d\n", nCount);
 
-    while(!feof(fp_in)){
+	//while(!feof(fp_in))
+    for(int x=0; x<nCount; x++){
     	int i, o;
 
     	fgets(string, MAX_MARKER_LEN, fp_in);
+
+    	//printf("1string %d: %s\n", strlen(string), string);
 
     	for(i = 0, o = 0 ; i < strlen(string) ; i++){   // remove " character
 			if(string[i] != '\"'){
@@ -120,30 +137,40 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
 				o++;
 			}
 		}
-		string[o-1] = '\0';   // add NULL character at the end of String
 
-    	msglen = strlen(string);
-
-    	if(Num_of_Line >0){
-    		printf("string : %s\n", string);
-
-    		fprintf(fp_out, "\nLen = %d\n", msglen * 8);
-			//fprintBstr(fp_out, "Msg = ", string, msglen);
-
-			if (hashbitlen > 0) {
-				Keccak(rate, capacity, string, msglen, delimitedSuffix, Squeezed, hashbitlen/8);
-				fprintBstr(fp_out, "", Squeezed, hashbitlen/8);
-			}
-			else {
-				Keccak(rate, capacity, string, msglen, delimitedSuffix, Squeezed, squeezedOutputLength/8);
-				fprintBstr(fp_out, "Squeezed = ", Squeezed, squeezedOutputLength/8);
-			}
+    	if ((strlen(string) == 3) && (string[strlen(string)-1] == '\"')){
+    		string[o] = '\0';
+    	}else {
+    		string[o-1] = '\0';   // add NULL character at the end of String
     	}
 
-    	Num_of_Line++;
+    	msglen = strlen(string);
+    	printf("string : %s\n", string);
+
+    	if(strlen(string) == 1 && string[0] == 'a'){ // use only "a" million
+
+    		for(int temp = 0 ; temp < 1000000 ; temp++){
+    			string[temp] = 'a';
+    		}
+    		string[1000000] = '\0';
+    		msglen = strlen(string);
+    		//databitlen = datalen * 8;
+    	}
+
+		//fprintf(fp_out, "\nLen = %d\n", msglen * 8);
+		//fprintBstr(fp_out, "Msg = ", string, msglen);
+
+		if (hashbitlen > 0) {
+			Keccak(rate, capacity, string, msglen, delimitedSuffix, Squeezed, hashbitlen/8);
+			fprintBstr(fp_out, "", Squeezed, hashbitlen/8);
+		}
+		else {
+			Keccak(rate, capacity, string, msglen, delimitedSuffix, Squeezed, squeezedOutputLength/8);
+			fprintBstr(fp_out, "", Squeezed, squeezedOutputLength/8);
+		}
     }
 
-    printf("finished ShortMsgKAT for <%s>\n", fileName);
+    printf("finished ShortMsgKAT for <%s>\n", inputFileName);
 
     fclose(fp_in);
     fclose(fp_out);
