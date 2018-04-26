@@ -117,18 +117,16 @@ int main(void){
         printf("Test %d:\n", i + 1);
 
 		
-		hmac_sha224(keys[i], keys_len[i], (unsigned char *) messages[i],
-					strlen(messages[i]), mac, mac_224_size);
+		hmac_sha224(keys[i], keys_len[i], (unsigned char *) messages[i],strlen(messages[i]), mac, mac_224_size);
 		test(vectors[i], mac, mac_224_size);
-		hmac_sha256(keys[i], keys_len[i], (unsigned char *) messages[i],
-					strlen(messages[i]), mac, mac_256_size);
+
+		hmac_sha256(keys[i], keys_len[i], (unsigned char *) messages[i],strlen(messages[i]), mac, mac_256_size);
 		test(vectors[7 + i], mac, mac_256_size);
-		hmac_sha384(keys[i], keys_len[i], (unsigned char *) messages[i],
-					strlen(messages[i]), mac, mac_384_size);
+
+		hmac_sha384(keys[i], keys_len[i], (unsigned char *) messages[i],strlen(messages[i]), mac, mac_384_size);
 		test(vectors[14 + i], mac, mac_384_size);
 
-		hmac_sha512(keys[i], keys_len[i], (unsigned char *) messages[i],
-					strlen(messages[i]), mac, mac_512_size);
+		hmac_sha512(keys[i], keys_len[i], (unsigned char *) messages[i],strlen(messages[i]), mac, mac_512_size);
 		test(vectors[21 + i], mac, mac_512_size);
 		
     }

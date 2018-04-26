@@ -381,9 +381,7 @@ void hmac_sha512(const unsigned char *key, unsigned int key_size,
 
 }
 
-void test(const char *vector, unsigned char *digest,
-          unsigned int digest_size)
-{
+void test(const char *vector, unsigned char *digest, unsigned int digest_size){
     char output[2 * SHA512_DIGEST_SIZE + 1];
     int i;
 
