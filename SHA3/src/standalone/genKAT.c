@@ -61,9 +61,9 @@ genKAT_main(void)
 		}else if(!strcmp(pStr, "Algo_ID = SHA3-512\n")){
 			genShortMsgHash(576, 1024, 0x06, 512, 0,inputFileAddress,outputFileAddress,"Algo_ID = SHA3-512");
 		}else if(!strcmp(pStr, "Algo_ID = SHAKE128\n")){
-			genShortMsgHash(1344, 256, 0x1F, 0, 4096,inputFileAddress,outputFileAddress,"Algo_ID = SHAKE128");
+			genShortMsgHash(1344, 256, 0x1F, 128, 4096,inputFileAddress,outputFileAddress,"Algo_ID = SHAKE128");
 		}else if(!strcmp(pStr, "Algo_ID = SHAKE256\n")){
-			genShortMsgHash(1088, 512, 0x1F, 0, 4096,inputFileAddress,outputFileAddress,"Algo_ID = SHAKE256");
+			genShortMsgHash(1088, 512, 0x1F, 512, 4096,inputFileAddress,outputFileAddress,"Algo_ID = SHAKE256");
 		}else {
 			printf("Error!\n");
 		}
@@ -203,7 +203,7 @@ void fprintBstr(FILE *fp, char *S, BitSequence *A, int L){
     fprintf(fp, "%s", S);
 
     for ( i=0; i<L; i++ )
-        fprintf(fp, "%02X", A[i]);
+        fprintf(fp, "%02x", A[i]); //write small
 
     if ( L == 0 )
         fprintf(fp, "00");
