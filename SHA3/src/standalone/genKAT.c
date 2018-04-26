@@ -53,29 +53,17 @@ genKAT_main(void)
 		printf("%s", pStr);
 
 		if(!strcmp(pStr, "Algo_ID = SHA3-224\n")){
-			genShortMsgHash(1152, 448, 0x06, 224, 0,
-				inputFileAddress,outputFileAddress,
-				"Algo_ID = SHA3-224");
+			genShortMsgHash(1152, 448, 0x06, 224, 0,inputFileAddress,outputFileAddress,"Algo_ID = SHA3-224");
 		}else if(!strcmp(pStr, "Algo_ID = SHA3-256\n")){
-			genShortMsgHash(1088, 512, 0x06, 256, 0,
-				inputFileAddress,outputFileAddress,
-				"Algo_ID = SHA3-256");
+			genShortMsgHash(1088, 512, 0x06, 256, 0,inputFileAddress,outputFileAddress,"Algo_ID = SHA3-256");
 		}else if(!strcmp(pStr, "Algo_ID = SHA3-384\n")){
-			genShortMsgHash(832, 768, 0x06, 384, 0,
-					inputFileAddress,outputFileAddress,
-				"Algo_ID = SHA3-384");
+			genShortMsgHash(832, 768, 0x06, 384, 0,inputFileAddress,outputFileAddress,"Algo_ID = SHA3-384");
 		}else if(!strcmp(pStr, "Algo_ID = SHA3-512\n")){
-			genShortMsgHash(576, 1024, 0x06, 512, 0,
-					inputFileAddress,outputFileAddress,
-				"Algo_ID = SHA3-512");
+			genShortMsgHash(576, 1024, 0x06, 512, 0,inputFileAddress,outputFileAddress,"Algo_ID = SHA3-512");
 		}else if(!strcmp(pStr, "Algo_ID = SHAKE128\n")){
-			genShortMsgHash(1344, 256, 0x1F, 0, 4096,
-					inputFileAddress,outputFileAddress,
-				"Algo_ID = SHAKE128");
+			genShortMsgHash(1344, 256, 0x1F, 0, 4096,inputFileAddress,outputFileAddress,"Algo_ID = SHAKE128");
 		}else if(!strcmp(pStr, "Algo_ID = SHAKE256\n")){
-			genShortMsgHash(1088, 512, 0x1F, 0, 4096,
-					inputFileAddress,outputFileAddress,
-				"Algo_ID = SHAKE256");
+			genShortMsgHash(1088, 512, 0x1F, 0, 4096,inputFileAddress,outputFileAddress,"Algo_ID = SHAKE256");
 		}else {
 			printf("Error!\n");
 		}
@@ -154,7 +142,6 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
     		}
     		string[1000000] = '\0';
     		msglen = strlen(string);
-    		//databitlen = datalen * 8;
     	}
 
 		//fprintf(fp_out, "\nLen = %d\n", msglen * 8);
@@ -181,9 +168,7 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
 /*  */
 /* ALLOW TO READ HEXADECIMAL ENTRY (KEYS, DATA, TEXT, etc.) */
 /*  */
-int
-FindMarker(FILE *infile, const char *marker)
-{
+int FindMarker(FILE *infile, const char *marker){
     char    line[MAX_MARKER_LEN];
     int     i, len;
 
@@ -212,9 +197,7 @@ FindMarker(FILE *infile, const char *marker)
     return 0;
 }
 
-void
-fprintBstr(FILE *fp, char *S, BitSequence *A, int L)
-{
+void fprintBstr(FILE *fp, char *S, BitSequence *A, int L){
     int     i;
 
     fprintf(fp, "%s", S);
