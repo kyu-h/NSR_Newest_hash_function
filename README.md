@@ -12,6 +12,6 @@ If we have some time, we will change that base code on our own. (If possible..)
 
 <hr>
 
-OS : Window
-Compiler : MinGW
-IDE : Eclipse
+OS : Window <br>
+Compiler : MinGW <br>
+IDE : Eclipse <br>
