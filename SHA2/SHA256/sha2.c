@@ -828,9 +828,7 @@ void sha224_final(sha224_ctx *ctx, unsigned char *digest)
 #include <stdio.h>
 #include <stdlib.h>
 
-void test(const char *vector, unsigned char *digest,
-          unsigned int digest_size)
-{
+void test(const char *vector, unsigned char *digest, unsigned int digest_size){
     char output[2 * SHA512_DIGEST_SIZE + 1];
     int i;
 
