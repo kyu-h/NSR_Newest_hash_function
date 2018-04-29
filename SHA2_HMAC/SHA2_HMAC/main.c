@@ -78,9 +78,16 @@ int main(void){
         }
     }
 
+    printf("%c\n", keys[0]);
     memset(keys[0], 0x0b, keys_len[0]);
+    printf("%c\n", keys[0]);
+    printf("*******************%x\n", keys[0]);
+    printf("*******************%c\n", &keys[0]);
+
     strcpy((char *) keys[1], "Jefe");
+    printf("*******************%x\n", keys[1]);
     memset(keys[2], 0xaa, keys_len[2]);
+    printf("*******************%x\n", keys[2]);
     for (i = 0; i < (int) keys_len[3]; i++)
         keys[3][i] = (unsigned char) i + 1;
     memset(keys[4], 0x0c, keys_len[4]);
@@ -118,15 +125,19 @@ int main(void){
 
 		
 		hmac_sha224(keys[i], keys_len[i], (unsigned char *) messages[i],strlen(messages[i]), mac, mac_224_size);
+		printf("key224: %d\n", keys_len[i]);
 		test(vectors[i], mac, mac_224_size);
 
 		hmac_sha256(keys[i], keys_len[i], (unsigned char *) messages[i],strlen(messages[i]), mac, mac_256_size);
+		printf("key256: %c\n", keys[i]);
 		test(vectors[7 + i], mac, mac_256_size);
 
 		hmac_sha384(keys[i], keys_len[i], (unsigned char *) messages[i],strlen(messages[i]), mac, mac_384_size);
+		printf("key384: %c\n", keys[i]);
 		test(vectors[14 + i], mac, mac_384_size);
 
 		hmac_sha512(keys[i], keys_len[i], (unsigned char *) messages[i],strlen(messages[i]), mac, mac_512_size);
+		printf("key512: %c\n", keys[i]);
 		test(vectors[21 + i], mac, mac_512_size);
 		
     }
