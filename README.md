@@ -9,3 +9,9 @@ If we have some time, we will change that base code on our own. (If possible..)
 4. Make a HMAC_DRBG until MAY 23.
 5. Make a PBKDF until MAY 30.
 6. Make a HMAC_KDF until June 20.
+
+<hr>
+
+OS : Window
+Compiler : MinGW
+IDE : Eclipse
