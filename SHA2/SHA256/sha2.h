@@ -51,7 +51,7 @@
 #define SHA384_TEST	2
 #define SHA512_TEST	3
 
-#define SHA2_TEST	SHA512_TEST
+#define SHA2_TEST	SHA256_TEST
 
 #ifndef SHA2_TYPES
 #define SHA2_TYPES
