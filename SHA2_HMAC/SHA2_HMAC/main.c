@@ -52,10 +52,10 @@ int main(void){
     };
 
     static char *messages[] ={
-        "Hi There",
+        "Hi Thera",
         "what do ya want for nothing?",
-        NULL,
-        NULL,
+        "a",
+        "a",
         "Test With Truncation",
         "Test Using Larger Than Block-Size Key - Hash Key First",
         "This is a test using a larger than block-size key "
@@ -65,7 +65,7 @@ int main(void){
 
     unsigned char mac[SHA512_DIGEST_SIZE];
     unsigned char *keys[7];
-    unsigned int keys_len[7] = {20, 4, 20, 25, 20, 131, 131};
+    unsigned int keys_len[7] = {20, 4, 20, 20, 20, 131, 131};
     unsigned int messages2and3_len = 50;
     unsigned int mac_224_size, mac_256_size, mac_384_size, mac_512_size;
     int i;
@@ -78,23 +78,27 @@ int main(void){
         }
     }
 
-    printf("%c\n", keys[0]);
+    //printf("%c\n", keys[0]);
     memset(keys[0], 0x0b, keys_len[0]);
-    printf("%c\n", keys[0]);
-    printf("*******************%x\n", keys[0]);
-    printf("*******************%c\n", &keys[0]);
+	printf("key0: %c\n", *keys[0]);
+    /*printf("*******************%x\n", keys[0]);
+    printf("*******************%c\n", &keys[0]);*/
 
     strcpy((char *) keys[1], "Jefe");
-    printf("*******************%x\n", keys[1]);
+    printf("key1: %c\n", *keys[1]);
     memset(keys[2], 0xaa, keys_len[2]);
-    printf("*******************%x\n", keys[2]);
-    for (i = 0; i < (int) keys_len[3]; i++)
-        keys[3][i] = (unsigned char) i + 1;
+    printf("key2: %c\n", *keys[2]);
+    memset(keys[3], 0xaa, keys_len[3]);
+    printf("key3: %c\n", *keys[3]);
+
+    //printf("*******************%x\n", keys[2]);
+    /*for (i = 0; i < (int) keys_len[3]; i++)
+        keys[3][i] = (unsigned char) i + 1;*/
     memset(keys[4], 0x0c, keys_len[4]);
     memset(keys[5], 0xaa, keys_len[5]);
     memset(keys[6], 0xaa, keys_len[6]);
 
-    messages[2] = (char*)malloc(messages2and3_len + 1);
+    /*messages[2] = (char*)malloc(messages2and3_len + 1);
     messages[3] = (char*)malloc(messages2and3_len + 1);
 
     if (messages[2] == NULL || messages[3] == NULL) {
@@ -106,7 +110,7 @@ int main(void){
     messages[3][messages2and3_len] = '\0';
 
     memset(messages[2], 0xdd, messages2and3_len);
-    memset(messages[3], 0xcd, messages2and3_len);
+    memset(messages[3], 0xcd, messages2and3_len);*/
 
     printf("HMAC-SHA-2 IETF Validation tests\n\n");
 
@@ -121,25 +125,29 @@ int main(void){
 			mac_384_size = 128 / 8; mac_512_size = 128 / 8;
         }
 
-        printf("Test %d:\n", i + 1);
+        printf("******************Test %d:\n", i);
 
-		
+        printf("key: %c\n", *keys[i]);
 		hmac_sha224(keys[i], keys_len[i], (unsigned char *) messages[i],strlen(messages[i]), mac, mac_224_size);
 		printf("i= %d, key224 string: %s\n", i, messages[i]);
-		printf("i= %d, key224 char: %c\n", i, keys[i]);
-		printf("i= %d, key224 char: %s\n", i, keys[i]);
+		printf("i= %d, key224 keys_len: %d\n", i, keys_len[i]);
+		printf("key: %c\n", *keys[i]);
+		/*printf("i= %d, key224 char: %c\n", i, keys[i]);
+		printf("i= %d, key224 char: %s\n", i, keys[i]);*/
 		test(vectors[i], mac, mac_224_size);
+		/*printf("mac: %c\n", mac);
+		printf("mac224Size: %d\n", mac_224_size);*/
 
 		hmac_sha256(keys[i], keys_len[i], (unsigned char *) messages[i],strlen(messages[i]), mac, mac_256_size);
-		printf("i= %d, key256: %s\n", i, keys[i]);
+		//printf("i= %d, key256: %s\n", i, keys[i]);
 		test(vectors[7 + i], mac, mac_256_size);
 
 		hmac_sha384(keys[i], keys_len[i], (unsigned char *) messages[i],strlen(messages[i]), mac, mac_384_size);
-		printf("i= %d, key384: %s\n", i, keys[i]);
+		//printf("i= %d, key384: %s\n", i, keys[i]);
 		test(vectors[14 + i], mac, mac_384_size);
 
 		hmac_sha512(keys[i], keys_len[i], (unsigned char *) messages[i],strlen(messages[i]), mac, mac_512_size);
-		printf("i= %d, key512: %s\n", i, keys[i]);
+		//printf("i= %d, key512: %s\n", i, keys[i]);
 		test(vectors[21 + i], mac, mac_512_size);
 		
     }
