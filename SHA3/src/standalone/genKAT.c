@@ -84,13 +84,6 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
     char strDec[255];
     char str;
     int nCount=0;
-    /*char *HashName[6] = {"SHA3-224", "SHA3-256", "SHA3-384", "SHA3-512", "SHAKE128", "SHAKE256"};
-    char fileAddress[256];
-
-    for(int i=0; i<6; i++){
-    	sprintf(fileAddress, "Hash_testvectors/%s.txt", HashName[i]);
-		printf("%s\n", fileAddress);
-    }*/
 
     if ((squeezedOutputLength > SqueezingOutputLength) || (hashbitlen > SqueezingOutputLength)) {
         printf("Requested output length too long.\n");
