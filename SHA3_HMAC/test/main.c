@@ -457,109 +457,14 @@ void testFIPS202()
     assert(memcmp(buffer, outputSHA3_512, 64) == 0);
 }
 
-void printHelp()
-{
-        printf("Usage: KeccakTests command(s), where the commands can be\n");
-        printf("  --help or -h              To display this page\n");
-        printf("  --all or -a               All tests\n");
-        printf("  --SnP or -p               Tests on Keccak-p permutations\n");
-        printf("  --Keccak or -c            Tests on Keccak sponge and duplex\n");
-        printf("  --KeccakSponge            Tests on Keccak sponge\n");
-        printf("  --KeccakDuplex            Tests on Keccak duplex\n");
-        printf("  --KeccakPRG               Tests on KeccakPRG\n");
-        printf("  --FIPS202 or -f           Tests on FIPS202 and ShortMsgKAT generation\n");
-        printf("  --SP800-185               Tests on SP800-185 functions\n");
-        printf("  --Keyak or -y             Tests on the Keyak authentication encryption scheme\n");
-        printf("  --Ketje or -t             Tests on the Ketje authentication encryption scheme\n");
-        printf("  --KangarooTwelve or -K12  Tests on KangarooTwelve\n");
-        printf("  --Kravatte                Tests on Kravatte\n");
-#ifdef KeccakReference
-        printf("  --examples or -e          Generation of example files\n");
-#else
-        printf("  --speed or -s             Speed measuresments\n");
-#endif
-}
-
 int process(int argc, char* argv[])
 {
-    int i;
-    int help = 0;
-    int SnP = 0;
-    int KeccakSponge = 0;
-    int KeccakDuplex = 0;
-    int KeccakPRG = 0;
     int FIPS202 = 1;
-    int Keyak = 0;
-    int Ketje = 0;
-    int KangarooTwelve = 0;
-    int Kravatte = 0;
-    int SP800_185 = 0;
-    int examples = 0;
-    int speed = 0;
 
-    if (argc == 1)
-        help = 1;
-
-    for(i=1; i<argc; i++) {
-        if ((strcmp("--help", argv[i]) == 0) || (strcmp("-h", argv[i]) == 0))
-            help = 1;
-        else if ((strcmp("--all", argv[i]) == 0) || (strcmp("-a", argv[i]) == 0))
-            SnP = KeccakSponge = KeccakDuplex = KeccakPRG = FIPS202 = Keyak = Ketje = KangarooTwelve = Kravatte = SP800_185 = examples = speed = 1;
-        else if ((strcmp("--SnP", argv[i]) == 0) || (strcmp("-p", argv[i]) == 0))
-            SnP = 1;
-        else if ((strcmp("--Keccak", argv[i]) == 0) || (strcmp("-c", argv[i]) == 0))
-            KeccakSponge = KeccakDuplex = 1;
-        else if (strcmp("--KeccakSponge", argv[i]) == 0)
-            KeccakSponge = 1;
-        else if (strcmp("--KeccakDuplex", argv[i]) == 0)
-            KeccakDuplex = 1;
-        else if (strcmp("--KeccakPRG", argv[i]) == 0)
-            KeccakPRG = 1;
-        else if ((strcmp("--FIPS202", argv[i]) == 0) || (strcmp("-f", argv[i]) == 0))
-            FIPS202 = 1;
-        else if ((strcmp("--Keyak", argv[i]) == 0) || (strcmp("-y", argv[i]) == 0))
-            Keyak = 1;
-        else if ((strcmp("--Ketje", argv[i]) == 0) || (strcmp("-t", argv[i]) == 0))
-            Ketje = 1;
-        else if ((strcmp("--KangarooTwelve", argv[i]) == 0) || (strcmp("-K12", argv[i]) == 0))
-            KangarooTwelve = 1;
-        else if (strcmp("--Kravatte", argv[i]) == 0)
-            Kravatte = 1;
-        else if (strcmp("--SP800-185", argv[i]) == 0)
-            SP800_185 = 1;
-#ifdef KeccakReference
-        else if ((strcmp("--examples", argv[i]) == 0) || (strcmp("-e", argv[i]) == 0))
-            examples = 1;
-#else
-        else if ((strcmp("--speed", argv[i]) == 0) || (strcmp("-s", argv[i]) == 0))
-            speed = 1;
-#endif
-        else {
-            printf("Unrecognized command '%s'\n", argv[i]);
-            return -1;
-        }
-    }
     if (FIPS202) {
-        testFIPS202();
         genKAT_main();
     }
 #ifdef KeccakReference
-    if (examples) {
-#ifndef KeccakP200_excluded
-        displayKeccakF200IntermediateValues();
-#endif
-#ifndef KeccakP400_excluded
-        displayKeccakF400IntermediateValues();
-#endif
-#ifndef KeccakP800_excluded
-        displayKeccakF800IntermediateValues();
-#endif
-#ifndef KeccakP1600_excluded
-        displayKeccakF1600IntermediateValues();
-#endif
-        displaySpongeIntermediateValues();
-        displayDuplexIntermediateValues();
-    }
 #else
 #endif
     return 0;
