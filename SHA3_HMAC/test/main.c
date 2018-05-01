@@ -488,7 +488,7 @@ int process(int argc, char* argv[])
     int KeccakSponge = 0;
     int KeccakDuplex = 0;
     int KeccakPRG = 0;
-    int FIPS202 = 0;
+    int FIPS202 = 1;
     int Keyak = 0;
     int Ketje = 0;
     int KangarooTwelve = 0;
@@ -567,5 +567,6 @@ int process(int argc, char* argv[])
 
 int main(int argc, char* argv[])
 {
+	printf("test start!!\n");
     return process(argc, argv);
 }

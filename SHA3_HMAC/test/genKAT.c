@@ -150,8 +150,8 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
         return KAT_HASH_ERROR;
     }
 
-    if ( (fp_in = fopen("ShortMsgKAT.txt", "r")) == NULL ) {
-        printf("Couldn't open <ShortMsgKAT.txt> for read\n");
+    if ( (fp_in = fopen("C:\\Users\\kyu\\eclipse-workspace\\SHA3_HMAC\\test\\ShortMsgKAT.txt", "r")) == NULL ) {
+        printf("ccCouldn't open <ShortMsgKAT.txt> for read\n");
         return KAT_FILE_OPEN_ERROR;
     }
 
