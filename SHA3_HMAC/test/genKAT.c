@@ -48,7 +48,7 @@ http://creativecommons.org/publicdomain/zero/1.0/
 
 #include "KeccakHash.h"
 
-#define MAX_MARKER_LEN      50
+#define MAX_MARKER_LEN      4096
 #define SUBMITTER_INFO_LEN  128
 
 typedef enum { KAT_SUCCESS = 0, KAT_FILE_OPEN_ERROR = 1, KAT_HEADER_ERROR = 2, KAT_DATA_ERROR = 3, KAT_HASH_ERROR = 4 } STATUS_CODES;
@@ -57,11 +57,11 @@ typedef enum { KAT_SUCCESS = 0, KAT_FILE_OPEN_ERROR = 1, KAT_HEADER_ERROR = 2, K
 
 #define SqueezingOutputLength 4096
 
-STATUS_CODES    genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimitedSuffix, unsigned int hashbitlen, unsigned int squeezedOutputLength, const char *fileName, const char *description);
+STATUS_CODES    genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimitedSuffix, unsigned int hashbitlen, unsigned int squeezedOutputLength, const char *inputFileName, const char *outputFileName, const char *description);
 int     FindMarker(FILE *infile, const char *marker);
 int     ReadHex(FILE *infile, BitSequence *A, int Length, char *str);
 void    fprintBstr(FILE *fp, char *S, BitSequence *A, int L);
-void convertShortMsgToPureLSB(void);
+//void convertShortMsgToPureLSB(void);
 
 STATUS_CODES
 genKAT_main(void)
@@ -73,29 +73,49 @@ genKAT_main(void)
     /* Note: "SakuraSequential" translates into "input followed by 11", */
     /* see https://keccak.team/files/Sakura.pdf for more details. */
     /*  */
-    genShortMsgHash(1344, 256, 0x1F, 0, 4096,
-        "ShortMsgKAT_SHAKE128.txt",
-        "Keccak(SakuraSequential|11)[r=1344, c=256], or SHAKE128 as in FIPS 202 standard");
-    genShortMsgHash(1088, 512, 0x1F, 0, 4096,
-        "ShortMsgKAT_SHAKE256.txt",
-        "Keccak(SakuraSequential|11)[r=1088, c=512], or SHAKE256 as in FIPS 202 standard");
-    genShortMsgHash(1152, 448, 0x06, 224, 0,
-        "ShortMsgKAT_SHA3-224.txt",
-        "Keccak(input|01)[r=1152, c=448] truncated to 224 bits, or SHA3-224 as in FIPS 202 standard");
-    genShortMsgHash(1088, 512, 0x06, 256, 0,
-        "ShortMsgKAT_SHA3-256.txt",
-        "Keccak(input|01)[r=1088, c=512] truncated to 256 bits, or SHA3-256 as in FIPS 202 standard");
-    genShortMsgHash(832, 768, 0x06, 384, 0,
-        "ShortMsgKAT_SHA3-384.txt",
-        "Keccak(input|01)[r=832, c=768] truncated to 384 bits, or SHA3-384 as in FIPS 202 standard");
-    genShortMsgHash(576, 1024, 0x06, 512, 0,
-        "ShortMsgKAT_SHA3-512.txt",
-        "Keccak(input|01)[r=576, c=1024] truncated to 512 bits, or SHA3-512 as in FIPS 202 standard");
+
+	FILE *fp_in;
+	char strTemp[255];
+	char *pStr;
+	char *HashName[6] = {"SHA3-224", "SHA3-256", "SHA3-384", "SHA3-512", "SHAKE128", "SHAKE256"};
+	char inputFileAddress[256], outputFileAddress[256];
+
+	for(int i=0; i<6; i++){
+		sprintf(inputFileAddress, "Hash_testvectors/%s.txt", HashName[i]);
+		sprintf(outputFileAddress, "Hash_testvectors/%s_rsp.txt", HashName[i]);
+
+		if ( (fp_in = fopen(inputFileAddress, "r")) == NULL ) {
+			printf("Couldn't open <ShortMsgKAT.txt> for read\n");
+			return KAT_FILE_OPEN_ERROR;
+		}
+
+		pStr = fgets(strTemp, sizeof(strTemp), fp_in);
+		printf("%s", pStr);
+
+		if(!strcmp(pStr, "Algo_ID = SHA3-224\n")){
+			genShortMsgHash(1152, 448, 0x06, 224, 0,inputFileAddress,outputFileAddress,"Algo_ID = SHA3-224");
+		}else if(!strcmp(pStr, "Algo_ID = SHA3-256\n")){
+			genShortMsgHash(1088, 512, 0x06, 256, 0,inputFileAddress,outputFileAddress,"Algo_ID = SHA3-256");
+		}else if(!strcmp(pStr, "Algo_ID = SHA3-384\n")){
+			genShortMsgHash(832, 768, 0x06, 384, 0,inputFileAddress,outputFileAddress,"Algo_ID = SHA3-384");
+		}else if(!strcmp(pStr, "Algo_ID = SHA3-512\n")){
+			genShortMsgHash(576, 1024, 0x06, 512, 0,inputFileAddress,outputFileAddress,"Algo_ID = SHA3-512");
+		}else if(!strcmp(pStr, "Algo_ID = SHAKE128\n")){
+			genShortMsgHash(1344, 256, 0x1F, 0, 4096,inputFileAddress,outputFileAddress,"Algo_ID = SHAKE128");
+		}else if(!strcmp(pStr, "Algo_ID = SHAKE256\n")){
+			genShortMsgHash(1088, 512, 0x1F, 0, 4096,inputFileAddress,outputFileAddress,"Algo_ID = SHAKE256");
+		}else {
+			printf("Error!\n");
+		}
+	}
+
+	fclose(fp_in);
+
 #endif
     return KAT_SUCCESS;
 }
 
-void convertShortMsgToPureLSB(void)
+/*void convertShortMsgToPureLSB(void)
 {
     int         msglen, msgbytelen;
     BitSequence Msg[256];
@@ -123,7 +143,7 @@ void convertShortMsgToPureLSB(void)
             printf("ERROR: unable to read 'Msg' from <ShortMsgKAT.txt>\n");
             return;
         }
-        /* Align the last byte on the least significant bit */
+         Align the last byte on the least significant bit
         if ((msglen % 8) != 0)
             Msg[msgbytelen-1] = Msg[msgbytelen-1] >> (8-(msglen%8));
 
@@ -134,62 +154,94 @@ void convertShortMsgToPureLSB(void)
 
     fclose(fp_in);
     fclose(fp_out);
-}
+}*/
 
 STATUS_CODES
-genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimitedSuffix, unsigned int hashbitlen, unsigned int squeezedOutputLength, const char *fileName, const char *description)
+genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimitedSuffix, unsigned int hashbitlen, unsigned int squeezedOutputLength, const char *inputFileName, const char *outputFileName, const char *description)
 {
     int         msglen, msgbytelen;
     BitSequence Msg[256];
     BitSequence Squeezed[SqueezingOutputLength/8];
     Keccak_HashInstance   hash;
     FILE        *fp_in, *fp_out;
+    unsigned char string[1000001] = {0, };
+	char strDec[255];
+	char str;
+	int nCount=0;
 
     if ((squeezedOutputLength > SqueezingOutputLength) || (hashbitlen > SqueezingOutputLength)) {
         printf("Requested output length too long.\n");
         return KAT_HASH_ERROR;
     }
 
-    if ( (fp_in = fopen("C:\\Users\\kyu\\eclipse-workspace\\SHA3_HMAC\\test\\ShortMsgKAT.txt", "r")) == NULL ) {
-        printf("ccCouldn't open <ShortMsgKAT.txt> for read\n");
+    if ( (fp_in = fopen(inputFileName, "r")) == NULL ) {
+        printf("Couldn't open <ShortMsgKAT.txt> for read\n");
         return KAT_FILE_OPEN_ERROR;
     }
 
-    if ( (fp_out = fopen(fileName, "w")) == NULL ) {
-        printf("Couldn't open <%s> for write\n", fileName);
+    if ( (fp_out = fopen(outputFileName, "w")) == NULL ) {
+        printf("Couldn't open <%s> for write\n", outputFileName);
         return KAT_FILE_OPEN_ERROR;
     }
-    fprintf(fp_out, "# %s\n", description);
+    fprintf(fp_out, "%s\n", description);
 
-    do {
-        if ( FindMarker(fp_in, "Len = ") )
-            fscanf(fp_in, "%d", &msglen);
-        else {
-            break;
-        }
-        msgbytelen = (msglen+7)/8;
+    if(FindMarker(fp_in, "Message")){
+		printf("Started ShortMsgKAT for <%s>\n", inputFileName);
+	}
+	fscanf(fp_in, " %c %d\n", &str, &nCount);
 
-        if ( !ReadHex(fp_in, Msg, msgbytelen, "Msg = ") ) {
-            printf("ERROR: unable to read 'Msg' from <ShortMsgKAT.txt>\n");
-            return KAT_DATA_ERROR;
-        }
-        fprintf(fp_out, "\nLen = %d\n", msglen);
-        fprintBstr(fp_out, "Msg = ", Msg, msgbytelen);
+	for(int x=0; x<nCount; x++){
+		int i, o;
 
-        if (Keccak_HashInitialize(&hash, rate, capacity, hashbitlen, delimitedSuffix) != SUCCESS) {
-            printf("Keccak[r=%d, c=%d] is not supported.\n", rate, capacity);
-            return KAT_HASH_ERROR;
-        }
-        Keccak_HashUpdate(&hash, Msg, msglen);
-        Keccak_HashFinal(&hash, Squeezed);
-        if (hashbitlen > 0)
-            fprintBstr(fp_out, "MD = ", Squeezed, hashbitlen/8);
-        if (squeezedOutputLength > 0) {
-            Keccak_HashSqueeze(&hash, Squeezed, squeezedOutputLength);
-            fprintBstr(fp_out, "Squeezed = ", Squeezed, squeezedOutputLength/8);
-        }
-    } while ( 1 );
-    printf("finished ShortMsgKAT for <%s>\n", fileName);
+		fgets(string, MAX_MARKER_LEN, fp_in);
+
+		for(i = 0, o = 0 ; i < strlen(string) ; i++){   // remove " character
+			if(string[i] != '\"'){
+				string[o] = string[i];
+				o++;
+			}
+		}
+
+		if ((strlen(string) == 3) && (string[strlen(string)-1] == '\"')){
+			string[o] = '\0';
+		}else {
+			string[o-1] = '\0';   // add NULL character at the end of String
+		}
+
+		msglen = strlen(string);
+
+		if(strlen(string) == 1 && string[0] == 'a'){ // use only "a" million
+
+			for(int temp = 0 ; temp < 1000000 ; temp++){
+				string[temp] = 'a';
+			}
+			string[1000000] = '\0';
+			msglen = strlen(string);
+		}
+
+		//fprintf(fp_out, "Len = %d\n", msglen * 8);
+		//fprintf(fp_out, "string = %s\n", string);
+
+		//printf("string : %s\n", string);
+
+		if (Keccak_HashInitialize(&hash, rate, capacity, hashbitlen, delimitedSuffix) != SUCCESS) {
+			printf("Keccak[r=%d, c=%d] is not supported.\n", rate, capacity);
+			return KAT_HASH_ERROR;
+		}
+
+		Keccak_HashUpdate(&hash, string, msglen * 8);
+		Keccak_HashFinal(&hash, Squeezed);
+
+		if (hashbitlen > 0)
+			fprintBstr(fp_out, "", Squeezed, hashbitlen/8);
+		if (squeezedOutputLength > 0) {
+			Keccak_HashSqueeze(&hash, Squeezed, squeezedOutputLength);
+			fprintBstr(fp_out, "", Squeezed, squeezedOutputLength/8);
+		}
+
+	}
+
+    printf("finished ShortMsgKAT for <%s>\n", inputFileName);
 
     fclose(fp_in);
     fclose(fp_out);
@@ -283,7 +335,7 @@ fprintBstr(FILE *fp, char *S, BitSequence *A, int L)
     fprintf(fp, "%s", S);
 
     for ( i=0; i<L; i++ )
-        fprintf(fp, "%02X", A[i]);
+        fprintf(fp, "%02x", A[i]);
 
     if ( L == 0 )
         fprintf(fp, "00");

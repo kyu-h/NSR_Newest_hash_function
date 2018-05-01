@@ -19,6 +19,7 @@ http://creativecommons.org/publicdomain/zero/1.0/
 HashReturn Keccak_HashInitialize(Keccak_HashInstance *instance, unsigned int rate, unsigned int capacity, unsigned int hashbitlen, unsigned char delimitedSuffix)
 {
     HashReturn result;
+    //printf("***Keccak_HashInitialize***\n");
 
     if (delimitedSuffix == 0)
         return FAIL;
@@ -34,6 +35,7 @@ HashReturn Keccak_HashInitialize(Keccak_HashInstance *instance, unsigned int rat
 
 HashReturn Keccak_HashUpdate(Keccak_HashInstance *instance, const BitSequence *data, BitLength databitlen)
 {
+	//printf("***Keccak_HashUpdate***\n");
     if ((databitlen % 8) == 0)
         return (HashReturn)KeccakWidth1600_SpongeAbsorb(&instance->sponge, data, databitlen/8);
     else {
@@ -61,6 +63,7 @@ HashReturn Keccak_HashUpdate(Keccak_HashInstance *instance, const BitSequence *d
 
 HashReturn Keccak_HashFinal(Keccak_HashInstance *instance, BitSequence *hashval)
 {
+	//printf("***Keccak_HashFinal***\n");
     HashReturn ret = (HashReturn)KeccakWidth1600_SpongeAbsorbLastFewBits(&instance->sponge, instance->delimitedSuffix);
     if (ret == SUCCESS)
         return (HashReturn)KeccakWidth1600_SpongeSqueeze(&instance->sponge, hashval, instance->fixedOutputLength/8);
