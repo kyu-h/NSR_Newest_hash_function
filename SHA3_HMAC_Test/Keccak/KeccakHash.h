@@ -51,7 +51,7 @@ typedef struct {
     unsigned char delimitedSuffix;
 
     //**for HMAC**//
-/*    unsigned int tot_len;
+    /*unsigned int tot_len;
 	unsigned int len;
 	unsigned char block[2 * SHA256_BLOCK_SIZE];
 	uint32 h[8];*/
