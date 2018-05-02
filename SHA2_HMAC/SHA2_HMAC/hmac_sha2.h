@@ -34,7 +34,7 @@
 #ifndef HMAC_SHA2_H
 #define HMAC_SHA2_H
 
-#include "C:\\Users\\kyu\\eclipse-workspace\\SHA2_HMAC\\SHA2_HMAC\\sha2.h"
+#include "sha2.h"
 
 #define HMAC_SHA224	0
 #define HMAC_SHA256	1

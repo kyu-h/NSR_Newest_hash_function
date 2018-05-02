@@ -34,7 +34,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "C:\\Users\\kyu\\eclipse-workspace\\SHA2_HMAC\\SHA2_HMAC\\hmac_sha2.h"
+#include "hmac_sha2.h"
 
 /* HMAC-SHA-224 functions */
 
@@ -58,6 +58,11 @@ void hmac_sha224_init(hmac_sha224_ctx *ctx, const unsigned char *key, unsigned i
         if (key_size > SHA224_BLOCK_SIZE){
             num = SHA224_DIGEST_SIZE;
             sha224(key, key_size, key_temp);
+
+            /*Keccak_HashInitialize(&hash, rate, capacity, hashbitlen, delimitedSuffix);
+            Keccak_HashUpdate(&hash, Msgstring, msglen * 8);
+			Keccak_HashFinal(&hash, Squeezed);*/
+
             key_used = key_temp;
         } else { /* key_size < SHA224_BLOCK_SIZE */
         	//printf("test");

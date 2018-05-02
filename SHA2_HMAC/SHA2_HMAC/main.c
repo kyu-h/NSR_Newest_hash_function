@@ -64,6 +64,9 @@ int main(void){
     };
 
     unsigned char mac[SHA512_DIGEST_SIZE];
+
+    printf("mmmmmac: %s\n", mac);
+
     unsigned char *keys[7];
     unsigned int keys_len[7] = {20, 4, 20, 20, 20, 131, 131};
     unsigned int messages2and3_len = 50;
@@ -121,17 +124,23 @@ int main(void){
 			mac_384_size = SHA384_DIGEST_SIZE;
 			mac_512_size = SHA512_DIGEST_SIZE;
         } else {
-			mac_224_size = 128 / 8; mac_256_size = 128 / 8;
-			mac_384_size = 128 / 8; mac_512_size = 128 / 8;
+			mac_224_size = 128 / 8;
+			mac_256_size = 128 / 8;
+			mac_384_size = 128 / 8;
+			mac_512_size = 128 / 8;
         }
 
         printf("******************Test %d:\n", i);
 
         printf("key: %c\n", *keys[i]);
+        printf("mac: %c\n", mac);
 		hmac_sha224(keys[i], keys_len[i], (unsigned char *) messages[i],strlen(messages[i]), mac, mac_224_size);
 		printf("i= %d, key224 string: %s\n", i, messages[i]);
 		printf("i= %d, key224 keys_len: %d\n", i, keys_len[i]);
 		printf("key: %c\n", *keys[i]);
+		printf("mac: %c\n", mac);
+		printf("mac_224_size: %d\n", mac_224_size);
+
 		/*printf("i= %d, key224 char: %c\n", i, keys[i]);
 		printf("i= %d, key224 char: %s\n", i, keys[i]);*/
 		test(vectors[i], mac, mac_224_size);
