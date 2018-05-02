@@ -49,11 +49,12 @@ extern "C" {
 
 typedef struct {
 	Keccak_HashInstance hash_ctx;
-	BitSequence opad[256];
 	sha224_ctx ctx_inside;
 	sha224_ctx ctx_outside;
 	sha224_ctx ctx_inside_reinit;
 	sha224_ctx ctx_outside_reinit;
+	unsigned char block_ipad[SHA224_BLOCK_SIZE];
+	unsigned char block_opad[SHA224_BLOCK_SIZE];
 } HMAC_SHA3;
 
 typedef struct {
@@ -149,4 +150,3 @@ void test(const char *vector, unsigned char *digest, unsigned int digest_size);
 #endif
 
 #endif /* !HMAC_SHA2_H */
-

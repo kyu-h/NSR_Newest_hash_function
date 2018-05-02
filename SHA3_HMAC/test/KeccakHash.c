@@ -28,6 +28,7 @@ HashReturn Keccak_HashInitialize(Keccak_HashInstance *instance, unsigned int rat
         return result;
     instance->fixedOutputLength = hashbitlen;
     instance->delimitedSuffix = delimitedSuffix;
+
     return SUCCESS;
 }
 

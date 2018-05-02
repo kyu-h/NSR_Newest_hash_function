@@ -1,0 +1,4 @@
+eclipse.preferences.version=1
+encoding//test/KeccakHash.h=UTF-8
+encoding//test/genKAT.c=UTF-8
+encoding//test/hmac.h=UTF-8

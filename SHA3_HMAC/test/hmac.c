@@ -30,7 +30,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-#include "hmac_Keccak.h"
+#include "hmac.h"
 #include "KeccakHash.h"
 
 #include <stdio.h>
@@ -48,16 +48,11 @@ void hmac_sha224_init(HMAC_SHA3 *ctx, const unsigned char *key, unsigned int key
 		BitSequence *hashval){
     unsigned int fill;
     unsigned int num;
-    BitSequence ipad[256];
-
-    printf("*****hmac_sha224_init*****\n");
-    printf("key: %c\n", key);
 
     const unsigned char *key_used;
     unsigned char key_temp[SHA224_DIGEST_SIZE];
     int i;
 
-    printf("SHA224_BLOCK_SIZE: %d\n", SHA224_BLOCK_SIZE);
 
     if (key_size == SHA224_BLOCK_SIZE) {
         key_used = key;
@@ -67,8 +62,6 @@ void hmac_sha224_init(HMAC_SHA3 *ctx, const unsigned char *key, unsigned int key
         if (key_size > SHA224_BLOCK_SIZE){
             num = SHA224_DIGEST_SIZE;
 
-
-            //Keccak_HashInitialize(&ctx->hash_ctx, rate, capacity, hashbitlen, delimitedSuffix);
             if (Keccak_HashInitialize(&ctx->hash_ctx, rate, capacity, hashbitlen, delimitedSuffix) != SUCCESS) {
 				printf("Keccak[r=%d, c=%d] is not supported.\n", rate, capacity);
 				//return KAT_HASH_ERROR;
@@ -78,39 +71,26 @@ void hmac_sha224_init(HMAC_SHA3 *ctx, const unsigned char *key, unsigned int key
 
             key_used = key_temp;
         } else { /* key_size < SHA224_BLOCK_SIZE */
-        	//printf("test");
-        	 printf("key_size < SHA224_BLOCK_SIZE ");
             key_used = key;
             num = key_size;
         }
         fill = SHA224_BLOCK_SIZE - num;
 
-        memset(ipad + num, 0x36, fill);
-        memset(ctx->opad + num, 0x5c, fill);
+        memset(ctx->block_ipad, 0x36, fill);
+        memset(ctx->block_opad + num, 0x5c, fill);
     }
 
     for (i = 0; i < (int) num; i++) {
-        ipad[i] = key_used[i] ^ 0x36;
-        ctx->opad[i] = key_used[i] ^ 0x5c;
+        ctx->block_ipad[i] = key_used[i] ^ 0x36;
+        ctx->block_opad[i] = key_used[i] ^ 0x5c;
     }
 
     Keccak_HashInitialize(&ctx->ctx_inside, rate, capacity, hashbitlen, delimitedSuffix);
-    Keccak_HashUpdate(&ctx->ctx_inside, ipad, SHA224_BLOCK_SIZE);
+    Keccak_HashUpdate(&ctx->ctx_inside, ctx->block_ipad, SHA224_BLOCK_SIZE);
 
     Keccak_HashInitialize(&ctx->ctx_outside, rate, capacity, hashbitlen, delimitedSuffix);
-	Keccak_HashUpdate(&ctx->ctx_outside, ipad, SHA224_BLOCK_SIZE);
+	Keccak_HashUpdate(&ctx->ctx_outside, ctx->block_opad, SHA224_BLOCK_SIZE);
 
-
-/*
-    sha224_init(&ctx->ctx_inside);
-    sha224_update(&ctx->ctx_inside, ctx->block_ipad, SHA224_BLOCK_SIZE);
-
-
-    sha224_init(&ctx->ctx_outside);
-    sha224_update(&ctx->ctx_outside, ctx->block_opad, SHA224_BLOCK_SIZE);
-*/
-
-    /* for hmac_reinit */
     memcpy(&ctx->ctx_inside_reinit, &ctx->ctx_inside, sizeof(sha224_ctx));
     memcpy(&ctx->ctx_outside_reinit, &ctx->ctx_outside, sizeof(sha224_ctx));
 }
@@ -122,8 +102,6 @@ void hmac_sha224_reinit(hmac_sha224_ctx *ctx){
 
 void hmac_sha224_update(HMAC_SHA3 *ctx, const unsigned char *message, unsigned int message_len,
 		const BitSequence *data, BitLength databitlen){
-//    sha224_update(&ctx->ctx_inside, message, message_len);
-	printf("hmac_sha224_update start \n");
 	Keccak_HashUpdate(&ctx->ctx_inside, message, message_len);
 }
 
@@ -132,18 +110,10 @@ void hmac_sha224_final(HMAC_SHA3 *ctx, unsigned char *mac, unsigned int mac_size
     unsigned char digest_inside[SHA224_DIGEST_SIZE];
     unsigned char mac_temp[SHA224_DIGEST_SIZE];
 
-    printf("final start \n");
-
-/*
-    sha224_final(&ctx->ctx_inside, digest_inside);
-    sha224_update(&ctx->ctx_outside, digest_inside, SHA224_DIGEST_SIZE);
-    sha224_final(&ctx->ctx_outside, mac_temp);
-*/
     Keccak_HashFinal(&ctx->ctx_inside, digest_inside);
     Keccak_HashUpdate(&ctx->ctx_outside, digest_inside, SHA224_DIGEST_SIZE);
     Keccak_HashFinal(&ctx->ctx_outside, mac_temp);
 
-    printf("*************mac: %02x\n", mac_temp);
 
     memcpy(mac, mac_temp, mac_size);
 }
@@ -155,14 +125,9 @@ void hmac_sha224(const unsigned char *key, unsigned int key_size, const unsigned
 
 	HMAC_SHA3 ctx;
 
-    //printf("hmac_sha224 key: %c\n", key);
     hmac_sha224_init(&ctx, key, key_size, rate, capacity, hashbitlen, delimitedSuffix, data, databitlen, hashval);
-    printf("init finished \n");
-    //hmac_sha224_update(&ctx, message, message_len, data, databitlen);
-    printf("update finished \n");
-
-    //hmac_sha224_final(&ctx, mac, mac_size, data, databitlen, hashval);
-    printf("final finished \n");
+    hmac_sha224_update(&ctx, message, message_len, data, databitlen);
+    hmac_sha224_final(&ctx, mac, mac_size, data, databitlen, hashval);
 
 }
 
@@ -202,7 +167,6 @@ void hmac_sha256_init(hmac_sha256_ctx *ctx, const unsigned char *key, unsigned i
 /*
     sha256_init(&ctx->ctx_inside);
     sha256_update(&ctx->ctx_inside, ctx->block_ipad, SHA256_BLOCK_SIZE);
-
     sha256_init(&ctx->ctx_outside);
     sha256_update(&ctx->ctx_outside, ctx->block_opad, SHA256_BLOCK_SIZE);
 */
@@ -277,7 +241,6 @@ void hmac_sha384_init(hmac_sha384_ctx *ctx, const unsigned char *key, unsigned i
 /*
     sha384_init(&ctx->ctx_inside);
     sha384_update(&ctx->ctx_inside, ctx->block_ipad, SHA384_BLOCK_SIZE);
-
     sha384_init(&ctx->ctx_outside);
     sha384_update(&ctx->ctx_outside, ctx->block_opad, SHA384_BLOCK_SIZE);
 */
@@ -349,7 +312,6 @@ void hmac_sha512_init(hmac_sha512_ctx *ctx, const unsigned char *key, unsigned i
 
     /*sha512_init(&ctx->ctx_inside);
     sha512_update(&ctx->ctx_inside, ctx->block_ipad, SHA512_BLOCK_SIZE);
-
     sha512_init(&ctx->ctx_outside);
     sha512_update(&ctx->ctx_outside, ctx->block_opad,
                   SHA512_BLOCK_SIZE);*/

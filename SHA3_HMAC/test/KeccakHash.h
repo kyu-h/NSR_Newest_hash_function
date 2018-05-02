@@ -2,10 +2,8 @@
 Implementation by the Keccak Team, namely, Guido Bertoni, Joan Daemen,
 Michaël Peeters, Gilles Van Assche and Ronny Van Keer,
 hereby denoted as "the implementer".
-
 For more information, feedback or questions, please refer to our website:
 https://keccak.team/
-
 To the extent possible under law, the implementer has waived all copyright
 and related or neighboring rights to the source code in this file.
 http://creativecommons.org/publicdomain/zero/1.0/
@@ -51,10 +49,10 @@ typedef struct {
     unsigned char delimitedSuffix;
 
     //**for HMAC**//
-/*    unsigned int tot_len;
+    unsigned int tot_len;
 	unsigned int len;
 	unsigned char block[2 * SHA256_BLOCK_SIZE];
-	uint32 h[8];*/
+	uint32 h[8];
 } Keccak_HashInstance;
 
 //****kyu start line
@@ -73,7 +71,7 @@ typedef struct {
 } sha512_ctx;
 
 typedef sha512_ctx sha384_ctx;
-typedef sha256_ctx sha224_ctx;
+typedef Keccak_HashInstance sha224_ctx;
 //****kyu finish line
 
 /**

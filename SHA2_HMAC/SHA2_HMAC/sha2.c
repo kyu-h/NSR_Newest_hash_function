@@ -753,11 +753,14 @@ void sha224_update(sha224_ctx *ctx, const unsigned char *message,unsigned int le
 
     rem_len = new_len % SHA224_BLOCK_SIZE;
 
-    memcpy(ctx->block, &shifted_message[block_nb << 6],
-           rem_len);
+    memcpy(ctx->block, &shifted_message[block_nb << 6], rem_len);
 
     ctx->len = rem_len;
     ctx->tot_len += (block_nb + 1) << 6;
+
+    printf("ctx->tot_len: %d\n", ctx->tot_len);
+    printf("block_nb: %d\n", block_nb);
+
 }
 
 void sha224_final(sha224_ctx *ctx, unsigned char *digest){
