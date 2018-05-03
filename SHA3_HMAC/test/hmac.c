@@ -46,13 +46,14 @@ int hmac_sha3_init(struct HMAC_SHA3 *ctx, int algtype, BitSequence *key, int key
 {
 	int result;
 
-	char ipad[256];
-	char tempKey[64];
+	BitSequence ipad[256];
+	BitSequence tempKey[2048];
 
 	unsigned int i;
 	unsigned int blockbytelen = 256;
 
 	const unsigned int databitlen = databytelen * 8;
+	const unsigned int keybitlen = keybytelen * 8;
 
 	if (ctx == NULL){
 		return KAT_DATA_ERROR;
@@ -64,7 +65,7 @@ int hmac_sha3_init(struct HMAC_SHA3 *ctx, int algtype, BitSequence *key, int key
 			return result;
 		}
 
-		result = Keccak_HashUpdate(&ctx->hash_ctx, data, databitlen);
+		result = Keccak_HashUpdate(&ctx->hash_ctx, key, keybitlen);
 		if (result != KAT_SUCCESS){
 			return result;
 		}
@@ -93,7 +94,7 @@ int hmac_sha3_init(struct HMAC_SHA3 *ctx, int algtype, BitSequence *key, int key
 		return result;
 	}
 
-	result = Keccak_HashUpdate(&ctx->hash_ctx, data, databitlen);
+	result = Keccak_HashUpdate(&ctx->hash_ctx, ipad, blockbytelen * 8);
 	if (result != KAT_SUCCESS){
 		return result;
 	}
@@ -117,7 +118,6 @@ int hmac_sha3_final(struct HMAC_SHA3 *ctx, BitSequence *mac, int algtype, BitSeq
 {
 	int result;
 	unsigned int blockbytelen = 256;
-	unsigned int databitlen = databytelen * 8;
 
 	if (ctx == NULL || mac == NULL){
 		return KAT_DATA_ERROR;
@@ -132,13 +132,13 @@ int hmac_sha3_final(struct HMAC_SHA3 *ctx, BitSequence *mac, int algtype, BitSeq
 		return result;
 	}
 
-	result = Keccak_HashUpdate(&ctx->hash_ctx, ctx->opad, databitlen);
+	result = Keccak_HashUpdate(&ctx->hash_ctx, ctx->opad, blockbytelen * 8);
 	memset(ctx->opad, 0, blockbytelen);
 	if (result != KAT_SUCCESS){
 		return result;
 	}
 
-	result = Keccak_HashUpdate(&ctx->hash_ctx, mac, databitlen);
+	result = Keccak_HashUpdate(&ctx->hash_ctx, mac, algtype);
 	if (result != KAT_SUCCESS){
 		return result;
 	}

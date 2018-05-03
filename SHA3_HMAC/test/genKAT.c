@@ -106,7 +106,6 @@ genHmac(FILE *fp_in, FILE *fp_out, int hashbits)
 {
 	int nKeySetCount=0;
 	int nMessageCount=0;
-	BitSequence Squeezed[SqueezingOutputLength/8];
 	char str;
 	BitSequence Msgstring[1000001] = {0, };
 	BitSequence Keystring[10][2024];
@@ -202,39 +201,27 @@ genHmac(FILE *fp_in, FILE *fp_out, int hashbits)
 				}
 
 				//////////////HMACINPUT///////////////
-
 				if(hashbits == 224) {
-				//	unsigned char mac[SHA224_DIGEST_SIZE];
 					rate = 1152;
 					capacity = 448;
-
-					hmac_digest(hashbits, rate, capacity, keylen, Keystring[keyindex], Msgstring, msglen, mac);
-					hash_out(fp_out, counter++, keylen, SHA3_TAG[tagindex], Keystring[keyindex], mac);
+					hmac_digest(hashbits, rate, capacity, Keystring[keyindex], keylen, Msgstring, msglen, mac);
 				}
 				else if(hashbits == 256) {
-				//	unsigned char mac[SHA256_DIGEST_SIZE];
 					rate = 1088;
 					capacity = 512;
-
-					hmac_digest(hashbits, rate, capacity, keylen, Keystring[keyindex], Msgstring, msglen, mac);
-					hash_out(fp_out, counter++, keylen, SHA3_TAG[tagindex], Keystring[keyindex], mac);
+					hmac_digest(hashbits, rate, capacity, Keystring[keyindex], keylen, Msgstring, msglen, mac);
 				}
 				else if(hashbits == 384) {
-				//	unsigned char mac[SHA384_DIGEST_SIZE];
 					rate = 832;
 					capacity = 768;
-
-					hmac_digest(hashbits, rate, capacity, keylen, Keystring[keyindex], Msgstring, msglen, mac);
-					hash_out(fp_out, counter++, keylen, SHA3_TAG[tagindex], Keystring[keyindex], mac);
+					hmac_digest(hashbits, rate, capacity, Keystring[keyindex], keylen, Msgstring, msglen, mac);
 				}
 				else if(hashbits == 512) {
-				//	unsigned char mac[SHA512_DIGEST_SIZE];
 					rate = 576;
 					capacity = 1024;
-
-					hmac_digest(hashbits, rate, capacity, keylen, Keystring[keyindex], Msgstring, msglen, mac);
-					hash_out(fp_out, counter++, keylen, SHA3_TAG[tagindex], Keystring[keyindex], mac);
+					hmac_digest(hashbits, rate, capacity, Keystring[keyindex], keylen, Msgstring, msglen, mac);
 				}
+				hash_out(fp_out, counter++, keylen, SHA3_TAG[tagindex], Keystring[keyindex], mac);
 			}
 		}
 	}
