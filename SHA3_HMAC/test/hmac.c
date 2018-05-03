@@ -42,329 +42,140 @@ typedef enum { KAT_SUCCESS = 0, KAT_FILE_OPEN_ERROR = 1, KAT_HEADER_ERROR = 2, K
 
 /* HMAC-SHA-224 functions */
 
-void hmac_sha224_init(HMAC_SHA3 *ctx, const unsigned char *key, unsigned int key_size,
-		unsigned int rate, unsigned int capacity, unsigned int hashbitlen, unsigned char delimitedSuffix,
-		const BitSequence *data, BitLength databitlen,
-		BitSequence *hashval){
-    unsigned int fill;
-    unsigned int num;
+int hmac_sha3_init(struct HMAC_SHA3 *ctx, int algtype, BitSequence *key, int keybytelen, unsigned int rate, unsigned capacity, BitSequence *data, int databytelen, BitSequence *mac, unsigned char delimitedSuffix)
+{
+	int result;
 
-    const unsigned char *key_used;
-    unsigned char key_temp[SHA224_DIGEST_SIZE];
-    int i;
+	char ipad[256];
+	char tempKey[64];
 
+	unsigned int i;
+	unsigned int blockbytelen = 256;
 
-    if (key_size == SHA224_BLOCK_SIZE) {
-        key_used = key;
-        num = SHA224_BLOCK_SIZE;
+	const unsigned int databitlen = databytelen * 8;
 
-    } else {
-        if (key_size > SHA224_BLOCK_SIZE){
-            num = SHA224_DIGEST_SIZE;
+	if (ctx == NULL){
+		return KAT_DATA_ERROR;
+	}
 
-            if (Keccak_HashInitialize(&ctx->hash_ctx, rate, capacity, hashbitlen, delimitedSuffix) != SUCCESS) {
-				printf("Keccak[r=%d, c=%d] is not supported.\n", rate, capacity);
-				//return KAT_HASH_ERROR;
-			}
-            Keccak_HashUpdate(&ctx->hash_ctx, data, databitlen);
-			Keccak_HashFinal(&ctx->hash_ctx, hashval);
+	if (keybytelen > blockbytelen){
+		result = Keccak_HashInitialize(&ctx->hash_ctx, rate, capacity, algtype, delimitedSuffix);
+		if (result != KAT_SUCCESS){
+			return result;
+		}
 
-            key_used = key_temp;
-        } else { /* key_size < SHA224_BLOCK_SIZE */
-            key_used = key;
-            num = key_size;
-        }
-        fill = SHA224_BLOCK_SIZE - num;
+		result = Keccak_HashUpdate(&ctx->hash_ctx, data, databitlen);
+		if (result != KAT_SUCCESS){
+			return result;
+		}
 
-        memset(ctx->block_ipad, 0x36, fill);
-        memset(ctx->block_opad + num, 0x5c, fill);
-    }
+		result = Keccak_HashFinal(&ctx->hash_ctx, tempKey);
+		if (result != KAT_SUCCESS){
+			return result;
+		}
 
-    for (i = 0; i < (int) num; i++) {
-        ctx->block_ipad[i] = key_used[i] ^ 0x36;
-        ctx->block_opad[i] = key_used[i] ^ 0x5c;
-    }
+		key = tempKey;
+		keybytelen = algtype / 8;
+	}
 
-    Keccak_HashInitialize(&ctx->ctx_inside, rate, capacity, hashbitlen, delimitedSuffix);
-    Keccak_HashUpdate(&ctx->ctx_inside, ctx->block_ipad, SHA224_BLOCK_SIZE);
+	for (i = 0; i < keybytelen; i++){
+		ipad[i] = key[i] ^ 0x36;
+		ctx->opad[i] = key[i] ^ 0x5c;
+	}
 
-    Keccak_HashInitialize(&ctx->ctx_outside, rate, capacity, hashbitlen, delimitedSuffix);
-	Keccak_HashUpdate(&ctx->ctx_outside, ctx->block_opad, SHA224_BLOCK_SIZE);
+	for (; i < blockbytelen; i++){
+		ipad[i] = 0x36;
+		ctx->opad[i] = 0x5c;
+	}
 
-    memcpy(&ctx->ctx_inside_reinit, &ctx->ctx_inside, sizeof(sha224_ctx));
-    memcpy(&ctx->ctx_outside_reinit, &ctx->ctx_outside, sizeof(sha224_ctx));
+	result = Keccak_HashInitialize(&ctx->hash_ctx, rate, capacity, algtype, delimitedSuffix);
+	if (result != KAT_SUCCESS){
+		return result;
+	}
+
+	result = Keccak_HashUpdate(&ctx->hash_ctx, data, databitlen);
+	if (result != KAT_SUCCESS){
+		return result;
+	}
+
+	memset(ipad, 0, blockbytelen);
+
+	return KAT_SUCCESS;
 }
 
-void hmac_sha224_reinit(hmac_sha224_ctx *ctx){
-    memcpy(&ctx->ctx_inside, &ctx->ctx_inside_reinit, sizeof(sha224_ctx));
-    memcpy(&ctx->ctx_outside, &ctx->ctx_outside_reinit, sizeof(sha224_ctx));
+int hmac_sha3_update(struct HMAC_SHA3 *ctx, const BitSequence *data, unsigned int databytelen)
+{
+	unsigned int databitlen = databytelen * 8;
+	if (ctx == NULL || data == NULL){
+			return KAT_DATA_ERROR;
+	}
+
+	return Keccak_HashUpdate(&ctx->hash_ctx, data, databitlen);
 }
 
-void hmac_sha224_update(HMAC_SHA3 *ctx, const unsigned char *message, unsigned int message_len,
-		const BitSequence *data, BitLength databitlen){
-	Keccak_HashUpdate(&ctx->ctx_inside, message, message_len);
+int hmac_sha3_final(struct HMAC_SHA3 *ctx, BitSequence *mac, int algtype, BitSequence *data, unsigned int databytelen, unsigned int rate, unsigned int capacity, unsigned char delimitedSuffix)
+{
+	int result;
+	unsigned int blockbytelen = 256;
+	unsigned int databitlen = databytelen * 8;
+
+	if (ctx == NULL || mac == NULL){
+		return KAT_DATA_ERROR;
+	}
+	result = Keccak_HashFinal(&ctx->hash_ctx, mac);
+	if (result != KAT_SUCCESS){
+		return result;
+	}
+
+	result = Keccak_HashInitialize(&ctx->hash_ctx, rate, capacity, algtype, delimitedSuffix);
+	if (result != KAT_SUCCESS){
+		return result;
+	}
+
+	result = Keccak_HashUpdate(&ctx->hash_ctx, ctx->opad, databitlen);
+	memset(ctx->opad, 0, blockbytelen);
+	if (result != KAT_SUCCESS){
+		return result;
+	}
+
+	result = Keccak_HashUpdate(&ctx->hash_ctx, mac, databitlen);
+	if (result != KAT_SUCCESS){
+		return result;
+	}
+
+	return Keccak_HashFinal(&ctx->hash_ctx, mac);
 }
 
-void hmac_sha224_final(HMAC_SHA3 *ctx, unsigned char *mac, unsigned int mac_size,
-		const BitSequence *data, BitLength databitlen, BitSequence *hashval){
-    unsigned char digest_inside[SHA224_DIGEST_SIZE];
-    unsigned char mac_temp[SHA224_DIGEST_SIZE];
+int hmac_digest(int algtype, unsigned int rate, unsigned int capacity, BitSequence *key, int keybytelen, BitSequence *data, int databytelen, BitSequence *mac) {
+	struct HMAC_SHA3 ctx;
+	int result;
+	unsigned char delimitedSuffix = 0x06;
 
-    Keccak_HashFinal(&ctx->ctx_inside, digest_inside);
-    Keccak_HashUpdate(&ctx->ctx_outside, digest_inside, SHA224_DIGEST_SIZE);
-    Keccak_HashFinal(&ctx->ctx_outside, mac_temp);
+	result = hmac_sha3_init(&ctx, algtype, key, keybytelen, rate, capacity, data, databytelen, mac, delimitedSuffix);
+	if (result != KAT_SUCCESS){
+		return result;
+	}
 
+	result = hmac_sha3_update(&ctx, data, databytelen);
+	if (result != KAT_SUCCESS){
+		return result;
+	}
 
-    memcpy(mac, mac_temp, mac_size);
+	return hmac_sha3_final(&ctx, mac, algtype, data, databytelen, rate, capacity, delimitedSuffix);
 }
 
-void hmac_sha224(const unsigned char *key, unsigned int key_size, const unsigned char *message, unsigned int message_len, unsigned char *mac, unsigned int mac_size,
-		unsigned int rate, unsigned int capacity, unsigned int hashbitlen, unsigned char delimitedSuffix,
-		const BitSequence *data, BitLength databitlen,
-		BitSequence *hashval){
+void hash_out(FILE *fp_out, int counter, int keylen, unsigned int digest_size, BitSequence *Keystring, unsigned char *digest){
+    fprintf(fp_out, "COUNT = %d\n", counter);
+    fprintf(fp_out, "Klen = %d\n", keylen);
+    fprintf(fp_out, "Tlen = %d\n", digest_size);
+    fprintf(fp_out, "Key = %s\n", Keystring);
 
-	HMAC_SHA3 ctx;
+    fprintf(fp_out, "Msg = ");
+    for(int i = 0 ; i < digest_size ; i++)
+    	fprintf(fp_out, "%02x", digest[i]);
+    fprintf(fp_out, "\n\n");
 
-    hmac_sha224_init(&ctx, key, key_size, rate, capacity, hashbitlen, delimitedSuffix, data, databitlen, hashval);
-    hmac_sha224_update(&ctx, message, message_len, data, databitlen);
-    hmac_sha224_final(&ctx, mac, mac_size, data, databitlen, hashval);
-
-}
-
-/* HMAC-SHA-256 functions */
-
-void hmac_sha256_init(hmac_sha256_ctx *ctx, const unsigned char *key, unsigned int key_size){
-    unsigned int fill;
-    unsigned int num;
-
-    const unsigned char *key_used;
-    unsigned char key_temp[SHA256_DIGEST_SIZE];
-    int i;
-
-    if (key_size == SHA256_BLOCK_SIZE) {
-        key_used = key;
-        num = SHA256_BLOCK_SIZE;
-    } else {
-        if (key_size > SHA256_BLOCK_SIZE){
-            num = SHA256_DIGEST_SIZE;
-//            sha256(key, key_size, key_temp);
-            key_used = key_temp;
-        } else { /* key_size > SHA256_BLOCK_SIZE */
-            key_used = key;
-            num = key_size;
-        }
-        fill = SHA256_BLOCK_SIZE - num;
-
-        memset(ctx->block_ipad + num, 0x36, fill);
-        memset(ctx->block_opad + num, 0x5c, fill);
-    }
-
-    for (i = 0; i < (int) num; i++) {
-        ctx->block_ipad[i] = key_used[i] ^ 0x36;
-        ctx->block_opad[i] = key_used[i] ^ 0x5c;
-    }
-
-/*
-    sha256_init(&ctx->ctx_inside);
-    sha256_update(&ctx->ctx_inside, ctx->block_ipad, SHA256_BLOCK_SIZE);
-    sha256_init(&ctx->ctx_outside);
-    sha256_update(&ctx->ctx_outside, ctx->block_opad, SHA256_BLOCK_SIZE);
-*/
-
-    /* for hmac_reinit */
-    memcpy(&ctx->ctx_inside_reinit, &ctx->ctx_inside, sizeof(sha256_ctx));
-    memcpy(&ctx->ctx_outside_reinit, &ctx->ctx_outside, sizeof(sha256_ctx));
-}
-
-void hmac_sha256_reinit(hmac_sha256_ctx *ctx){
-    memcpy(&ctx->ctx_inside, &ctx->ctx_inside_reinit, sizeof(sha256_ctx));
-    memcpy(&ctx->ctx_outside, &ctx->ctx_outside_reinit, sizeof(sha256_ctx));
-}
-
-void hmac_sha256_update(hmac_sha256_ctx *ctx, const unsigned char *message, unsigned int message_len){
-//    sha256_update(&ctx->ctx_inside, message, message_len);
-}
-
-void hmac_sha256_final(hmac_sha256_ctx *ctx, unsigned char *mac, unsigned int mac_size){
-    unsigned char digest_inside[SHA256_DIGEST_SIZE];
-    unsigned char mac_temp[SHA256_DIGEST_SIZE];
-
-/*
-    sha256_final(&ctx->ctx_inside, digest_inside);
-    sha256_update(&ctx->ctx_outside, digest_inside, SHA256_DIGEST_SIZE);
-    sha256_final(&ctx->ctx_outside, mac_temp);
-*/
-    memcpy(mac, mac_temp, mac_size);
-}
-
-void hmac_sha256(const unsigned char *key, unsigned int key_size, const unsigned char *message, unsigned int message_len, unsigned char *mac, unsigned mac_size){
-    hmac_sha256_ctx ctx;
-
-    hmac_sha256_init(&ctx, key, key_size);
-    hmac_sha256_update(&ctx, message, message_len);
-    hmac_sha256_final(&ctx, mac, mac_size);
-}
-
-/* HMAC-SHA-384 functions */
-
-void hmac_sha384_init(hmac_sha384_ctx *ctx, const unsigned char *key, unsigned int key_size){
-    unsigned int fill;
-    unsigned int num;
-
-    const unsigned char *key_used;
-    unsigned char key_temp[SHA384_DIGEST_SIZE];
-    int i;
-
-    if (key_size == SHA384_BLOCK_SIZE) {
-        key_used = key;
-        num = SHA384_BLOCK_SIZE;
-    } else {
-        if (key_size > SHA384_BLOCK_SIZE){
-            num = SHA384_DIGEST_SIZE;
-//            sha384(key, key_size, key_temp);
-            key_used = key_temp;
-        } else { /* key_size > SHA384_BLOCK_SIZE */
-            key_used = key;
-            num = key_size;
-        }
-        fill = SHA384_BLOCK_SIZE - num;
-
-        memset(ctx->block_ipad + num, 0x36, fill);
-        memset(ctx->block_opad + num, 0x5c, fill);
-    }
-
-    for (i = 0; i < (int) num; i++) {
-        ctx->block_ipad[i] = key_used[i] ^ 0x36;
-        ctx->block_opad[i] = key_used[i] ^ 0x5c;
-    }
-
-/*
-    sha384_init(&ctx->ctx_inside);
-    sha384_update(&ctx->ctx_inside, ctx->block_ipad, SHA384_BLOCK_SIZE);
-    sha384_init(&ctx->ctx_outside);
-    sha384_update(&ctx->ctx_outside, ctx->block_opad, SHA384_BLOCK_SIZE);
-*/
-
-    /* for hmac_reinit */
-    memcpy(&ctx->ctx_inside_reinit, &ctx->ctx_inside, sizeof(sha384_ctx));
-    memcpy(&ctx->ctx_outside_reinit, &ctx->ctx_outside, sizeof(sha384_ctx));
-}
-
-void hmac_sha384_reinit(hmac_sha384_ctx *ctx){
-    memcpy(&ctx->ctx_inside, &ctx->ctx_inside_reinit, sizeof(sha384_ctx));
-    memcpy(&ctx->ctx_outside, &ctx->ctx_outside_reinit, sizeof(sha384_ctx));
-}
-
-void hmac_sha384_update(hmac_sha384_ctx *ctx, const unsigned char *message, unsigned int message_len){
-    //sha384_update(&ctx->ctx_inside, message, message_len);
-}
-
-void hmac_sha384_final(hmac_sha384_ctx *ctx, unsigned char *mac, unsigned int mac_size){
-    unsigned char digest_inside[SHA384_DIGEST_SIZE];
-    unsigned char mac_temp[SHA384_DIGEST_SIZE];
-
-    /*sha384_final(&ctx->ctx_inside, digest_inside);
-    sha384_update(&ctx->ctx_outside, digest_inside, SHA384_DIGEST_SIZE);
-    sha384_final(&ctx->ctx_outside, mac_temp);*/
-    memcpy(mac, mac_temp, mac_size);
-}
-
-void hmac_sha384(const unsigned char *key, unsigned int key_size, const unsigned char *message, unsigned int message_len, unsigned char *mac, unsigned mac_size){
-    hmac_sha384_ctx ctx;
-
-    hmac_sha384_init(&ctx, key, key_size);
-    hmac_sha384_update(&ctx, message, message_len);
-    hmac_sha384_final(&ctx, mac, mac_size);
-}
-
-/* HMAC-SHA-512 functions */
-
-void hmac_sha512_init(hmac_sha512_ctx *ctx, const unsigned char *key, unsigned int key_size){
-    unsigned int fill;
-    unsigned int num;
-
-    const unsigned char *key_used;
-    unsigned char key_temp[SHA512_DIGEST_SIZE];
-    int i;
-
-    if (key_size == SHA512_BLOCK_SIZE) {
-        key_used = key;
-        num = SHA512_BLOCK_SIZE;
-    } else {
-        if (key_size > SHA512_BLOCK_SIZE){
-            num = SHA512_DIGEST_SIZE;
-            //sha512(key, key_size, key_temp);
-            key_used = key_temp;
-        } else { /* key_size > SHA512_BLOCK_SIZE */
-            key_used = key;
-            num = key_size;
-        }
-        fill = SHA512_BLOCK_SIZE - num;
-
-        memset(ctx->block_ipad + num, 0x36, fill);
-        memset(ctx->block_opad + num, 0x5c, fill);
-    }
-
-    for (i = 0; i < (int) num; i++) {
-        ctx->block_ipad[i] = key_used[i] ^ 0x36;
-        ctx->block_opad[i] = key_used[i] ^ 0x5c;
-    }
-
-    /*sha512_init(&ctx->ctx_inside);
-    sha512_update(&ctx->ctx_inside, ctx->block_ipad, SHA512_BLOCK_SIZE);
-    sha512_init(&ctx->ctx_outside);
-    sha512_update(&ctx->ctx_outside, ctx->block_opad,
-                  SHA512_BLOCK_SIZE);*/
-
-    /* for hmac_reinit */
-    memcpy(&ctx->ctx_inside_reinit, &ctx->ctx_inside,
-           sizeof(sha512_ctx));
-    memcpy(&ctx->ctx_outside_reinit, &ctx->ctx_outside,
-           sizeof(sha512_ctx));
-}
-
-void hmac_sha512_reinit(hmac_sha512_ctx *ctx){
-    memcpy(&ctx->ctx_inside, &ctx->ctx_inside_reinit,
-           sizeof(sha512_ctx));
-    memcpy(&ctx->ctx_outside, &ctx->ctx_outside_reinit,
-           sizeof(sha512_ctx));
-}
-
-void hmac_sha512_update(hmac_sha512_ctx *ctx, const unsigned char *message, unsigned int message_len){
-    //sha512_update(&ctx->ctx_inside, message, message_len);
-}
-
-void hmac_sha512_final(hmac_sha512_ctx *ctx, unsigned char *mac, unsigned int mac_size){
-    unsigned char digest_inside[SHA512_DIGEST_SIZE];
-    unsigned char mac_temp[SHA512_DIGEST_SIZE];
-
-    /*sha512_final(&ctx->ctx_inside, digest_inside);
-    sha512_update(&ctx->ctx_outside, digest_inside, SHA512_DIGEST_SIZE);
-    sha512_final(&ctx->ctx_outside, mac_temp);*/
-    memcpy(mac, mac_temp, mac_size);
-}
-
-void hmac_sha512(const unsigned char *key, unsigned int key_size, const unsigned char *message, unsigned int message_len, unsigned char *mac, unsigned mac_size){
-    hmac_sha512_ctx ctx;
-
-    hmac_sha512_init(&ctx, key, key_size);
-    hmac_sha512_update(&ctx, message, message_len);
-    hmac_sha512_final(&ctx, mac, mac_size);
-
-}
-
-void test(const char *vector, unsigned char *digest, unsigned int digest_size){
-    char output[2 * SHA512_DIGEST_SIZE + 1];
-    int i;
-
-    output[2 * digest_size] = '\0';
-
-    for (i = 0; i < (int) digest_size ; i++) {
-       sprintf(output + 2*i, "%02x", digest[i]);
-    }
-
-    printf("H: %s\n", output);
-    /*if (strcmp(vector, output)) { //Ãâ·ÂÀÌ Á¦´ë·Î ³ª¿À´ÂÁö È®ÀÎ¿ë test vector
+    /*if (strcmp(vector, output)) { //ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ È®ï¿½Î¿ï¿½ test vector
         fprintf(stderr, "Test failed.\n");
         exit(1);
     }*/

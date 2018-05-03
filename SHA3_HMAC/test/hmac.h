@@ -34,6 +34,7 @@
 #ifndef HMAC_SHA2_H
 #define HMAC_SHA2_H
 
+#include <stdio.h>
 #include "KeccakHash.h"
 
 #define HMAC_SHA224	0
@@ -47,103 +48,20 @@
 extern "C" {
 #endif
 
-typedef struct {
+struct HMAC_SHA3 {
 	Keccak_HashInstance hash_ctx;
-	sha224_ctx ctx_inside;
-	sha224_ctx ctx_outside;
-	sha224_ctx ctx_inside_reinit;
-	sha224_ctx ctx_outside_reinit;
-	unsigned char block_ipad[SHA224_BLOCK_SIZE];
-	unsigned char block_opad[SHA224_BLOCK_SIZE];
-} HMAC_SHA3;
+	BitSequence opad[256];
+};
 
-typedef struct {
-    sha224_ctx ctx_inside;
-    sha224_ctx ctx_outside;
 
-    /* for hmac_reinit */
-    sha224_ctx ctx_inside_reinit;
-    sha224_ctx ctx_outside_reinit;
+/******************/
+int hmac_sha3_init(struct HMAC_SHA3 *ctx, int algtype, BitSequence *key, int keybytelen, unsigned int rate, unsigned capacity, BitSequence *data, int databytelen, BitSequence *mac, unsigned char delimitedSuffix);
+int hmac_sha3_update(struct HMAC_SHA3 *ctx, const BitSequence *data, unsigned int databytelen);
+int hmac_sha3_final(struct HMAC_SHA3 *ctx, BitSequence *mac, int algtype, BitSequence *data, unsigned int databytelen, unsigned int rate, unsigned int capacity, unsigned char delimitedSuffix);
+int hmac_digest(int algtype, unsigned int rate, unsigned int capacity, BitSequence *key, int keybytelen, BitSequence *data, int databytelen, BitSequence *mac);
+/******************/
 
-    unsigned char block_ipad[SHA224_BLOCK_SIZE];
-    unsigned char block_opad[SHA224_BLOCK_SIZE];
-} hmac_sha224_ctx;
-
-typedef struct {
-    sha256_ctx ctx_inside;
-    sha256_ctx ctx_outside;
-
-    /* for hmac_reinit */
-    sha256_ctx ctx_inside_reinit;
-    sha256_ctx ctx_outside_reinit;
-
-    unsigned char block_ipad[SHA256_BLOCK_SIZE];
-    unsigned char block_opad[SHA256_BLOCK_SIZE];
-} hmac_sha256_ctx;
-
-typedef struct {
-    sha384_ctx ctx_inside;
-    sha384_ctx ctx_outside;
-
-    /* for hmac_reinit */
-    sha384_ctx ctx_inside_reinit;
-    sha384_ctx ctx_outside_reinit;
-
-    unsigned char block_ipad[SHA384_BLOCK_SIZE];
-    unsigned char block_opad[SHA384_BLOCK_SIZE];
-} hmac_sha384_ctx;
-
-typedef struct {
-    sha512_ctx ctx_inside;
-    sha512_ctx ctx_outside;
-
-    /* for hmac_reinit */
-    sha512_ctx ctx_inside_reinit;
-    sha512_ctx ctx_outside_reinit;
-
-    unsigned char block_ipad[SHA512_BLOCK_SIZE];
-    unsigned char block_opad[SHA512_BLOCK_SIZE];
-} hmac_sha512_ctx;
-
-void hmac_sha224_init(HMAC_SHA3 *ctx, const unsigned char *key, unsigned int key_size,
-		unsigned int rate, unsigned int capacity, unsigned int hashbitlen, unsigned char delimitedSuffix,
-		const BitSequence *data, BitLength databitlen,
-		BitSequence *hashval);
-void hmac_sha224_reinit(hmac_sha224_ctx *ctx);
-void hmac_sha224_update(HMAC_SHA3 *ctx, const unsigned char *message, unsigned int message_len,
-		const BitSequence *data, BitLength databitlen);
-void hmac_sha224_final(HMAC_SHA3 *ctx, unsigned char *mac, unsigned int mac_size,
-		const BitSequence *data, BitLength databitlen, BitSequence *hashval);
-void hmac_sha224(const unsigned char *key, unsigned int key_size, const unsigned char *message, unsigned int message_len, unsigned char *mac, unsigned mac_size,
-		unsigned int rate, unsigned int capacity, unsigned int hashbitlen, unsigned char delimitedSuffix,
-		const BitSequence *data, BitLength databitlen,
-		BitSequence *hashval);
-
-void hmac_sha256_init(hmac_sha256_ctx *ctx, const unsigned char *key, unsigned int key_size);
-void hmac_sha256_reinit(hmac_sha256_ctx *ctx);
-void hmac_sha256_update(hmac_sha256_ctx *ctx, const unsigned char *message, unsigned int message_len);
-void hmac_sha256_final(hmac_sha256_ctx *ctx, unsigned char *mac,
-                       unsigned int mac_size);
-void hmac_sha256(const unsigned char *key, unsigned int key_size,
-                 const unsigned char *message, unsigned int message_len,
-                 unsigned char *mac, unsigned mac_size);
-
-void hmac_sha384_init(hmac_sha384_ctx *ctx, const unsigned char *key, unsigned int key_size);
-void hmac_sha384_reinit(hmac_sha384_ctx *ctx);
-void hmac_sha384_update(hmac_sha384_ctx *ctx, const unsigned char *message, unsigned int message_len);
-void hmac_sha384_final(hmac_sha384_ctx *ctx, unsigned char *mac, unsigned int mac_size);
-void hmac_sha384(const unsigned char *key, unsigned int key_size,
-                 const unsigned char *message, unsigned int message_len,
-                 unsigned char *mac, unsigned mac_size);
-
-void hmac_sha512_init(hmac_sha512_ctx *ctx, const unsigned char *key, unsigned int key_size);
-void hmac_sha512_reinit(hmac_sha512_ctx *ctx);
-void hmac_sha512_update(hmac_sha512_ctx *ctx, const unsigned char *message, unsigned int message_len);
-void hmac_sha512_final(hmac_sha512_ctx *ctx, unsigned char *mac, unsigned int mac_size);
-void hmac_sha512(const unsigned char *key, unsigned int key_size,
-                 const unsigned char *message, unsigned int message_len,
-                 unsigned char *mac, unsigned mac_size);
-void test(const char *vector, unsigned char *digest, unsigned int digest_size);
+void hash_out(FILE *fp_out, int counter, int keylen, unsigned int digest_size, BitSequence *Keystring, unsigned char *digest);
 
 #ifdef __cplusplusa
 }

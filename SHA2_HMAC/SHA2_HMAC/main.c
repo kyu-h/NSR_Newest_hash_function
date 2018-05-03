@@ -135,11 +135,11 @@ int main(void){
         printf("key: %c\n", *keys[i]);
         printf("mac: %c\n", mac);
 		hmac_sha224(keys[i], keys_len[i], (unsigned char *) messages[i],strlen(messages[i]), mac, mac_224_size);
-		printf("i= %d, key224 string: %s\n", i, messages[i]);
+		/*printf("i= %d, key224 string: %s\n", i, messages[i]);
 		printf("i= %d, key224 keys_len: %d\n", i, keys_len[i]);
 		printf("key: %c\n", *keys[i]);
 		printf("mac: %c\n", mac);
-		printf("mac_224_size: %d\n", mac_224_size);
+		printf("mac_224_size: %d\n", mac_224_size);*/
 
 		/*printf("i= %d, key224 char: %c\n", i, keys[i]);
 		printf("i= %d, key224 char: %s\n", i, keys[i]);*/

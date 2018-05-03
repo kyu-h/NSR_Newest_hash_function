@@ -98,22 +98,21 @@ genKAT_main(void)
 		fclose(fp_out);
 	}
 
-
     return KAT_SUCCESS;
 }
 
+void
 genHmac(FILE *fp_in, FILE *fp_out, int hashbits)
 {
 	int nKeySetCount=0;
 	int nMessageCount=0;
 	BitSequence Squeezed[SqueezingOutputLength/8];
 	char str;
-	unsigned char Msgstring[1000001];
-	unsigned char Keystring[10][2024];
+	BitSequence Msgstring[1000001] = {0, };
+	BitSequence Keystring[10][2024];
 	int keylen=0;
 	int msglen=0;
 	int i, o;
-	char *HashName[4] = {"HMAC_SHA3-224", "HMAC_SHA3-256", "HMAC_SHA3-384", "HMAC_SHA3-512"};
 
 	const int SHA3_224_TAGS[5] = {14, 16, 20, 24, 28};
 	const int SHA3_256_TAGS[3] = {16, 24, 32};
@@ -121,6 +120,9 @@ genHmac(FILE *fp_in, FILE *fp_out, int hashbits)
 	const int SHA3_512_TAGS[5] = {32, 40, 48, 56, 64};
 	int *SHA3_TAG, taglen;
 
+	int rate, capacity;
+
+	BitSequence mac[65];
 	int counter = 0;
 
 	printf("********************* file %d ******************* \n", hashbits);
@@ -132,10 +134,7 @@ genHmac(FILE *fp_in, FILE *fp_out, int hashbits)
 	{
 		fgets(Keystring[index], MAX_MARKER_LEN, fp_in);
 		Keystring[index][strlen(Keystring[index]) - 1] = '\0'; // remove LF character
-
 	}
-
-
 
 	if(hashbits == 224)
 	{
@@ -158,15 +157,18 @@ genHmac(FILE *fp_in, FILE *fp_out, int hashbits)
 		SHA3_TAG = SHA3_512_TAGS;
 	}
 
-	for(int x=0; x<nKeySetCount; x++)
+	fprintf(fp_out, "Algo_ID = HMAC_SHA3-%d\n\n", hashbits);
+
+	for(int keyindex=0; keyindex<nKeySetCount; keyindex++)
 	{
-		keylen = strlen(Keystring[x]);
+		keylen = strlen(Keystring[keyindex]);
 		rewind(fp_in);
 		for(int i = 0 ; i < nKeySetCount + 2 ; i++)
 			fgets(Msgstring, MAX_MARKER_LEN, fp_in);	// skip 2 lines
 
 		FindMarker(fp_in, "Message");
 		fscanf(fp_in, " %c %d\n", &str, &nMessageCount);
+
 		for(int tagindex = 0 ; tagindex < taglen ; tagindex++)
 		{
 			if(tagindex)
@@ -178,81 +180,61 @@ genHmac(FILE *fp_in, FILE *fp_out, int hashbits)
 			for(int msgindex = 0 ; msgindex < nMessageCount ; msgindex++)
 			{
 				fgets(Msgstring, MAX_MARKER_LEN, fp_in);
-
-				for(i = 0, o = 0 ; i < strlen(Msgstring); i++){	// remove " character
+				for(i = 0, o = 0 ; i < strlen(Msgstring) ; i++)
+				{	// remove " character
 					if(Msgstring[i] != '\"')
 						Msgstring[o++] = Msgstring[i];
 				}
-
-				/*if ((strlen(Msgstring) == 3) && (Msgstring[strlen(Msgstring)-1] == '\"')){
+				if ((strlen(Msgstring) == 3) && (Msgstring[strlen(Msgstring)-1] == '\"')){
 					Msgstring[o] = '\0';
 				}else {
 					Msgstring[o-1] = '\0';   // add NULL character at the end of String
-				}*/
-
-				Msgstring[o-1] = '\0';   // add NULL character at the end of String
+				}
 
 				msglen = strlen(Msgstring);
 
-				if(strlen(Msgstring) == 1 && Msgstring[0] == 'a'){ // use only "a" million
-
-					for(int data_index = 0 ; data_index < 1000000 ; data_index++){
+				if(msglen == 1 && Msgstring[0] == 'a') // use only "a" million
+				{
+					for(int data_index = 0 ; data_index < 1000000 ; data_index++)
 						Msgstring[data_index] = 'a';
-					}
 					Msgstring[1000000] = '\0';
-					//printf("dddddddddddddddddddddddd\n");
 					msglen = strlen(Msgstring);
 				}
-
-				printf("Msg: %s\n", Msgstring);
-				printf("msglen: %d\n", msglen);
 
 				//////////////HMACINPUT///////////////
 
 				if(hashbits == 224) {
-					unsigned char mac[SHA224_DIGEST_SIZE];
+				//	unsigned char mac[SHA224_DIGEST_SIZE];
+					rate = 1152;
+					capacity = 448;
 
-					hmac_sha224(Keystring[x], keylen, Msgstring, msglen, mac, SHA224_DIGEST_SIZE, 1152,448, 0x06, 224, Msgstring, msglen * 8, Squeezed);
-					printf("Counter: %d\n", counter++);
-					printf("x: %d\n", x);
-					printf("Key: %s\n", Keystring[x]);
-
-					test("", mac, 24);
-
-				}/*else if(hashbits == 256){
-					unsigned char mac[SHA256_DIGEST_SIZE];
-
-					hmac_sha224(Keystring, keylen, Msgstring, msglen, mac, SHA224_DIGEST_SIZE, 1088, 512, 0x06, 256, Msgstring, msglen * 8, Squeezed);
-					test("", mac, 24);
-				}else if(hashbits == 384){
-					unsigned char mac[SHA384_DIGEST_SIZE];
-
-					hmac_sha224(Keystring, keylen, Msgstring, msglen, mac, SHA224_DIGEST_SIZE, 832, 768, 0x06, 384, Msgstring, msglen * 8, Squeezed);
-					test("", mac, 24);
-				}else if(hashbits == 512){
-					unsigned char mac[SHA512_DIGEST_SIZE];
-
-					hmac_sha224(Keystring, keylen, Msgstring, msglen, mac, SHA224_DIGEST_SIZE, 576, 1024, 0x06, 512, Msgstring, msglen * 8, Squeezed);
-					test("", mac, 24);
-				}else{
-					printf("Error!");
-				}*/
-
-				///////////original Keccak code////////////////////
-				/*
-				if (Keccak_HashInitialize(&hash, rate, capacity, hashbitlen, delimitedSuffix) != SUCCESS) {
-					printf("Keccak[r=%d, c=%d] is not supported.\n", rate, capacity);
-					return KAT_HASH_ERROR;
+					hmac_digest(hashbits, rate, capacity, keylen, Keystring[keyindex], Msgstring, msglen, mac);
+					hash_out(fp_out, counter++, keylen, SHA3_TAG[tagindex], Keystring[keyindex], mac);
 				}
-				Keccak_HashUpdate(&hash, Msgstring, msglen * 8);
-				Keccak_HashFinal(&hash, Squeezed);
-				if (hashbitlen > 0)
-					fprintBstr(fp_out, "", Squeezed, hashbitlen/8);
-				if (squeezedOutputLength > 0) {
-					Keccak_HashSqueeze(&hash, Squeezed, squeezedOutputLength);
-					fprintBstr(fp_out, "", Squeezed, squeezedOutputLength/8);
+				else if(hashbits == 256) {
+				//	unsigned char mac[SHA256_DIGEST_SIZE];
+					rate = 1088;
+					capacity = 512;
+
+					hmac_digest(hashbits, rate, capacity, keylen, Keystring[keyindex], Msgstring, msglen, mac);
+					hash_out(fp_out, counter++, keylen, SHA3_TAG[tagindex], Keystring[keyindex], mac);
 				}
-				*/
+				else if(hashbits == 384) {
+				//	unsigned char mac[SHA384_DIGEST_SIZE];
+					rate = 832;
+					capacity = 768;
+
+					hmac_digest(hashbits, rate, capacity, keylen, Keystring[keyindex], Msgstring, msglen, mac);
+					hash_out(fp_out, counter++, keylen, SHA3_TAG[tagindex], Keystring[keyindex], mac);
+				}
+				else if(hashbits == 512) {
+				//	unsigned char mac[SHA512_DIGEST_SIZE];
+					rate = 576;
+					capacity = 1024;
+
+					hmac_digest(hashbits, rate, capacity, keylen, Keystring[keyindex], Msgstring, msglen, mac);
+					hash_out(fp_out, counter++, keylen, SHA3_TAG[tagindex], Keystring[keyindex], mac);
+				}
 			}
 		}
 	}
@@ -289,65 +271,4 @@ FindMarker(FILE *infile, const char *marker)
 
     /* shouldn't get here */
     return 0;
-}
-
-/*  */
-/* ALLOW TO READ HEXADECIMAL ENTRY (KEYS, DATA, TEXT, etc.) */
-/*  */
-int
-ReadHex(FILE *infile, BitSequence *A, int Length, char *str)
-{
-    int         i, ch, started;
-    BitSequence ich = '\0';
-
-    if ( Length == 0 ) {
-        A[0] = 0x00;
-        return 1;
-    }
-    memset(A, 0x00, Length);
-    started = 0;
-    if ( FindMarker(infile, str) )
-        while ( (ch = fgetc(infile)) != EOF ) {
-            if ( !isxdigit(ch) ) {
-                if ( !started ) {
-                    if ( ch == '\n' )
-                        break;
-                    else
-                        continue;
-                }
-                else
-                    break;
-            }
-            started = 1;
-            if ( (ch >= '0') && (ch <= '9') )
-                ich = ch - '0';
-            else if ( (ch >= 'A') && (ch <= 'F') )
-                ich = ch - 'A' + 10;
-            else if ( (ch >= 'a') && (ch <= 'f') )
-                ich = ch - 'a' + 10;
-
-            for ( i=0; i<Length-1; i++ )
-                A[i] = (A[i] << 4) | (A[i+1] >> 4);
-            A[Length-1] = (A[Length-1] << 4) | ich;
-        }
-    else
-        return 0;
-
-    return 1;
-}
-
-void
-fprintBstr(FILE *fp, char *S, BitSequence *A, int L)
-{
-    int     i;
-
-    fprintf(fp, "%s", S);
-
-    for ( i=0; i<L; i++ )
-        fprintf(fp, "%02x", A[i]);
-
-    if ( L == 0 )
-        fprintf(fp, "00");
-
-    fprintf(fp, "\n");
 }
