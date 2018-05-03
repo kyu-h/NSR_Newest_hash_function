@@ -467,11 +467,13 @@ int process(int argc, char* argv[])
 #ifdef KeccakReference
 #else
 #endif
+    //getchar();
     return 0;
 }
 
 int main(int argc, char* argv[])
 {
 	printf("test start!!\n");
+
     return process(argc, argv);
 }

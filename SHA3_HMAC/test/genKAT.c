@@ -132,7 +132,10 @@ genHmac(FILE *fp_in, FILE *fp_out, int hashbits)
 	{
 		fgets(Keystring[index], MAX_MARKER_LEN, fp_in);
 		Keystring[index][strlen(Keystring[index]) - 1] = '\0'; // remove LF character
+
 	}
+
+
 
 	if(hashbits == 224)
 	{
@@ -166,38 +169,76 @@ genHmac(FILE *fp_in, FILE *fp_out, int hashbits)
 		fscanf(fp_in, " %c %d\n", &str, &nMessageCount);
 		for(int tagindex = 0 ; tagindex < taglen ; tagindex++)
 		{
+			if(tagindex)
+			{
+				rewind(fp_in);
+				for(int i = 0 ; i < nKeySetCount + 3 ; i++)
+					fgets(Msgstring, MAX_MARKER_LEN, fp_in);	// skip 2 lines
+			}
 			for(int msgindex = 0 ; msgindex < nMessageCount ; msgindex++)
 			{
 				fgets(Msgstring, MAX_MARKER_LEN, fp_in);
-				for(i = 0, o = 0 ; i < strlen(Msgstring) ; i++)
-				{	// remove " character
+
+				for(i = 0, o = 0 ; i < strlen(Msgstring); i++){	// remove " character
 					if(Msgstring[i] != '\"')
 						Msgstring[o++] = Msgstring[i];
 				}
-				Msgstring[o-1] = '\0';	// add NULL character at the end of String
 
-				if(msglen == 1 && Msgstring[0] == 'a') // use only "a" million
-				{
-					for(int data_index = 0 ; data_index < 1000000 ; data_index++)
+				/*if ((strlen(Msgstring) == 3) && (Msgstring[strlen(Msgstring)-1] == '\"')){
+					Msgstring[o] = '\0';
+				}else {
+					Msgstring[o-1] = '\0';   // add NULL character at the end of String
+				}*/
+
+				Msgstring[o-1] = '\0';   // add NULL character at the end of String
+
+				msglen = strlen(Msgstring);
+
+				if(strlen(Msgstring) == 1 && Msgstring[0] == 'a'){ // use only "a" million
+
+					for(int data_index = 0 ; data_index < 1000000 ; data_index++){
 						Msgstring[data_index] = 'a';
+					}
 					Msgstring[1000000] = '\0';
+					//printf("dddddddddddddddddddddddd\n");
 					msglen = strlen(Msgstring);
 				}
 
-
-
-
+				printf("Msg: %s\n", Msgstring);
+				printf("msglen: %d\n", msglen);
 
 				//////////////HMACINPUT///////////////
 
 				if(hashbits == 224) {
 					unsigned char mac[SHA224_DIGEST_SIZE];
 
-					hmac_sha224(Keystring, keylen, Msgstring, msglen, mac, SHA224_DIGEST_SIZE, 1152,448, 0x06, 224, Msgstring, msglen * 8, Squeezed);
+					hmac_sha224(Keystring[x], keylen, Msgstring, msglen, mac, SHA224_DIGEST_SIZE, 1152,448, 0x06, 224, Msgstring, msglen * 8, Squeezed);
+					printf("Counter: %d\n", counter++);
+					printf("x: %d\n", x);
+					printf("Key: %s\n", Keystring[x]);
+
 					test("", mac, 24);
-				}
 
+				}/*else if(hashbits == 256){
+					unsigned char mac[SHA256_DIGEST_SIZE];
 
+					hmac_sha224(Keystring, keylen, Msgstring, msglen, mac, SHA224_DIGEST_SIZE, 1088, 512, 0x06, 256, Msgstring, msglen * 8, Squeezed);
+					test("", mac, 24);
+				}else if(hashbits == 384){
+					unsigned char mac[SHA384_DIGEST_SIZE];
+
+					hmac_sha224(Keystring, keylen, Msgstring, msglen, mac, SHA224_DIGEST_SIZE, 832, 768, 0x06, 384, Msgstring, msglen * 8, Squeezed);
+					test("", mac, 24);
+				}else if(hashbits == 512){
+					unsigned char mac[SHA512_DIGEST_SIZE];
+
+					hmac_sha224(Keystring, keylen, Msgstring, msglen, mac, SHA224_DIGEST_SIZE, 576, 1024, 0x06, 512, Msgstring, msglen * 8, Squeezed);
+					test("", mac, 24);
+				}else{
+					printf("Error!");
+				}*/
+
+				///////////original Keccak code////////////////////
 				/*
 				if (Keccak_HashInitialize(&hash, rate, capacity, hashbitlen, delimitedSuffix) != SUCCESS) {
 					printf("Keccak[r=%d, c=%d] is not supported.\n", rate, capacity);
