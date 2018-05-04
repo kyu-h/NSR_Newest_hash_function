@@ -164,19 +164,18 @@ int hmac_digest(int algtype, unsigned int rate, unsigned int capacity, BitSequen
 	return hmac_sha3_final(&ctx, mac, algtype, data, databytelen, rate, capacity, delimitedSuffix);
 }
 
-void hash_out(FILE *fp_out, int counter, int keylen, unsigned int digest_size, BitSequence *Keystring, unsigned char *digest){
-    fprintf(fp_out, "COUNT = %d\n", counter);
-    fprintf(fp_out, "Klen = %d\n", keylen);
-    fprintf(fp_out, "Tlen = %d\n", digest_size);
-    fprintf(fp_out, "Key = %s\n", Keystring);
+void hash_out_TestVectors(FILE *fp_out, unsigned int digest_size, unsigned char *digest){
 
-    fprintf(fp_out, "Msg = ");
-    for(int i = 0 ; i < digest_size ; i++)
-    	fprintf(fp_out, "%02x", digest[i]);
-    fprintf(fp_out, "\n\n");
+	fprintf(fp_out, "Mac = ");
+	for(int i = 0 ; i < digest_size ; i++)
+		fprintf(fp_out, "%02x", digest[i]);
+	fprintf(fp_out, "\n\n");
 
-    /*if (strcmp(vector, output)) { //����� ����� �������� Ȯ�ο� test vector
-        fprintf(stderr, "Test failed.\n");
-        exit(1);
-    }*/
+}
+
+void hash_out_ReferenceValues(FILE *fp_out, unsigned int digest_size, unsigned char *digest){
+	for(int i = 0 ; i < digest_size ; i++)
+		fprintf(fp_out, "%02x", digest[i]);
+
+	fprintf(fp_out, "\n");
 }

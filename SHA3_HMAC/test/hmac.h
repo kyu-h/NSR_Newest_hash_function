@@ -61,7 +61,8 @@ int hmac_sha3_final(struct HMAC_SHA3 *ctx, BitSequence *mac, int algtype, BitSeq
 int hmac_digest(int algtype, unsigned int rate, unsigned int capacity, BitSequence *key, int keybytelen, BitSequence *data, int databytelen, BitSequence *mac);
 /******************/
 
-void hash_out(FILE *fp_out, int counter, int keylen, unsigned int digest_size, BitSequence *Keystring, unsigned char *digest);
+void hash_out_TestVectors(FILE *fp_out, unsigned int digest_size, unsigned char *digest);
+void hash_out_ReferenceValues(FILE *fp_out, unsigned int digest_size, unsigned char *digest);
 
 #ifdef __cplusplusa
 }

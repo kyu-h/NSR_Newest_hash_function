@@ -56,54 +56,71 @@ STATUS_CODES    genShortMsgHash(unsigned int rate, unsigned int capacity, unsign
 int     FindMarker(FILE *infile, const char *marker);
 int     ReadHex(FILE *infile, BitSequence *A, int Length, char *str);
 void    fprintBstr(FILE *fp, char *S, BitSequence *A, int L);
-//void convertShortMsgToPureLSB(void);
 
 STATUS_CODES
-genKAT_main(void)
-{
-	FILE *fp_in, *fp_out;
+genKAT_main(void){
+	FILE *fp_in_ReferenceValues, *fp_in_TestVectors_req, *fp_out_TestVectors_req, *fp_out_ReferenceValues;
 	char strTemp[2048];
-	char pStr[128], *pAlg;
+	char pStr_ReferenceValues[128], *pAlg_ReferenceValues, pStr_TestVectors_req[128], *pAlg_TestVectors_req ;
 	int hashbits[4] = {224, 256, 384, 512};
-	char inputFileAddress[256], outputFileAddress[256];
+	char inputFileAddress_ReferenceValues[256], inputFileAddress_TestVectors_req[256], outputFileAddress_TestVectors_req[256], outputFileAddress_ReferenceValues[256];
 
 	for(int i=0; i<4; i++){
-		sprintf(inputFileAddress, "(180430)_HMAC_Vector/RefereceValues_req/HMAC_SHA3-%d.txt", hashbits[i]);
-		sprintf(outputFileAddress, "(180430)_HMAC_Vector/RefereceValues_req/HMAC_SHA3-%d_rsp.txt", hashbits[i]);
+		sprintf(inputFileAddress_TestVectors_req, "(180430)_HMAC_Vector/TestVectors_req/HMAC_SHA3-%d.txt", hashbits[i]);
+		sprintf(outputFileAddress_TestVectors_req, "(180430)_HMAC_Vector/TestVectors_req/HMAC_SHA3-%d_rsp.txt", hashbits[i]);
 
-		fp_in = fopen(inputFileAddress, "r");
-		fp_out = fopen(outputFileAddress, "w");
+		sprintf(inputFileAddress_ReferenceValues, "(180430)_HMAC_Vector/RefereceValues_req/HMAC_SHA3-%d.txt", hashbits[i]);
+		sprintf(outputFileAddress_ReferenceValues, "(180430)_HMAC_Vector/RefereceValues_req/HMAC_SHA3-%d_rsp.txt", hashbits[i]);
 
-		if (fp_in == NULL ) {
-			printf("Couldn't open <%s.txt> for read\n", inputFileAddress);
+		fp_in_TestVectors_req = fopen(inputFileAddress_TestVectors_req, "r");
+		fp_in_ReferenceValues = fopen(inputFileAddress_ReferenceValues, "r");
+		fp_out_TestVectors_req = fopen(outputFileAddress_TestVectors_req, "w");
+		fp_out_ReferenceValues = fopen(outputFileAddress_ReferenceValues, "w");
+
+		if (fp_in_ReferenceValues == NULL ) {
+			printf("Couldn't open <%s.txt> for read\n", inputFileAddress_ReferenceValues);
 			return KAT_FILE_OPEN_ERROR;
 		}
 
-		fgets(pStr, sizeof(pStr), fp_in);
-		pAlg = strstr(pStr, "HMAC");
-		pAlg[strlen(pAlg) - 1] = '\0';
+		if (fp_in_TestVectors_req == NULL ) {
+			printf("Couldn't open <%s.txt> for read\n", inputFileAddress_ReferenceValues);
+			return KAT_FILE_OPEN_ERROR;
+		}
 
-		if(!strcmp(pAlg, "HMAC_SHA3-224")){
-			genHmac(fp_in, fp_out, 224);
-		}else if(!strcmp(pAlg, "HMAC_SHA3-256")){
-			genHmac(fp_in, fp_out, 256);
-		}else if(!strcmp(pAlg, "HMAC_SHA3-384")){
-			genHmac(fp_in, fp_out, 384);
-		}else if(!strcmp(pAlg, "HMAC_SHA3-512")){
-			genHmac(fp_in, fp_out, 512);
+		fgets(pStr_ReferenceValues, sizeof(pStr_ReferenceValues), fp_in_ReferenceValues);
+		pAlg_ReferenceValues = strstr(pStr_ReferenceValues, "HMAC");
+		pAlg_ReferenceValues[strlen(pAlg_ReferenceValues) - 1] = '\0';
+
+		fgets(pStr_TestVectors_req, sizeof(pStr_TestVectors_req), fp_in_TestVectors_req);
+		pAlg_TestVectors_req = strstr(pStr_TestVectors_req, "HMAC");
+		pAlg_TestVectors_req[strlen(pAlg_TestVectors_req) - 1] = '\0';
+
+		if((!strcmp(pAlg_ReferenceValues, "HMAC_SHA3-224"))||(!strcmp(pAlg_TestVectors_req, "HMAC_SHA3-224"))){
+			genHmac_ReferenceValues(fp_in_ReferenceValues, fp_out_ReferenceValues, 224);
+			genHmac_TestVectors(fp_in_TestVectors_req, fp_out_TestVectors_req, 224);
+		}else if((!strcmp(pAlg_ReferenceValues, "HMAC_SHA3-256")) || (!strcmp(pAlg_TestVectors_req, "HMAC_SHA3-224"))){
+			genHmac_ReferenceValues(fp_in_ReferenceValues, fp_out_ReferenceValues, 256);
+			genHmac_TestVectors(fp_in_TestVectors_req, fp_out_TestVectors_req, 256);
+		}else if((!strcmp(pAlg_ReferenceValues, "HMAC_SHA3-384")) || (!strcmp(pAlg_TestVectors_req, "HMAC_SHA3-224"))){
+			genHmac_ReferenceValues(fp_in_ReferenceValues, fp_out_TestVectors_req, 384);
+			genHmac_TestVectors(fp_in_TestVectors_req, fp_out_ReferenceValues, 384);
+		}else if((!strcmp(pAlg_ReferenceValues, "HMAC_SHA3-512")) || (!strcmp(pAlg_TestVectors_req, "HMAC_SHA3-224"))){
+			genHmac_ReferenceValues(fp_in_ReferenceValues, fp_out_ReferenceValues, 512);
+			genHmac_TestVectors(fp_in_TestVectors_req, fp_out_TestVectors_req, 512);
 		}else {
 			printf("Error!\n");
 		}
-		fclose(fp_in);
-		fclose(fp_out);
+
+		fclose(fp_in_TestVectors_req);
+		fclose(fp_in_ReferenceValues);
+		fclose(fp_out_TestVectors_req);
+		fclose(fp_out_ReferenceValues);
 	}
 
     return KAT_SUCCESS;
 }
 
-void
-genHmac(FILE *fp_in, FILE *fp_out, int hashbits)
-{
+void genHmac_ReferenceValues(FILE *fp_in, FILE *fp_out_ReferenceValues, int hashbits){
 	int nKeySetCount=0;
 	int nMessageCount=0;
 	char str;
@@ -117,7 +134,13 @@ genHmac(FILE *fp_in, FILE *fp_out, int hashbits)
 	const int SHA3_256_TAGS[3] = {16, 24, 32};
 	const int SHA3_384_TAGS[4] = {24, 32, 40, 48};
 	const int SHA3_512_TAGS[5] = {32, 40, 48, 56, 64};
-	int *SHA3_TAG, taglen;
+
+	const int SHA3_224 = 28;
+	const int SHA3_256 = 32;
+	const int SHA3_384 = 48;
+	const int SHA3_512 = 64;
+
+	int *SHA3_TAG, taglen, *SHA3_Len;
 
 	int rate, capacity;
 
@@ -126,11 +149,12 @@ genHmac(FILE *fp_in, FILE *fp_out, int hashbits)
 
 	printf("********************* file %d ******************* \n", hashbits);
 
+	fprintf(fp_out_ReferenceValues, "Algo_ID = HMAC_SHA3-%d\n", hashbits);
+
 	FindMarker(fp_in, "Key_Set");
 	fscanf(fp_in, " %c %d\n", &str, &nKeySetCount);
 
-	for(int index = 0 ; index < nKeySetCount ; index++)
-	{
+	for(int index = 0 ; index < nKeySetCount ; index++){
 		fgets(Keystring[index], MAX_MARKER_LEN, fp_in);
 		Keystring[index][strlen(Keystring[index]) - 1] = '\0'; // remove LF character
 	}
@@ -156,10 +180,8 @@ genHmac(FILE *fp_in, FILE *fp_out, int hashbits)
 		SHA3_TAG = SHA3_512_TAGS;
 	}
 
-	fprintf(fp_out, "Algo_ID = HMAC_SHA3-%d\n\n", hashbits);
 
-	for(int keyindex=0; keyindex<nKeySetCount; keyindex++)
-	{
+	for(int keyindex=0; keyindex<nKeySetCount; keyindex++){
 		keylen = strlen(Keystring[keyindex]);
 		rewind(fp_in);
 		for(int i = 0 ; i < nKeySetCount + 2 ; i++)
@@ -168,62 +190,120 @@ genHmac(FILE *fp_in, FILE *fp_out, int hashbits)
 		FindMarker(fp_in, "Message");
 		fscanf(fp_in, " %c %d\n", &str, &nMessageCount);
 
-		for(int tagindex = 0 ; tagindex < taglen ; tagindex++)
-		{
-			if(tagindex)
-			{
-				rewind(fp_in);
-				for(int i = 0 ; i < nKeySetCount + 3 ; i++)
-					fgets(Msgstring, MAX_MARKER_LEN, fp_in);	// skip 2 lines
+		fprintf(fp_out_ReferenceValues, "\nKey = %s\n", Keystring[keyindex]);
+
+		for(int msgindex = 0 ; msgindex < nMessageCount ; msgindex++){
+			fgets(Msgstring, MAX_MARKER_LEN, fp_in);
+			for(i = 0, o = 0 ; i < strlen(Msgstring) ; i++){	// remove " character
+				if(Msgstring[i] != '\"')
+					Msgstring[o++] = Msgstring[i];
 			}
-			for(int msgindex = 0 ; msgindex < nMessageCount ; msgindex++)
-			{
-				fgets(Msgstring, MAX_MARKER_LEN, fp_in);
-				for(i = 0, o = 0 ; i < strlen(Msgstring) ; i++)
-				{	// remove " character
-					if(Msgstring[i] != '\"')
-						Msgstring[o++] = Msgstring[i];
-				}
-				if ((strlen(Msgstring) == 3) && (Msgstring[strlen(Msgstring)-1] == '\"')){
-					Msgstring[o] = '\0';
-				}else {
-					Msgstring[o-1] = '\0';   // add NULL character at the end of String
-				}
+			if ((strlen(Msgstring) == 3) && (Msgstring[strlen(Msgstring)-1] == '\"')){
+				Msgstring[o] = '\0';
+			}else {
+				Msgstring[o-1] = '\0';   // add NULL character at the end of String
+			}
 
+			msglen = strlen(Msgstring);
+
+			if(msglen == 1 && Msgstring[0] == 'a'){ // use only "a" million
+				for(int data_index = 0 ; data_index < 1000000 ; data_index++)
+					Msgstring[data_index] = 'a';
+				Msgstring[1000000] = '\0';
 				msglen = strlen(Msgstring);
+			}
 
-				if(msglen == 1 && Msgstring[0] == 'a') // use only "a" million
-				{
-					for(int data_index = 0 ; data_index < 1000000 ; data_index++)
-						Msgstring[data_index] = 'a';
-					Msgstring[1000000] = '\0';
-					msglen = strlen(Msgstring);
-				}
-
-				//////////////HMACINPUT///////////////
-				if(hashbits == 224) {
-					rate = 1152;
-					capacity = 448;
-					hmac_digest(hashbits, rate, capacity, Keystring[keyindex], keylen, Msgstring, msglen, mac);
-				}
-				else if(hashbits == 256) {
-					rate = 1088;
-					capacity = 512;
-					hmac_digest(hashbits, rate, capacity, Keystring[keyindex], keylen, Msgstring, msglen, mac);
-				}
-				else if(hashbits == 384) {
-					rate = 832;
-					capacity = 768;
-					hmac_digest(hashbits, rate, capacity, Keystring[keyindex], keylen, Msgstring, msglen, mac);
-				}
-				else if(hashbits == 512) {
-					rate = 576;
-					capacity = 1024;
-					hmac_digest(hashbits, rate, capacity, Keystring[keyindex], keylen, Msgstring, msglen, mac);
-				}
-				hash_out(fp_out, counter++, keylen, SHA3_TAG[tagindex], Keystring[keyindex], mac);
+			//////////////HMACINPUT///////////////
+			if(hashbits == 224) {
+				rate = 1152;
+				capacity = 448;
+				hmac_digest(hashbits, rate, capacity, Keystring[keyindex], keylen, Msgstring, msglen, mac);
+				hash_out_ReferenceValues(fp_out_ReferenceValues, SHA3_224, mac);
+			}
+			else if(hashbits == 256) {
+				rate = 1088;
+				capacity = 512;
+				hmac_digest(hashbits, rate, capacity, Keystring[keyindex], keylen, Msgstring, msglen, mac);
+				hash_out_ReferenceValues(fp_out_ReferenceValues, SHA3_256, mac);
+			}
+			else if(hashbits == 384) {
+				rate = 832;
+				capacity = 768;
+				hmac_digest(hashbits, rate, capacity, Keystring[keyindex], keylen, Msgstring, msglen, mac);
+				hash_out_ReferenceValues(fp_out_ReferenceValues, SHA3_384, mac);
+			}
+			else if(hashbits == 512) {
+				rate = 576;
+				capacity = 1024;
+				hmac_digest(hashbits, rate, capacity, Keystring[keyindex], keylen, Msgstring, msglen, mac);
+				hash_out_ReferenceValues(fp_out_ReferenceValues, SHA3_512, mac);
 			}
 		}
+	}
+}
+
+
+void genHmac_TestVectors(FILE *fp_in, FILE *fp_out_TestVectors, int hashbits){
+	int kLen = 0;
+	int Tlen = 0;
+	char str;
+	int count = 0;
+	int rate = 1152;
+	int capacity = 448;
+	int keylen, msglen = 0;
+	BitSequence Keystring[2024];
+	BitSequence Msgstring[2024];
+	BitSequence mac[65];
+
+	printf("********************* file %d ******************* \n", hashbits);
+	fprintf(fp_out_TestVectors, "Algo_ID = HMAC_SHA3-%d\n\n", hashbits);
+
+	while(!feof(fp_in)) {
+		fprintf(fp_out_TestVectors, "COUNT = %d\n", count);
+		FindMarker(fp_in, "Klen");
+		fscanf(fp_in, " %c %d\n", &str, &kLen);
+		fprintf(fp_out_TestVectors, "Klen = %d\n", kLen);
+
+		FindMarker(fp_in, "Tlen");
+		fscanf(fp_in, " %c %d\n", &str, &Tlen);
+		fprintf(fp_out_TestVectors, "Tlen = %d\n", Tlen);
+
+		FindMarker(fp_in, "Key");
+		fscanf(fp_in, " %c %s\n", &str, &Keystring);
+		fprintf(fp_out_TestVectors, "Key = %s\n", Keystring);
+
+		FindMarker(fp_in, "Msg");
+		fscanf(fp_in, " %c %s\n", &str, &Msgstring);
+		fprintf(fp_out_TestVectors, "Msg = %s\n", Msgstring);
+
+		keylen = strlen(Keystring) / 2;
+		msglen = strlen(Msgstring) / 2;
+
+		if(hashbits == 224) {
+			rate = 1152;
+			capacity = 448;
+			hmac_digest(hashbits, rate, capacity, Keystring, keylen, Msgstring, msglen, mac);
+		}
+		else if(hashbits == 256) {
+			rate = 1088;
+			capacity = 512;
+			hmac_digest(hashbits, rate, capacity, Keystring, keylen, Msgstring, msglen, mac);
+		}
+		else if(hashbits == 384) {
+			rate = 832;
+			capacity = 768;
+			hmac_digest(hashbits, rate, capacity, Keystring, keylen, Msgstring, msglen, mac);
+		}
+		else if(hashbits == 512) {
+			rate = 576;
+			capacity = 1024;
+			hmac_digest(hashbits, rate, capacity, Keystring, keylen, Msgstring, msglen, mac);
+		}
+		hash_out_TestVectors(fp_out_TestVectors, Tlen, mac);
+
+		count++;
+		/*if(count == 10)
+			break;*/
 	}
 }
 
