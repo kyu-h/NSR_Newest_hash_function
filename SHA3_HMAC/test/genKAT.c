@@ -201,7 +201,7 @@ void genHmac_ReferenceValues(FILE *fp_in, FILE *fp_out_ReferenceValues, int hash
 			if ((strlen(Msgstring) == 3) && (Msgstring[strlen(Msgstring)-1] == '\"')){
 				Msgstring[o] = '\0';
 			}else {
-				Msgstring[o-1] = '\0';   // add NULL character at the end of String
+				Msgstring[o] = '\0';   // add NULL character at the end of String
 			}
 
 			msglen = strlen(Msgstring);
@@ -217,25 +217,29 @@ void genHmac_ReferenceValues(FILE *fp_in, FILE *fp_out_ReferenceValues, int hash
 			if(hashbits == 224) {
 				rate = 1152;
 				capacity = 448;
-				hmac_digest(hashbits, rate, capacity, Keystring[keyindex], keylen, Msgstring, msglen, mac);
+				hmac_digest(hashbits, rate, capacity, Keystring[keyindex], keylen / 2, Msgstring, msglen / 2, mac);
 				hash_out_ReferenceValues(fp_out_ReferenceValues, SHA3_224, mac);
+
+				fprintf(fp_out_ReferenceValues, "Msgstring: %s\n", Msgstring);
+				fprintf(fp_out_ReferenceValues, "keylen: %d\n", keylen / 2);
+				fprintf(fp_out_ReferenceValues, "msglen: %d\n", msglen / 2);
 			}
 			else if(hashbits == 256) {
 				rate = 1088;
 				capacity = 512;
-				hmac_digest(hashbits, rate, capacity, Keystring[keyindex], keylen, Msgstring, msglen, mac);
+				hmac_digest(hashbits, rate, capacity, Keystring[keyindex], keylen / 2, Msgstring, msglen / 2, mac);
 				hash_out_ReferenceValues(fp_out_ReferenceValues, SHA3_256, mac);
 			}
 			else if(hashbits == 384) {
 				rate = 832;
 				capacity = 768;
-				hmac_digest(hashbits, rate, capacity, Keystring[keyindex], keylen, Msgstring, msglen, mac);
+				hmac_digest(hashbits, rate, capacity, Keystring[keyindex], keylen / 2, Msgstring, msglen / 2, mac);
 				hash_out_ReferenceValues(fp_out_ReferenceValues, SHA3_384, mac);
 			}
 			else if(hashbits == 512) {
 				rate = 576;
 				capacity = 1024;
-				hmac_digest(hashbits, rate, capacity, Keystring[keyindex], keylen, Msgstring, msglen, mac);
+				hmac_digest(hashbits, rate, capacity, Keystring[keyindex], keylen / 2, Msgstring, msglen / 2, mac);
 				hash_out_ReferenceValues(fp_out_ReferenceValues, SHA3_512, mac);
 			}
 		}
