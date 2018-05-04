@@ -50,10 +50,22 @@ int hmac_sha3_init(struct HMAC_SHA3 *ctx, int algtype, BitSequence *key, int key
 	BitSequence tempKey[2048];
 
 	unsigned int i;
-	unsigned int blockbytelen = 256;
+	unsigned int blockbytelen = 0;
 
 	const unsigned int databitlen = databytelen * 8;
 	const unsigned int keybitlen = keybytelen * 8;
+
+	if(algtype == 224){
+		blockbytelen = 144;
+	}else if(algtype == 256){
+		blockbytelen = 136;
+	}else if(algtype == 384){
+		blockbytelen = 104;
+	}else if(algtype == 512){
+		blockbytelen = 72;
+	}else {
+		printf("Error!");
+	}
 
 	if (ctx == NULL){
 		return KAT_DATA_ERROR;
@@ -117,7 +129,19 @@ int hmac_sha3_update(struct HMAC_SHA3 *ctx, const BitSequence *data, unsigned in
 int hmac_sha3_final(struct HMAC_SHA3 *ctx, BitSequence *mac, int algtype, BitSequence *data, unsigned int databytelen, unsigned int rate, unsigned int capacity, unsigned char delimitedSuffix)
 {
 	int result;
-	unsigned int blockbytelen = 256;
+	unsigned int blockbytelen = 0;
+
+	if(algtype == 224){
+		blockbytelen = 144;
+	}else if(algtype == 256){
+		blockbytelen = 136;
+	}else if(algtype == 384){
+		blockbytelen = 104;
+	}else if(algtype == 512){
+		blockbytelen = 72;
+	}else {
+		printf("Error!");
+	}
 
 	if (ctx == NULL || mac == NULL){
 		return KAT_DATA_ERROR;
