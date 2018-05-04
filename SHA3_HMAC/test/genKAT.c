@@ -102,8 +102,8 @@ genKAT_main(void){
 			genHmac_ReferenceValues(fp_in_ReferenceValues, fp_out_ReferenceValues, 256);
 			genHmac_TestVectors(fp_in_TestVectors_req, fp_out_TestVectors_req, 256);
 		}else if((!strcmp(pAlg_ReferenceValues, "HMAC_SHA3-384")) || (!strcmp(pAlg_TestVectors_req, "HMAC_SHA3-224"))){
-			genHmac_ReferenceValues(fp_in_ReferenceValues, fp_out_TestVectors_req, 384);
-			genHmac_TestVectors(fp_in_TestVectors_req, fp_out_ReferenceValues, 384);
+			genHmac_ReferenceValues(fp_in_ReferenceValues, fp_out_ReferenceValues, 384);
+			genHmac_TestVectors(fp_in_TestVectors_req, fp_out_TestVectors_req, 384);
 		}else if((!strcmp(pAlg_ReferenceValues, "HMAC_SHA3-512")) || (!strcmp(pAlg_TestVectors_req, "HMAC_SHA3-224"))){
 			genHmac_ReferenceValues(fp_in_ReferenceValues, fp_out_ReferenceValues, 512);
 			genHmac_TestVectors(fp_in_TestVectors_req, fp_out_TestVectors_req, 512);
