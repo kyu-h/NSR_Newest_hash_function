@@ -185,7 +185,14 @@ void genHmac_ReferenceValues(FILE *fp_in, FILE *fp_out_ReferenceValues, int hash
 				if(Msgstring[i] != '\"')
 					Msgstring[o++] = Msgstring[i];
 			}
-			Msgstring[o] = '\0';
+
+			if ((strlen(Msgstring) == 3) && (Msgstring[strlen(Msgstring)-1] == '\"')){
+				Msgstring[o] = '\0';
+			}else {
+				Msgstring[o-1] = '\0';   // add NULL character at the end of String
+			}
+
+			printf("%s\n", Msgstring);
 			msglen = strlen(Msgstring);
 
 			if(msglen == 1 && Msgstring[0] == 'a'){ // use only "a" million
