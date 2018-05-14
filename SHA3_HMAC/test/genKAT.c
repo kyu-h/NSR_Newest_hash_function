@@ -162,8 +162,7 @@ void genHmac_ReferenceValues(FILE *fp_in, FILE *fp_out_ReferenceValues, int hash
 		for(int i = 0 ; i < nKeySetCount + 2 ; i++)
 			fgets(Msgstring, MAX_MARKER_LEN, fp_in);	// skip 2 lines
 
-		for(int r = 0, w = 0 ; r < keylen ; r += 2)
-		{
+		for(int r = 0, w = 0 ; r < keylen ; r += 2){
 		   BitSequence temp_arr[3] = {Keystring[keyindex][r], Keystring[keyindex][r+1], '\0'};
 		   Key_values[w++] = strtol(temp_arr, NULL, 16);
 		}
@@ -192,7 +191,6 @@ void genHmac_ReferenceValues(FILE *fp_in, FILE *fp_out_ReferenceValues, int hash
 				Msgstring[o-1] = '\0';   // add NULL character at the end of String
 			}
 
-			printf("%s\n", Msgstring);
 			msglen = strlen(Msgstring);
 
 			if(msglen == 1 && Msgstring[0] == 'a'){ // use only "a" million
@@ -211,17 +209,17 @@ void genHmac_ReferenceValues(FILE *fp_in, FILE *fp_out_ReferenceValues, int hash
 			}else if(hashbits == 256) {
 				rate = 1088;
 				capacity = 512;
-				hmac_digest(hashbits, rate, capacity, Keystring[keyindex], keylen / 2, Msgstring, msglen / 2, mac);
+				hmac_digest(hashbits, rate, capacity, Key_values, keylen / 2, Msgstring, msglen, mac);
 				hash_out_ReferenceValues(fp_out_ReferenceValues, SHA3_256, mac);
 			}else if(hashbits == 384) {
 				rate = 832;
 				capacity = 768;
-				hmac_digest(hashbits, rate, capacity, Keystring[keyindex], keylen / 2, Msgstring, msglen / 2, mac);
+				hmac_digest(hashbits, rate, capacity, Key_values, keylen / 2, Msgstring, msglen, mac);
 				hash_out_ReferenceValues(fp_out_ReferenceValues, SHA3_384, mac);
 			}else if(hashbits == 512) {
 				rate = 576;
 				capacity = 1024;
-				hmac_digest(hashbits, rate, capacity, Keystring[keyindex], keylen / 2, Msgstring, msglen / 2, mac);
+				hmac_digest(hashbits, rate, capacity, Key_values, keylen / 2, Msgstring, msglen, mac);
 				hash_out_ReferenceValues(fp_out_ReferenceValues, SHA3_512, mac);
 			}else {
 				printf("Error!");
@@ -262,8 +260,7 @@ void genHmac_TestVectors(FILE *fp_in, FILE *fp_out_TestVectors, int hashbits){
 		fscanf(fp_in, " %c %s\n", &str, &Keystring);
 		keylen = strlen(Keystring);
 
-		for(int r = 0, w = 0 ; r < keylen ; r += 2)
-		{
+		for(int r = 0, w = 0 ; r < keylen ; r += 2){
 		   BitSequence temp_arr[3] = {Keystring[r], Keystring[r+1], '\0'};
 		   Key_values[w++] = strtol(temp_arr, NULL, 16);
 		}
@@ -278,8 +275,7 @@ void genHmac_TestVectors(FILE *fp_in, FILE *fp_out_TestVectors, int hashbits){
 
 		msglen = strlen(Msgstring);
 
-		for(int r = 0, w = 0 ; r < msglen ; r += 2)
-		{
+		for(int r = 0, w = 0 ; r < msglen ; r += 2){
 		   BitSequence temp_arr[3] = {Msgstring[r], Msgstring[r+1], '\0'};
 		   Msg_values[w++] = strtol(temp_arr, NULL, 16);
 		}
@@ -309,16 +305,13 @@ void genHmac_TestVectors(FILE *fp_in, FILE *fp_out_TestVectors, int hashbits){
 		hash_out_TestVectors(fp_out_TestVectors, Tlen, mac);
 
 		count++;
-		/*if(count == 10)
-			break;*/
 	}
 }
 
 /*  */
 /* ALLOW TO READ HEXADECIMAL ENTRY (KEYS, DATA, TEXT, etc.) */
 /*  */
-int
-FindMarker(FILE *infile, const char *marker)
+int FindMarker(FILE *infile, const char *marker)
 {
     char    line[MAX_MARKER_LEN];
     int     i, len;
