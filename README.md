@@ -13,7 +13,7 @@ If we have some time, we will change that base code on our own. (If possible..)
 <hr>
 Every package have test text input file seems like SHA3-224.txt or HMAC_SHA3-224.txt. <br>
 Output file which is test result of the input files is SHA3-224_rsp.txt or HMAC_SHA3-224_rsp.txt <br>
-So, If you want to check input files and output files, just go test folder (every package have different name. so if some folder have only text file it might be test folder) and check above 2 sentence.
+So, If you want to check input files and output files, just go test folder (every package have different name. so if some folder have only text file it might be test folder) and check above 2 sentences.
 
 <hr>
 
