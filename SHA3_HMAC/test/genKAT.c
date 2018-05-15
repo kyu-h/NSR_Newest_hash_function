@@ -167,7 +167,6 @@ void genHmac_ReferenceValues(FILE *fp_in, FILE *fp_out_ReferenceValues, int hash
 		   Key_values[w++] = strtol(temp_arr, NULL, 16);
 		}
 
-
         fprintf(fp_out_ReferenceValues, "Key = ");
         for(int kvindex = 0 ; kvindex < keylen / 2 ; kvindex++)
            fprintf(fp_out_ReferenceValues, "%02x", Key_values[kvindex]);
