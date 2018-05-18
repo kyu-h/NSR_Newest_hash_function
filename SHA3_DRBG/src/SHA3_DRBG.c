@@ -305,6 +305,7 @@ int main( int argc, char *argv[] )
         mbedtls_printf("\n    Using /dev/random, so can take a long time! " );
         fflush( stdout );
     }
+
 #endif /* !_WIN32 && MBEDTLS_FS_IO */
 
     if( ( ret = mbedtls_ctr_drbg_seed( &ctr_drbg, mbedtls_entropy_func, &entropy,
