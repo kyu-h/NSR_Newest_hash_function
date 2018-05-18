@@ -9,6 +9,7 @@ If we have some time, we will change that base code on our own. (If possible..)
  ->Can check HMAC hash values result in this web site: http://www.wolfgang-ehrhardt.de/hmac-sha3-testvectors.html <br>
 3. Make a Hash_DRBG due to MAY 16. <br>
  ->Reference site of how to set DRBG: https://github.com/Chronic-Dev/libgcrypt <br>
+ ->TTAK.KO-12.0190: http://committee.tta.or.kr/data/standard_view.jsp?nowPage=3&pk_num=TTAK.KO-12.0190&commit_code=TC5 <br>
 4. Make a HMAC_DRBG due to MAY 23.
 5. Make a PBKDF due to MAY 30.
 6. Make a HMAC_KDF due to June 20.
