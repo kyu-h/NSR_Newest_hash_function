@@ -43,7 +43,7 @@ So, If you want to check input files and output files, just go test folder (ever
   <tr>
     <th rowspan="2">
     OS: Linux<br>
-    Compiler: Linux &nbsp;&nbsp;&nbsp;&nbsp;<br>
+    Compiler: Linux<br>
     IDE: Eclipse<br></th>
     <td>
     SHA3_DRBG<br>
