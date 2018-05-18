@@ -23,7 +23,7 @@ So, If you want to check input files and output files, just go test folder (ever
 
 <hr>
 
-<table>
+<table style="width:100%">
   <tr>
     <th rowspan="2">
     OS: Window<br>
@@ -39,7 +39,7 @@ So, If you want to check input files and output files, just go test folder (ever
 </table>
 <br>
 
-<table>
+<table style="width:100%">
   <tr>
     <th rowspan="2">
     OS: Linux<br>
