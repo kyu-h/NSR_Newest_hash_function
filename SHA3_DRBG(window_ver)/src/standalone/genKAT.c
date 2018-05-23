@@ -23,7 +23,6 @@ typedef enum { KAT_SUCCESS = 0, KAT_FILE_OPEN_ERROR = 1, KAT_HEADER_ERROR = 2, K
 STATUS_CODES    genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimitedSuffix, unsigned int hashbitlen, unsigned int squeezedOutputLength, const char *inputFileName, const char *outputFileName, const char *description);
 int     FindMarker(FILE *infile, const char *marker);
 void    fprintBstr(FILE *fp, char *S, BitSequence *A, int L);
-void printBstr(char *S, BitSequence *A, int L);
 void convertShortMsgToPureLSB(void);
 
 STATUS_CODES
@@ -203,18 +202,63 @@ void fprintBstr(FILE *fp, char *S, BitSequence *A, int L){
     fprintf(fp, "\n");
 }
 
-void printBstr(char *S, BitSequence *A, int L){
-    int     i;
+void Inner_Output_Generation_Function(unsigned int rate, unsigned int capacity, unsigned char *input, unsigned long long int inputByteLen, unsigned char delimitedSuffix, unsigned char *output, unsigned long long int outputByteLen){
+	int length = inputByteLen - 1;
 
-    printf("SHA3: ");
+	unsigned char mod01[length];
+	unsigned char mod02[length];
 
-    for ( i=0; i<L; i++ )
-        printf("%02x", A[i]); //write small
+	unsigned char mod01test[length];
+	unsigned char mod02test[length];
 
-    if ( L == 0 )
-        printf("00");
+	unsigned char SHA3_mod01[outputByteLen];
+	unsigned char SHA3_mod02[outputByteLen];
+	unsigned char SHA3_mod03[outputByteLen];
 
-    printf("\n");
+	BitSequence Squeezed[SqueezingOutputLength/8];
+
+
+	printf("\n\nOutput Generation Function: ");
+	for(int i=0; i<length; i++){
+		printf("%02X", input[i]);
+	}
+	printf("\n");
+
+	input[length-1] += 0x01;
+	printf("Mod01: ");
+	for(int i=0; i<length; i++){
+		mod01[i] = input[i];
+		printf("%02X", mod01[i]);
+	}
+	printf("\n");
+
+	printf("atoi: %d\n", sizeof(atoi(mod01)));
+
+	input[length-1] += 0x01;
+	printf("Mod02: ");
+	for(int i=0; i<length; i++){
+		mod02[i] = input[i];
+		printf("%02X", mod02[i]);
+	}
+	printf("\n");
+
+	printf("SHA3_mod01: ");
+	Keccak(rate, capacity, mod01, length, delimitedSuffix, Squeezed, outputByteLen);
+	for (int i=0; i<outputByteLen; i++){
+		SHA3_mod01[i] = Squeezed[i];
+		printf("%02x", SHA3_mod01[i]); //write small
+	}
+	printf("\n");
+
+	printf("SHA3_mod02: ");
+	Keccak(rate, capacity, mod02, length, delimitedSuffix, Squeezed, outputByteLen);
+	for (int i=0; i<outputByteLen; i++){
+		SHA3_mod02[i] = Squeezed[i];
+		SHA3_mod03[i] = Squeezed[i];
+		printf("%02x", SHA3_mod02[i]); //write small
+	}
+	printf("\n");
+
 }
 
 void DerivedFunction(unsigned int rate, unsigned int capacity, const unsigned char *input, unsigned long long int inputByteLen, unsigned char delimitedSuffix, unsigned char *output, unsigned long long int outputByteLen, unsigned char input_data[10000]) {
@@ -301,9 +345,13 @@ void DerivedFunction(unsigned int rate, unsigned int capacity, const unsigned ch
     }
     printf("\n");
 
+    printf("j: %d\n", j);
+
     printf("Final Key: ");
-    for(int i=0; i<55; i++){ //55맞는지 확인 필요
+    for(int i=0; i<j-1; i++){ //55맞는지 확인 필요
         Final_Key[i] = Add_Key[i];
         printf("%02X", Final_Key[i]);
     }
+
+    Inner_Output_Generation_Function(rate, capacity, Final_Key, j, delimitedSuffix, Squeezed, outputByteLen/8);
 }
