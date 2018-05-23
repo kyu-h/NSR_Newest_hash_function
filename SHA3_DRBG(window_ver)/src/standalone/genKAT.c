@@ -276,85 +276,73 @@ void Inner_Output_Generation_Function(unsigned int rate, unsigned int capacity, 
 
 }
 
-void S_DerivedFunction(unsigned int rate, unsigned int capacity, const unsigned char *input, unsigned long long int inputByteLen, unsigned char delimitedSuffix, unsigned char *output, unsigned long long int outputByteLen) {
-    unsigned char buff_01[100] = "01000001B8";
-    unsigned char buff_02[100] = "02000001B8";
-    unsigned char Key_values01[10000];
-    unsigned char Key_values02[10000];
-    unsigned char SHA3_values01[10000];
+void C_DerivedFunction(unsigned int rate, unsigned int capacity, unsigned char input[110], unsigned long long int inputByteLen, unsigned char delimitedSuffix, unsigned char *output, unsigned long long int outputByteLen) {
+	unsigned char buff[100] = "00";
+	unsigned char buff_01[100] = "01000001B8";
+	unsigned char buff_02[100] = "02000001B8";
+	unsigned char Key_values01[10000];
+	unsigned char Key_values02[10000];
+	unsigned char SHA3_values01[10000];
 	unsigned char SHA3_values02[10000];
-    unsigned char Add_Key[30000];
-    unsigned char Final_Key[110];
-    unsigned char buff[10] = "00";
-    unsigned char input_data[1000];
+	unsigned char Add_Key[30000];
+	unsigned char Input_data[10000];
+	unsigned char Final_Key[110];
+	BitSequence Squeezed[SqueezingOutputLength/8];
 
-    BitSequence Squeezed[SqueezingOutputLength/8];
-    int r, w, j, x = 0;
+	int r, w, j = 0;
 
-    printf("\n");
-    for(int i=0; i<inputByteLen; i++){
-    	printf("%02X", input[i]);
-    }
-    printf("\n");
+	//*********************buff**************************//
+	for(r = 0, w = 0 ; r < strlen(buff) ; r += 2){
+		unsigned char temp_arr[3] = {buff[r], buff[r+1], '\0'};
+		Input_data[w++] = strtol(temp_arr, NULL, 16);
+	} //2 string to hex
 
-    printf("strlen(bff): %d", strlen(buff));
-    //*********************buff**************************//
-
-	unsigned char temp_arr[3] = {buff[0], buff[1], '\0'};
-	input_data[x++] = strtol(temp_arr, NULL, 16);
-
-
-	for(r = 0; r < strlen(input) ; r++){
-		unsigned char temp_arr[3] = {input[r], input[r+1], '\0'};
-		input_data[x++] = strtol(temp_arr, NULL, 16);
+	for(r = 0, w; r < inputByteLen-1 ; r++){
+		Input_data[w++] = input[r];
 	} //2 string to hex
 	//*********************buff**************************//
 
+	printf("\nInput data: ");
+	for(int i=0; i< w; i++){
+		printf("%02X", Input_data[i]);
+	}
+	printf("\n");
 
-    //*********************buff01**************************//
-    for(r = 0, w = 0 ; r < strlen(buff_01) ; r += 2){
-        unsigned char temp_arr[3] = {buff_01[r], buff_01[r+1], '\0'};
-        Key_values01[w++] = strtol(temp_arr, NULL, 16);
-    } //2 string to hex
+	//*********************buff01**************************//
+	for(r = 0, w = 0 ; r < strlen(buff_01) ; r += 2){
+		unsigned char temp_arr[3] = {buff_01[r], buff_01[r+1], '\0'};
+		Key_values01[w++] = strtol(temp_arr, NULL, 16);
+	} //2 string to hex
 
-    for(r = 0, w; r < strlen(input_data) ; r += 2){
-        unsigned char temp_arr[3] = {input_data[r], input_data[r+1], '\0'};
-        Key_values01[w++] = strtol(temp_arr, NULL, 16);
-    } //2 string to hex
-    //*********************buff01**************************//
+	for(r = 0, w; r < inputByteLen ; r++){
+		Key_values01[w++] = Input_data[r];
+	} //2 string to hex
+	//*********************buff01**************************//
 
-    //*********************buff02**************************//
-    for(r = 0, w = 0 ; r < strlen(buff_02) ; r += 2){
-        unsigned char temp_arr[3] = {buff_02[r], buff_02[r+1], '\0'};
-        Key_values02[w++] = strtol(temp_arr, NULL, 16);
-    } //2 string to hex
+	//*********************buff02**************************//
+	for(r = 0, w = 0 ; r < strlen(buff_02) ; r += 2){
+		unsigned char temp_arr[3] = {buff_02[r], buff_02[r+1], '\0'};
+		Key_values02[w++] = strtol(temp_arr, NULL, 16);
+	} //2 string to hex
 
-    for(r = 0, w; r < strlen(input_data) ; r += 2){
-        unsigned char temp_arr[3] = {input_data[r], input_data[r+1], '\0'};
-        Key_values02[w++] = strtol(temp_arr, NULL, 16);
-    } //2 string to hex
-    //*********************buff02**************************//
+	for(r = 0, w; r < inputByteLen ; r++){
+		Key_values02[w++] = Input_data[r];
+	} //2 string to hex
+	//*********************buff02**************************//
 
+	printf("Key_values01: ");
+	for(int i=0; i< w; i++){
+		printf("%02X", Key_values01[i]);
+	}
+	printf("\n");
 
+	printf("Key_values02: ");
+	for(int i=0; i< w; i++){
+		printf("%02X", Key_values02[i]);
+	}
+	printf("\n");
 
-    printf("Key_values01: ");
-    for(int i=0; i< w; i++){
-        printf("%02X", Key_values01[i]);
-        //Add_Key[i] = Key_values01[i];
-    }
-    printf("\n");
-
-
-    printf("Key_values02: ");
-    j = w;
-    for(int i=0; i< w; i++){
-        printf("%02X", Key_values02[i]);
-        //Add_Key[j++] = Key_values02[i];
-    }
-    printf("\n");
-
-
-    Keccak(rate, capacity, Key_values01, w, delimitedSuffix, Squeezed, outputByteLen/8);
+	Keccak(rate, capacity, Key_values01, w, delimitedSuffix, Squeezed, outputByteLen/8);
 
 	for (int i=0; i<outputByteLen/8; i++){
 		SHA3_values01[i] = Squeezed[i];
@@ -379,19 +367,19 @@ void S_DerivedFunction(unsigned int rate, unsigned int capacity, const unsigned 
 		Add_Key[j++] = SHA3_values02[i];
 	}
 
-    printf("Add Key: ");
-    for(int i=0; i< j; i++){
-        printf("%02x", Add_Key[i]);
-    }
-    printf("\n");
+	printf("Add Key: ");
+	for(int i=0; i< j; i++){
+		printf("%02x", Add_Key[i]);
+	}
+	printf("\n");
 
-    printf("j: %d\n", j);
+	printf("j: %d\n", j);
 
-    printf("C Final Key: ");
-    for(int i=0; i<j-1; i++){ //55맞는지 확인 필요
-        Final_Key[i] = Add_Key[i];
-        printf("%02X", Final_Key[i]);
-    }
+	printf("C Final Key: ");
+	for(int i=0; i<j-1; i++){ //55맞는지 확인 필요
+		Final_Key[i] = Add_Key[i];
+		printf("%02X", Final_Key[i]);
+	}
 
     //Inner_Output_Generation_Function(rate, capacity, Final_Key, j, delimitedSuffix, Squeezed, outputByteLen/8);
 }
@@ -434,7 +422,7 @@ void V_DerivedFunction(unsigned int rate, unsigned int capacity, const unsigned 
     } //2 string to hex
     //*********************buff02**************************//
 
-    /*printf("Key_values01: ");
+    printf("Key_values01: ");
     for(int i=0; i< w; i++){
         printf("%02X", Key_values01[i]);
     }
@@ -445,7 +433,7 @@ void V_DerivedFunction(unsigned int rate, unsigned int capacity, const unsigned 
     for(int i=0; i< w; i++){
         printf("%02X", Key_values02[i]);
     }
-    printf("\n");*/ //just for test
+    printf("\n"); //just for test
 
     Keccak(rate, capacity, Key_values01, w, delimitedSuffix, Squeezed, outputByteLen/8);
 
@@ -486,7 +474,7 @@ void V_DerivedFunction(unsigned int rate, unsigned int capacity, const unsigned 
         printf("%02X", Final_Key[i]);
     }
 
-    S_DerivedFunction(rate, capacity, Final_Key, j, delimitedSuffix, Squeezed, outputByteLen);
+    C_DerivedFunction(rate, capacity, Final_Key, j, delimitedSuffix, Squeezed, outputByteLen);
     //Inner_Output_Generation_Function(rate, capacity, Final_Key, j, delimitedSuffix, Squeezed, outputByteLen/8);
 }
 
