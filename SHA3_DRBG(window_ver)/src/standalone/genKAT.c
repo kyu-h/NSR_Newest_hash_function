@@ -5,7 +5,7 @@
 #include <ctype.h>
 
 void Keccak(int rate, int capacity, const unsigned char *input, unsigned long long int inputByteLen, unsigned char delimitedSuffix, unsigned char *output, unsigned long long int outputByteLen);
-void DerivedFunction(unsigned int rate, unsigned int capacity, const unsigned char *input, unsigned long long int inputByteLen, unsigned char delimitedSuffix, unsigned char *output, unsigned long long int outputByteLen, unsigned char input_data[100]);
+void V_DerivedFunction(unsigned int rate, unsigned int capacity, const unsigned char *input, unsigned long long int inputByteLen, unsigned char delimitedSuffix, unsigned char *output, unsigned long long int outputByteLen);
 
 typedef unsigned char BitSequence;
 typedef size_t BitLength;
@@ -136,7 +136,7 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
 			Key_values01[w++] = strtol(temp_arr, NULL, 16);
 		} //2 string to hex
 
-    	DerivedFunction(rate, capacity, string, msglen, delimitedSuffix, Squeezed, hashbitlen, string);
+    	V_DerivedFunction(rate, capacity, string, msglen, delimitedSuffix, Squeezed, hashbitlen);
 
 		if (hashbitlen > 0) {
 			Keccak(rate, capacity, Key_values01, w, delimitedSuffix, Squeezed, hashbitlen/8);
@@ -207,13 +207,13 @@ void Inner_Output_Generation_Function(unsigned int rate, unsigned int capacity, 
 
 	unsigned char mod01[length];
 	unsigned char mod02[length];
-
 	unsigned char mod01test[length];
 	unsigned char mod02test[length];
-
 	unsigned char SHA3_mod01[outputByteLen];
 	unsigned char SHA3_mod02[outputByteLen];
 	unsigned char SHA3_mod03[outputByteLen];
+	unsigned char Final_SHA3_after_mod[outputByteLen * 3];
+	int num= 0;
 
 	BitSequence Squeezed[SqueezingOutputLength/8];
 
@@ -246,6 +246,7 @@ void Inner_Output_Generation_Function(unsigned int rate, unsigned int capacity, 
 	Keccak(rate, capacity, mod01, length, delimitedSuffix, Squeezed, outputByteLen);
 	for (int i=0; i<outputByteLen; i++){
 		SHA3_mod01[i] = Squeezed[i];
+		Final_SHA3_after_mod[num++] = SHA3_mod01[i];
 		printf("%02x", SHA3_mod01[i]); //write small
 	}
 	printf("\n");
@@ -255,13 +256,27 @@ void Inner_Output_Generation_Function(unsigned int rate, unsigned int capacity, 
 	for (int i=0; i<outputByteLen; i++){
 		SHA3_mod02[i] = Squeezed[i];
 		SHA3_mod03[i] = Squeezed[i];
+		Final_SHA3_after_mod[num++] = SHA3_mod02[i];
 		printf("%02x", SHA3_mod02[i]); //write small
+	}
+	printf("\n");
+
+	printf("SHA3_mod03: ");
+	for (int i=0; i<outputByteLen; i++){
+		Final_SHA3_after_mod[num++] = SHA3_mod03[i];
+		printf("%02x", SHA3_mod03[i]); //write small
+	}
+	printf("\n");
+
+	printf("Final_SHA3_after_mod: ");
+	for (int i=0; i<outputByteLen * 3; i++){
+		printf("%02x", Final_SHA3_after_mod[i]); //write small
 	}
 	printf("\n");
 
 }
 
-void DerivedFunction(unsigned int rate, unsigned int capacity, const unsigned char *input, unsigned long long int inputByteLen, unsigned char delimitedSuffix, unsigned char *output, unsigned long long int outputByteLen, unsigned char input_data[10000]) {
+void S_DerivedFunction(unsigned int rate, unsigned int capacity, const unsigned char *input, unsigned long long int inputByteLen, unsigned char delimitedSuffix, unsigned char *output, unsigned long long int outputByteLen) {
     unsigned char buff_01[100] = "01000001B8";
     unsigned char buff_02[100] = "02000001B8";
     unsigned char Key_values01[10000];
@@ -270,10 +285,31 @@ void DerivedFunction(unsigned int rate, unsigned int capacity, const unsigned ch
 	unsigned char SHA3_values02[10000];
     unsigned char Add_Key[30000];
     unsigned char Final_Key[110];
-    BitSequence Squeezed[SqueezingOutputLength/8];
-    int r, w, j = 0;
+    unsigned char buff[10] = "00";
+    unsigned char input_data[1000];
 
-    printf("\n\nstring: %s\n", input_data);
+    BitSequence Squeezed[SqueezingOutputLength/8];
+    int r, w, j, x = 0;
+
+    printf("\n");
+    for(int i=0; i<inputByteLen; i++){
+    	printf("%02X", input[i]);
+    }
+    printf("\n");
+
+    printf("strlen(bff): %d", strlen(buff));
+    //*********************buff**************************//
+
+	unsigned char temp_arr[3] = {buff[0], buff[1], '\0'};
+	input_data[x++] = strtol(temp_arr, NULL, 16);
+
+
+	for(r = 0; r < strlen(input) ; r++){
+		unsigned char temp_arr[3] = {input[r], input[r+1], '\0'};
+		input_data[x++] = strtol(temp_arr, NULL, 16);
+	} //2 string to hex
+	//*********************buff**************************//
+
 
     //*********************buff01**************************//
     for(r = 0, w = 0 ; r < strlen(buff_01) ; r += 2){
@@ -299,12 +335,15 @@ void DerivedFunction(unsigned int rate, unsigned int capacity, const unsigned ch
     } //2 string to hex
     //*********************buff02**************************//
 
+
+
     printf("Key_values01: ");
     for(int i=0; i< w; i++){
         printf("%02X", Key_values01[i]);
         //Add_Key[i] = Key_values01[i];
     }
     printf("\n");
+
 
     printf("Key_values02: ");
     j = w;
@@ -313,6 +352,7 @@ void DerivedFunction(unsigned int rate, unsigned int capacity, const unsigned ch
         //Add_Key[j++] = Key_values02[i];
     }
     printf("\n");
+
 
     Keccak(rate, capacity, Key_values01, w, delimitedSuffix, Squeezed, outputByteLen/8);
 
@@ -347,11 +387,129 @@ void DerivedFunction(unsigned int rate, unsigned int capacity, const unsigned ch
 
     printf("j: %d\n", j);
 
-    printf("Final Key: ");
+    printf("C Final Key: ");
     for(int i=0; i<j-1; i++){ //55맞는지 확인 필요
         Final_Key[i] = Add_Key[i];
         printf("%02X", Final_Key[i]);
     }
 
-    Inner_Output_Generation_Function(rate, capacity, Final_Key, j, delimitedSuffix, Squeezed, outputByteLen/8);
+    //Inner_Output_Generation_Function(rate, capacity, Final_Key, j, delimitedSuffix, Squeezed, outputByteLen/8);
+}
+
+void V_DerivedFunction(unsigned int rate, unsigned int capacity, const unsigned char *input, unsigned long long int inputByteLen, unsigned char delimitedSuffix, unsigned char *output, unsigned long long int outputByteLen) {
+    unsigned char buff_01[100] = "01000001B8";
+    unsigned char buff_02[100] = "02000001B8";
+    unsigned char Key_values01[10000];
+    unsigned char Key_values02[10000];
+    unsigned char SHA3_values01[10000];
+	unsigned char SHA3_values02[10000];
+    unsigned char Add_Key[30000];
+    unsigned char Final_Key[110];
+    BitSequence Squeezed[SqueezingOutputLength/8];
+    int r, w, j = 0;
+
+    printf("\n\nstring: %s\n", input);
+
+    //*********************buff01**************************//
+    for(r = 0, w = 0 ; r < strlen(buff_01) ; r += 2){
+        unsigned char temp_arr[3] = {buff_01[r], buff_01[r+1], '\0'};
+        Key_values01[w++] = strtol(temp_arr, NULL, 16);
+    } //2 string to hex
+
+    for(r = 0, w; r < strlen(input) ; r += 2){
+        unsigned char temp_arr[3] = {input[r], input[r+1], '\0'};
+        Key_values01[w++] = strtol(temp_arr, NULL, 16);
+    } //2 string to hex
+    //*********************buff01**************************//
+
+    //*********************buff02**************************//
+    for(r = 0, w = 0 ; r < strlen(buff_02) ; r += 2){
+        unsigned char temp_arr[3] = {buff_02[r], buff_02[r+1], '\0'};
+        Key_values02[w++] = strtol(temp_arr, NULL, 16);
+    } //2 string to hex
+
+    for(r = 0, w; r < strlen(input) ; r += 2){
+        unsigned char temp_arr[3] = {input[r], input[r+1], '\0'};
+        Key_values02[w++] = strtol(temp_arr, NULL, 16);
+    } //2 string to hex
+    //*********************buff02**************************//
+
+    /*printf("Key_values01: ");
+    for(int i=0; i< w; i++){
+        printf("%02X", Key_values01[i]);
+    }
+    printf("\n");
+
+    printf("Key_values02: ");
+    j = w;
+    for(int i=0; i< w; i++){
+        printf("%02X", Key_values02[i]);
+    }
+    printf("\n");*/ //just for test
+
+    Keccak(rate, capacity, Key_values01, w, delimitedSuffix, Squeezed, outputByteLen/8);
+
+	for (int i=0; i<outputByteLen/8; i++){
+		SHA3_values01[i] = Squeezed[i];
+		printf("%02x", SHA3_values01[i]); //write small
+	}
+	printf("\n");
+
+	Keccak(rate, capacity, Key_values02, w, delimitedSuffix, Squeezed, outputByteLen/8);
+
+	for (int i=0; i<outputByteLen/8; i++){
+		SHA3_values02[i] = Squeezed[i];
+		printf("%02x", SHA3_values02[i]); //write small
+	}
+	printf("\n");
+
+	for(int i=0; i< outputByteLen/8; i++){
+		Add_Key[i] = SHA3_values01[i];
+	}
+
+	j = outputByteLen/8;
+	for(int i=0; i< outputByteLen/8; i++){
+		Add_Key[j++] = SHA3_values02[i];
+	}
+
+    printf("Add Key: ");
+    for(int i=0; i< j; i++){
+        printf("%02x", Add_Key[i]);
+    }
+    printf("\n");
+
+    printf("j: %d\n", j);
+
+    printf("V Final Key: ");
+    for(int i=0; i<j-1; i++){ //55맞는지 확인 필요
+        Final_Key[i] = Add_Key[i];
+        printf("%02X", Final_Key[i]);
+    }
+
+    S_DerivedFunction(rate, capacity, Final_Key, j, delimitedSuffix, Squeezed, outputByteLen);
+    //Inner_Output_Generation_Function(rate, capacity, Final_Key, j, delimitedSuffix, Squeezed, outputByteLen/8);
+}
+
+void ResetFunction(unsigned char *entropy, unsigned char *nonce, unsigned char *perString){
+	int num = 0;
+	int length = 0;
+	unsigned char input_data[1000];
+
+	length = strlen(entropy);
+	for(int i=0; i<length; i++){
+		input_data[num++] = entropy[i];
+	}
+
+	length = strlen(nonce);
+	for(int i=0; i<length; i++){
+		input_data[num++] = nonce[i];
+	}
+
+	length = strlen(perString);
+	for(int i=0; i<length; i++){
+		input_data[num++] = perString[i];
+	}
+
+	//DerivedFunction(input_data);
+
 }
