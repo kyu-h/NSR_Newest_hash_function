@@ -61,10 +61,6 @@ genKAT_main(void)
 			genShortMsgHash(832, 768, 0x06, 384, 0,inputFileAddress,outputFileAddress,"Algo_ID = SHA3-384");
 		}else if(!strcmp(pStr, "Algo_ID = SHA3-512\n")){
 			genShortMsgHash(576, 1024, 0x06, 512, 0,inputFileAddress,outputFileAddress,"Algo_ID = SHA3-512");
-		}else if(!strcmp(pStr, "Algo_ID = SHAKE128\n")){
-			genShortMsgHash(1344, 256, 0x1F, 128, 4096,inputFileAddress,outputFileAddress,"Algo_ID = SHAKE128");
-		}else if(!strcmp(pStr, "Algo_ID = SHAKE256\n")){
-			genShortMsgHash(1088, 512, 0x1F, 512, 4096,inputFileAddress,outputFileAddress,"Algo_ID = SHAKE256");
 		}else {
 			printf("Error!\n");
 		}
@@ -202,22 +198,24 @@ void fprintBstr(FILE *fp, char *S, BitSequence *A, int L){
     fprintf(fp, "\n");
 }
 
-void operation_add(unsigned char *arr, int ary_size, unsigned int num){
-   unsigned int current;
-   unsigned int carry = 0;
-   int index = 1;
+void operation_add(unsigned char *arr, int ary_size, int start_index, unsigned int num)
+{
+	unsigned int current;
+	unsigned int carry = 0;
+	start_index++;
 
-   current = arr[ary_size - index];
-   current += num;
-   carry = (current >> 8);
-   arr[ary_size - index] = (unsigned char) current;
+	current = arr[ary_size - start_index];
+	current += num;
+	carry = (current >> 8);
+	arr[ary_size - start_index] = (unsigned char) current;
 
-    while(carry){
-    	index++;
-    	current = arr[ary_size - index];
-    	current += carry;
-    	carry = (current >> 8);
-    	arr[ary_size - index] = (unsigned char) current;
+    while(carry)
+    {
+    	start_index++;
+    	current = arr[ary_size - start_index];
+		current += carry;
+		carry = (current >> 8);
+		arr[ary_size - start_index] = (unsigned char) current;
     }
 }
 
@@ -272,11 +270,9 @@ void Output_Generation_Func(unsigned int rate, unsigned int capacity, unsigned c
 	}
 	printf("\n");
 
-	/*for(int i=outputByteLen/8; i>=0; i--){
-		Final_V[Vlen--] = V[Vlen--] + First_after_SHA3[i];
-	}*/ //have to check carry
-
-
+	for(int i = outputByteLen/8 - 1, start = 0 ; i > -1 ; i--){
+		operation_add(V, Vlen, start++, First_after_SHA3[i]);
+	}
 
 
 
@@ -343,7 +339,7 @@ void Inner_Output_Generation_Function(unsigned int rate, unsigned int capacity, 
 	}
 	printf("\n");*/
 
-	operation_add(input, length, 0x01);
+	operation_add(input, length, 0, 0x01);
 
 	/*for(int i=0; i<length; i++){
 		printf("%02X", input[i]);
@@ -360,7 +356,7 @@ void Inner_Output_Generation_Function(unsigned int rate, unsigned int capacity, 
 	}
 	printf("\n");*/
 
-	operation_add(input, length, 0x01);
+	operation_add(input, length, 0, 0x01);
 	//input[length-1] += 0x01;
 
 	//printf("mod02_before_sha3: ");
