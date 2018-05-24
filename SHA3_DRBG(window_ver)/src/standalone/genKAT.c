@@ -202,39 +202,63 @@ void fprintBstr(FILE *fp, char *S, BitSequence *A, int L){
     fprintf(fp, "\n");
 }
 
-void Output_Generation_Func(unsigned int rate, unsigned int capacity, unsigned char *input, unsigned long long int inputByteLen, unsigned char delimitedSuffix, unsigned char *output, unsigned long long int outputByteLen, unsigned char *V, unsigned char *C, unsigned char inputdata, unsigned char reseed){
-	unsigned char buff[10] = "02";
-	unsigned char buff01[10] = "03";
-	unsigned char Input_data[10000];
-	unsigned char First_before_SHA3[10000];
-	unsigned char First_after_SHA3[10000];
-	unsigned char Second_after_SHA3[10000];
-	unsigned char Final_V[10000];
+void operation_add(unsigned char *arr, int ary_size, unsigned int num){
+   unsigned int current;
+   unsigned int carry = 0;
+   int index = 1;
 
+   current = arr[ary_size - index];
+   current += num;
+   carry = (current >> 8);
+   arr[ary_size - index] = (unsigned char) current;
+
+    while(carry){
+    	index++;
+    	current = arr[ary_size - index];
+    	current += carry;
+    	carry = (current >> 8);
+    	arr[ary_size - index] = (unsigned char) current;
+    }
+}
+
+void Output_Generation_Func(unsigned int rate, unsigned int capacity, unsigned char delimitedSuffix, unsigned char *output, unsigned long long int outputByteLen, unsigned char *V, unsigned int Vlen, unsigned char *C, unsigned int Clen){
+	unsigned int reseed = 0;
+	BitSequence buff[10] = "02";
+	BitSequence buff01[10] = "03";
+	BitSequence First_before_SHA3[10000];
+	BitSequence First_after_SHA3[outputByteLen/8];
+	BitSequence Second_before_SHA3[10000];
+	BitSequence Second_after_SHA3[outputByteLen/8];
+	BitSequence Final_V[10000];
+	BitSequence *inputdata = "18711A6A00A18B3A2FA62A2B4F85CBDAC46F837AC92368DF250DE14C";
 
 	BitSequence Squeezed[SqueezingOutputLength/8];
 	int r, w, length = 0;
+	int j = Vlen;
+	printf("************Output_Generation_Function start************\n");
 
 	//*********************buff**************************//
 	for(r = 0, w = 0 ; r < strlen(buff) ; r += 2){
 		unsigned char temp_arr[3] = {buff[r], buff[r+1], '\0'};
-		Input_data[w++] = strtol(temp_arr, NULL, 16);
+		First_before_SHA3[w++] = strtol(temp_arr, NULL, 16);
 	} //2 string to hex
 
-	for(r = 0, w; r < inputByteLen-1 ; r++){ //inputByteLen를 v에 대한 길이로 변경
-		Input_data[w++] = V[r];
+	for(r = 0, w; r < Vlen; r++){ //inputByteLen를 v에 대한 길이로 변경
+		First_before_SHA3[w++] = V[r];
+	} //2 string to hex
+
+	length = strlen(inputdata);
+	for(r = 0, w; r < length; r += 2){
+		unsigned char temp_arr[3] = {inputdata[r], inputdata[r+1], '\0'};
+		First_before_SHA3[w++] = strtol(temp_arr, NULL, 16);
 	} //2 string to hex
 	//*********************buff**************************//
 
-	length = strlen(input);
-	for(r = 0, w = 0 ; r < length ; r += 2){
-		unsigned char temp_arr[3] = {input[r], input[r+1], '\0'};
-		Input_data[w++] = strtol(temp_arr, NULL, 16);
-	} //2 string to hex
-
+	printf("First before SHA3 data: ");
 	for(int i=0; i<w; i++){
-		First_before_SHA3[i] = Input_data[i] + V[i];	//맞는지 테스트 해봐야함
+		printf("%02x", First_before_SHA3[i]);
 	}
+	printf("\n");
 
 	Keccak(rate, capacity, First_before_SHA3, w, delimitedSuffix, Squeezed, outputByteLen/8); //have to check output, input length
 	for (int i=0; i<outputByteLen/8; i++){
@@ -242,39 +266,69 @@ void Output_Generation_Func(unsigned int rate, unsigned int capacity, unsigned c
 		//printf("%02x", SHA3_values02[i]); //write small
 	}
 
+	printf("First after SHA3 data: ");
+	for(int i=0; i<outputByteLen/8; i++){
+		printf("%02x", First_after_SHA3[i]);
+	}
+	printf("\n");
+
+	/*for(int i=outputByteLen/8; i>=0; i--){
+		Final_V[Vlen--] = V[Vlen--] + First_after_SHA3[i];
+	}*/ //have to check carry
+
+
+
+
+
+
+
+
+
+
+
+
 	//*********************buff01**************************//
 	for(r = 0, w = 0 ; r < strlen(buff01) ; r += 2){
 		unsigned char temp_arr[3] = {buff01[r], buff01[r+1], '\0'};
-		Input_data[w++] = strtol(temp_arr, NULL, 16);
+		Second_before_SHA3[w++] = strtol(temp_arr, NULL, 16);
 	} //2 string to hex
 
-	for(r = 0, w; r < inputByteLen-1 ; r++){ //inputByteLen를 First_after_SHA3에 대한 길이로 변경
-		Input_data[w++] = First_after_SHA3[r];
+	for(r = 0, w; r < j; r++){ //inputByteLen를 First_after_SHA3에 대한 길이로 변경
+		Second_before_SHA3[w++] = Final_V[r];
 	} //2 string to hex
 	//*********************buff01**************************//
 
-	Keccak(rate, capacity, Input_data, w, delimitedSuffix, Squeezed, outputByteLen/8); //have to check output, input length
+	Keccak(rate, capacity, Second_before_SHA3, j, delimitedSuffix, Squeezed, outputByteLen/8); //have to check output, input length
 	for (int i=0; i<outputByteLen/8; i++){
 		Second_after_SHA3[i] = Squeezed[i];
 		//printf("%02x", SHA3_values02[i]); //write small
 	}
 
-	Final_V = Second_after_SHA3 + C + First_after_SHA3 + reseed; // have to change using array
+
+
+
+
+
+
+
+
+
+	//Final_V = Second_after_SHA3 + C + First_after_SHA3 + reseed; // have to change using array
 	reseed += 0x01; //have to check
 
-	Inner_Output_Generation_Function(rate, capacity, First_after_SHA3, w, delimitedSuffix, Squeezed, outputByteLen/8); //have to check output, input length
+	//Inner_Output_Generation_Function(rate, capacity, First_after_SHA3, w, delimitedSuffix, Squeezed, outputByteLen/8); //have to check output, input length
 }
 
 void Inner_Output_Generation_Function(unsigned int rate, unsigned int capacity, unsigned char *input, unsigned long long int inputByteLen, unsigned char delimitedSuffix, unsigned char *output, unsigned long long int outputByteLen){
 	int length = inputByteLen - 1;
 	int BlockSize = (inputByteLen) / 2;
 
-	unsigned char mod01_before_sha3[BlockSize];
-	unsigned char mod02_before_sha3[BlockSize];
-	unsigned char SHA3_mod01[outputByteLen];
-	unsigned char SHA3_mod02[outputByteLen];
-	unsigned char SHA3_mod03[outputByteLen];
-	unsigned char Final_SHA3_after_mod[outputByteLen * 3];
+	BitSequence mod01_before_sha3[BlockSize];
+	BitSequence mod02_before_sha3[BlockSize];
+	BitSequence SHA3_mod01[outputByteLen];
+	BitSequence SHA3_mod02[outputByteLen];
+	BitSequence SHA3_mod03[outputByteLen];
+	BitSequence Final_SHA3_after_mod[outputByteLen * 3];
 	int num= 0;
 	int j=0;
 
@@ -282,15 +336,21 @@ void Inner_Output_Generation_Function(unsigned int rate, unsigned int capacity, 
 
 	printf("************Inner_Output_Generation_Function start************\n");
 
+
 	/*printf("Output Generation Function: ");
 	for(int i=0; i<length; i++){
 		printf("%02X", input[i]);
 	}
 	printf("\n");*/
 
-	input[length-1] += 0x01;
+	operation_add(input, length, 0x01);
 
-	//printf("mod01_before_sha3: ");
+	/*for(int i=0; i<length; i++){
+		printf("%02X", input[i]);
+	}
+	printf("\n");
+
+	printf("mod01_before_sha3: ");*/
 	j=BlockSize;
 	for(int i=length; i>=length-BlockSize-1; i--){
 		mod01_before_sha3[j--] = input[i];
@@ -300,14 +360,15 @@ void Inner_Output_Generation_Function(unsigned int rate, unsigned int capacity, 
 	}
 	printf("\n");*/
 
-	input[length-1] += 0x01;
+	operation_add(input, length, 0x01);
+	//input[length-1] += 0x01;
 
 	//printf("mod02_before_sha3: ");
 	j=BlockSize;
 	for(int i=length; i>=length-BlockSize-1; i--){
 		mod02_before_sha3[j--] = input[i];
 	}
-/*	for(int i=0; i<BlockSize; i++){
+	/*for(int i=0; i<BlockSize; i++){
 		printf("%02X", mod02_before_sha3[i]);
 	}
 	printf("\n");*/
@@ -347,19 +408,24 @@ void Inner_Output_Generation_Function(unsigned int rate, unsigned int capacity, 
 }
 
 void C_DerivedFunction(unsigned int rate, unsigned int capacity, unsigned char input[110], unsigned long long int inputByteLen, unsigned char delimitedSuffix, unsigned char *output, unsigned long long int outputByteLen) {
-	unsigned char buff[100] = "00";
-	unsigned char buff_01[100] = "01000001B8";
-	unsigned char buff_02[100] = "02000001B8";
-	unsigned char Key_values01[10000];
-	unsigned char Key_values02[10000];
-	unsigned char SHA3_values01[10000];
-	unsigned char SHA3_values02[10000];
-	unsigned char Add_Key[30000];
-	unsigned char Input_data[10000];
-	unsigned char Final_Key[110];
+	BitSequence buff[2] = "00";
+	BitSequence buff_01[10] = "01000001B8";
+	BitSequence buff_02[10] = "02000001B8";
+	BitSequence V[inputByteLen];
+	BitSequence Key_values01[10000];
+	BitSequence Key_values02[10000];
+	BitSequence SHA3_values01[10000];
+	BitSequence SHA3_values02[10000];
+	BitSequence Add_Key[30000];
+	BitSequence Input_data[10000];
+	BitSequence Final_Key[110];
 	BitSequence Squeezed[SqueezingOutputLength/8];
 
 	int r, w, j = 0;
+
+	for(int i=0; i<inputByteLen-1; i++){
+		V[i] = input[i];
+	}
 
 	printf("************C_DerivedFunction start************\n");
 
@@ -455,17 +521,18 @@ void C_DerivedFunction(unsigned int rate, unsigned int capacity, unsigned char i
 	printf("\n");
 
     //Inner_Output_Generation_Function(rate, capacity, Final_Key, j, delimitedSuffix, Squeezed, outputByteLen/8);
+	Output_Generation_Func(rate, capacity, delimitedSuffix, Squeezed, outputByteLen, V, inputByteLen-1, Final_Key, j-1);
 }
 
 void V_DerivedFunction(unsigned int rate, unsigned int capacity, const unsigned char *input, unsigned long long int inputByteLen, unsigned char delimitedSuffix, unsigned char *output, unsigned long long int outputByteLen) {
-    unsigned char buff_01[100] = "01000001B8";
-    unsigned char buff_02[100] = "02000001B8";
-    unsigned char Key_values01[10000];
-    unsigned char Key_values02[10000];
-    unsigned char SHA3_values01[10000];
-	unsigned char SHA3_values02[10000];
-    unsigned char Add_Key[30000];
-    unsigned char Final_Key[110];
+	BitSequence buff_01[100] = "01000001B8";
+	BitSequence buff_02[100] = "02000001B8";
+	BitSequence Key_values01[10000];
+	BitSequence Key_values02[10000];
+	BitSequence SHA3_values01[10000];
+	BitSequence SHA3_values02[10000];
+	BitSequence Add_Key[30000];
+	BitSequence Final_Key[110];
     BitSequence Squeezed[SqueezingOutputLength/8];
     int r, w, j = 0;
 
@@ -557,7 +624,7 @@ void V_DerivedFunction(unsigned int rate, unsigned int capacity, const unsigned 
 void ResetFunction(unsigned char *entropy, unsigned char *nonce, unsigned char *perString){
 	int num = 0;
 	int length = 0;
-	unsigned char input_data[1000];
+	BitSequence input_data[1000];
 
 	length = strlen(entropy);
 	for(int i=0; i<length; i++){
