@@ -202,8 +202,67 @@ void fprintBstr(FILE *fp, char *S, BitSequence *A, int L){
     fprintf(fp, "\n");
 }
 
-void Output_Generation_Func(){
+void Output_Generation_Func(unsigned int rate, unsigned int capacity, unsigned char *input, unsigned long long int inputByteLen, unsigned char delimitedSuffix, unsigned char *output, unsigned long long int outputByteLen, unsigned char *V, unsigned char *C, unsigned char inputdata, unsigned char reseed){
+	unsigned char buff[10] = "02";
+	unsigned char buff01[10] = "03";
+	unsigned char Input_data[10000];
+	unsigned char First_before_SHA3[10000];
+	unsigned char First_after_SHA3[10000];
+	unsigned char Second_after_SHA3[10000];
+	unsigned char Final_V[10000];
 
+
+	BitSequence Squeezed[SqueezingOutputLength/8];
+	int r, w, length = 0;
+
+	//*********************buff**************************//
+	for(r = 0, w = 0 ; r < strlen(buff) ; r += 2){
+		unsigned char temp_arr[3] = {buff[r], buff[r+1], '\0'};
+		Input_data[w++] = strtol(temp_arr, NULL, 16);
+	} //2 string to hex
+
+	for(r = 0, w; r < inputByteLen-1 ; r++){ //inputByteLen를 v에 대한 길이로 변경
+		Input_data[w++] = V[r];
+	} //2 string to hex
+	//*********************buff**************************//
+
+	length = strlen(input);
+	for(r = 0, w = 0 ; r < length ; r += 2){
+		unsigned char temp_arr[3] = {input[r], input[r+1], '\0'};
+		Input_data[w++] = strtol(temp_arr, NULL, 16);
+	} //2 string to hex
+
+	for(int i=0; i<w; i++){
+		First_before_SHA3[i] = Input_data[i] + V[i];	//맞는지 테스트 해봐야함
+	}
+
+	Keccak(rate, capacity, First_before_SHA3, w, delimitedSuffix, Squeezed, outputByteLen/8); //have to check output, input length
+	for (int i=0; i<outputByteLen/8; i++){
+		First_after_SHA3[i] = Squeezed[i];
+		//printf("%02x", SHA3_values02[i]); //write small
+	}
+
+	//*********************buff01**************************//
+	for(r = 0, w = 0 ; r < strlen(buff01) ; r += 2){
+		unsigned char temp_arr[3] = {buff01[r], buff01[r+1], '\0'};
+		Input_data[w++] = strtol(temp_arr, NULL, 16);
+	} //2 string to hex
+
+	for(r = 0, w; r < inputByteLen-1 ; r++){ //inputByteLen를 First_after_SHA3에 대한 길이로 변경
+		Input_data[w++] = First_after_SHA3[r];
+	} //2 string to hex
+	//*********************buff01**************************//
+
+	Keccak(rate, capacity, Input_data, w, delimitedSuffix, Squeezed, outputByteLen/8); //have to check output, input length
+	for (int i=0; i<outputByteLen/8; i++){
+		Second_after_SHA3[i] = Squeezed[i];
+		//printf("%02x", SHA3_values02[i]); //write small
+	}
+
+	Final_V = Second_after_SHA3 + C + First_after_SHA3 + reseed; // have to change using array
+	reseed += 0x01; //have to check
+
+	Inner_Output_Generation_Function(rate, capacity, First_after_SHA3, w, delimitedSuffix, Squeezed, outputByteLen/8); //have to check output, input length
 }
 
 void Inner_Output_Generation_Function(unsigned int rate, unsigned int capacity, unsigned char *input, unsigned long long int inputByteLen, unsigned char delimitedSuffix, unsigned char *output, unsigned long long int outputByteLen){
