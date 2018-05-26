@@ -97,7 +97,7 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
 
 	fp_out = fopen(outputFileName, "w");
 
-	ctx.ppp = fp_out;
+	ctx.file_output = fp_out;
 	fprintf(fp_out, "%s\n\n", description);
 
 	FindMarker(fp_in, "entropy1");
@@ -154,90 +154,6 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
 	ResetFunction(&ctx, rate, capacity, delimitedSuffix, Squeezed, hashbitlen, entropy01, nonce, perString, addinput01);
 // TAG
 
-	fprintf(fp_out, "dfInput = ");
-	for(int i=0; i<ctx.Vlen+1; i++){
-		fprintf(fp_out, "%02x", ctx.dfInput01[i]);
-	}
-	fprintf(fp_out, "\n");
-
-	fprintf(fp_out, "dfOutput = ");
-	for(int i=0; i<ctx.Vlen; i++){
-		fprintf(fp_out, "%02x", ctx.dfOutput01[i]);
-	}
-	fprintf(fp_out, "\n\n");
-
-	fprintf(fp_out, "V = ");
-	for(int i=0; i<ctx.Vlen; i++){
-		fprintf(fp_out, "%02x", ctx.dfOutput[i]);
-	}
-	fprintf(fp_out, "\n");
-
-	fprintf(fp_out, "C = ");
-	for(int i=0; i<ctx.Vlen; i++){
-		fprintf(fp_out, "%02x", ctx.dfOutput01[i]);
-	}
-	fprintf(fp_out, "\n");
-
-	fprintf(fp_out, "reseed_counter = ");
-	fprintf(fp_out, "%d", ctx.reseed_counter);
-	fprintf(fp_out, "\n");
-
-	fprintf(fp_out, "addInput = ");
-	for(int i=0; i<ctx.addInput_length; i++){
-		fprintf(fp_out, "%02x", ctx.addInput[i]);
-	}
-	fprintf(fp_out, "\n\n");
-
-	fprintf(fp_out, "w = ");
-	for(int i=0; i<ctx.W_VaddInput_length; i++){
-		fprintf(fp_out, "%02x", ctx.W_VaddInput[i]);
-	}
-	fprintf(fp_out, "\n");
-
-	fprintf(fp_out, "V = ");
-	for(int i=0; i<ctx.V_Mod_length; i++){
-		fprintf(fp_out, "%02x", ctx.V_Mod[i]);
-	}
-	fprintf(fp_out, "\n\n");
-
-	fprintf(fp_out, "output1 = ");
-	for(int i=0; i<512/8; i++){ //change
-		fprintf(fp_out, "%02x", ctx.Output01[i]);
-	}
-	fprintf(fp_out, "\n\n");
-
-	fprintf(fp_out, "w = ");
-	for(int i=0; i<ctx.W_03V_length; i++){
-		fprintf(fp_out, "%02x", ctx.W_03V[i]);
-	}
-	fprintf(fp_out, "\n");
-
-	fprintf(fp_out, "V = ");
-	for(int i=0; i<ctx.V_wCreseed_03V_length; i++){
-		fprintf(fp_out, "%02x", ctx.V_wCreseed[i]);
-	}
-	fprintf(fp_out, "\n");
-
-	fprintf(fp_out, "reseed_counter = ");
-	fprintf(fp_out, "%d", ctx.reseed_counter);
-	fprintf(fp_out, "\n\n");
-
-	fprintf(fp_out, "V = ");
-	for(int i=0; i<ctx.V_wCreseed_03V_length; i++){
-		fprintf(fp_out, "%02x", ctx.V_wCreseed[i]);
-	}
-	fprintf(fp_out, "\n");
-
-	fprintf(fp_out, "C = ");
-	for(int i=0; i<ctx.Vlen; i++){
-		fprintf(fp_out, "%02x", ctx.dfOutput01[i]);
-	}
-	fprintf(fp_out, "\n");
-
-	fprintf(fp_out, "reseed_counter = ");
-	fprintf(fp_out, "%d", ctx.reseed_counter);
-	fprintf(fp_out, "\n");
-
 	fprintf(fp_out, "addInput = ");
 	for(int i=0; i<e; i++){
 		fprintf(fp_out, "%02x", addinput02[i]);
@@ -251,56 +167,6 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
 	fprintf(fp_out, "\n\n");
 
 	SecondResetFunction(&ctx, rate, capacity, delimitedSuffix, Squeezed, hashbitlen, entropy02, ctx.V_wCreseed, addinput02);
-
-	fprintf(fp_out, "dfInput = ");
-	for(int i=0; i<ctx.V_secondcall_length; i++){
-		fprintf(fp_out, "%02x", ctx.V_secondcall[i]);
-	}
-	fprintf(fp_out, "\n");
-
-	fprintf(fp_out, "dfOutput = ");
-	for(int i=0; i<ctx.Vlen; i++){
-		fprintf(fp_out, "%02x", ctx.dfOutput[i]);
-	}
-	fprintf(fp_out, "\n\n");
-
-	fprintf(fp_out, "dfInput = ");
-	for(int i=0; i<ctx.Vlen+1; i++){
-		fprintf(fp_out, "%02x", ctx.dfInput01[i]);
-	}
-	fprintf(fp_out, "\n");
-
-	fprintf(fp_out, "dfOutput = ");
-	for(int i=0; i<ctx.Vlen; i++){
-		fprintf(fp_out, "%02x", ctx.dfOutput01[i]);
-	}
-	fprintf(fp_out, "\n\n");
-
-	fprintf(fp_out, "reseed_counter = ");
-	fprintf(fp_out, "%d", ctx.reseed_counter);
-	fprintf(fp_out, "\n\n");
-
-	fprintf(fp_out, "output2 = ");
-	for(int i=0; i<512/8; i++){
-		fprintf(fp_out, "%02x", ctx.Output01[i]);
-	}
-	fprintf(fp_out, "\n\n");
-
-	fprintf(fp_out, "w = ");
-	for(int i=0; i<ctx.W_03V_length; i++){
-		fprintf(fp_out, "%02x", ctx.W_03V[i]);
-	}
-	fprintf(fp_out, "\n");
-
-	fprintf(fp_out, "V = ");
-	for(int i=0; i<ctx.V_wCreseed_03V_length; i++){
-		fprintf(fp_out, "%02x", ctx.V_wCreseed[i]);
-	}
-	fprintf(fp_out, "\n");
-
-	fprintf(fp_out, "reseed_counter = ");
-	fprintf(fp_out, "%d", ctx.reseed_counter);
-	fprintf(fp_out, "\n");
 
     printf("finished ShortMsgKAT for <%s>\n", inputFileName);
 
@@ -377,6 +243,7 @@ void operation_add(unsigned char *arr, int ary_size, int start_index, unsigned i
 
 void Output_Generation_Func(struct DRBG_SHA3 *ctx, unsigned int rate, unsigned int capacity, unsigned char delimitedSuffix, unsigned char *output, unsigned long long int outputByteLen, unsigned char *V, unsigned int Vlen, unsigned char *C, unsigned int Clen, unsigned char *addinput01){
 	unsigned int reseed = 0x01;
+	static int func_call = 0;
 	BitSequence buff[10] = "02";
 	BitSequence buff01[10] = "03";
 	BitSequence First_before_SHA3[10000];
@@ -388,7 +255,9 @@ void Output_Generation_Func(struct DRBG_SHA3 *ctx, unsigned int rate, unsigned i
 	BitSequence Squeezed[SqueezingOutputLength/8];
 	int r, w, length = 0;
 	int j = Vlen;
+
 	printf("************Output_Generation_Function start************\n");
+	printf("func_call : %d", func_call);
 
 	//*********************buff**************************//
 	for(r = 0, w = 0 ; r < strlen(buff) ; r += 2){
@@ -410,42 +279,65 @@ void Output_Generation_Func(struct DRBG_SHA3 *ctx, unsigned int rate, unsigned i
 	}
 	ctx->addInput_length = length;
 
-	//*********************buff**************************//
-	printf("First before SHA3 data: ");
-	for(int i=0; i<w; i++){
-		printf("%02x", First_before_SHA3[i]);
-	}
-	printf("\n");
+	if(func_call == 1){
+		ctx->reseed_counter = reseed;
+		fprintf(ctx->file_output, "reseed_counter = %d\n\n", ctx->reseed_counter);
+	}else {
+		fprintf(ctx->file_output, "addInput = "); //=addInput1
+		for(int i=0; i<length; i++){
+			fprintf(ctx->file_output, "%02x", ctx->addInput[i]);
+		}
+		fprintf(ctx->file_output, "\n\n");
 
-	Keccak(rate, capacity, First_before_SHA3, w, delimitedSuffix, Squeezed, outputByteLen/8); //have to check output, input length
-	for (int i=0; i<outputByteLen/8; i++){
-		First_after_SHA3[i] = Squeezed[i];
-		//printf("%02x", SHA3_values02[i]); //write small
-	}
+		//*********************buff**************************//
+		printf("First before SHA3 data: ");
+		for(int i=0; i<w; i++){
+			printf("%02x", First_before_SHA3[i]);
+		}
+		printf("\n");
 
-	printf("First after SHA3 data: ");
-	for(int i=0; i<outputByteLen/8; i++){
-		printf("%02x", First_after_SHA3[i]);
-	}
-	printf("\n");
+		Keccak(rate, capacity, First_before_SHA3, w, delimitedSuffix, Squeezed, outputByteLen/8); //have to check output, input length
+		for (int i=0; i<outputByteLen/8; i++){
+			First_after_SHA3[i] = Squeezed[i];
+			//printf("%02x", SHA3_values02[i]); //write small
+		}
 
-	for(int i=0; i<w; i++){
-		ctx->W_VaddInput[i] = First_after_SHA3[i];
-	}
-	ctx->W_VaddInput_length = outputByteLen/8;
+		printf("First after SHA3 data: ");
+		for(int i=0; i<outputByteLen/8; i++){
+			printf("%02x", First_after_SHA3[i]);
+		}
+		printf("\n");
 
-	for(int i = outputByteLen/8 - 1, start = 0 ; i > -1 ; i--){ //V + after sha3
-		operation_add(V, Vlen, start++, First_after_SHA3[i]);
-	}
+		for(int i=0; i<w; i++){
+			ctx->W_VaddInput[i] = First_after_SHA3[i];
+		}
+		ctx->W_VaddInput_length = outputByteLen/8;
 
-	printf("Middle V: ");
-	for(int i=0; i<Vlen; i++){
-		MiddleV[i] = V[i];
-		printf("%02x", MiddleV[i]);
-		ctx->V_Mod[i] = MiddleV[i];
+		fprintf(ctx->file_output, "w = "); //=Hash(0x02||V||addInput)
+		for(int i=0; i<outputByteLen/8; i++){
+			fprintf(ctx->file_output, "%02x", ctx->W_VaddInput[i]);
+		}
+		fprintf(ctx->file_output, "\n");
+
+		for(int i = outputByteLen/8 - 1, start = 0 ; i > -1 ; i--){ //V + after sha3
+			operation_add(V, Vlen, start++, First_after_SHA3[i]);
+		}
+
+		printf("Middle V: ");
+		for(int i=0; i<Vlen; i++){
+			MiddleV[i] = V[i];
+			printf("%02x", MiddleV[i]);
+			ctx->V_Mod[i] = MiddleV[i];
+		}
+		ctx->V_Mod_length = Vlen;
+		printf("\n");
+
+		fprintf(ctx->file_output, "V = "); //=(w + V) mod 2^440
+		for(int i=0; i<Vlen; i++){
+			fprintf(ctx->file_output, "%02x", ctx->V_Mod[i]);
+		}
+		fprintf(ctx->file_output, "\n\n");
 	}
-	ctx->V_Mod_length = Vlen;
-	printf("\n");
 
 	Inner_Output_Generation_Function(ctx, rate, capacity, MiddleV, Vlen, delimitedSuffix, Squeezed, outputByteLen/8); //have to check output, input length
 
@@ -479,6 +371,12 @@ void Output_Generation_Func(struct DRBG_SHA3 *ctx, unsigned int rate, unsigned i
 	}
 	ctx->W_03V_length = outputByteLen/8;
 	printf("\n");
+
+	fprintf(ctx->file_output, "w = "); //=Hash(0x03||V)
+	for(int i=0; i<ctx->W_03V_length; i++){
+		fprintf(ctx->file_output, "%02x", ctx->W_03V[i]);
+	}
+	fprintf(ctx->file_output, "\n");
 
 	printf("Final C: ");
 	for(int i=0; i<Clen; i++){
@@ -516,11 +414,44 @@ void Output_Generation_Func(struct DRBG_SHA3 *ctx, unsigned int rate, unsigned i
 	}
 	ctx->V_wCreseed_03V_length = Vlen;
 	ctx->reseed_counter += 0x01;
-	printf("\n");
+
+	fprintf(ctx->file_output, "V = "); //=(w+V+C+reseed_counter) mod 2^440
+	for(int i=0; i<ctx->V_wCreseed_03V_length; i++){
+		fprintf(ctx->file_output, "%02x", ctx->V_wCreseed[i]);
+	}
+	fprintf(ctx->file_output, "\n");
+
+	fprintf(ctx->file_output, "reseed_counter = ");
+	fprintf(ctx->file_output, "%d", ctx->reseed_counter);
+	fprintf(ctx->file_output, "\n\n");
+
+	//tag kyu
+
+	if(func_call == 0){
+		fprintf(ctx->file_output, "V = ");
+		for(int i=0; i<ctx->V_wCreseed_03V_length; i++){
+			fprintf(ctx->file_output, "%02x", ctx->V_wCreseed[i]);
+		}
+		fprintf(ctx->file_output, "\n");
+
+		fprintf(ctx->file_output, "C = ");
+		for(int i=0; i<Clen; i++){
+			fprintf(ctx->file_output, "%02x", C[i]);
+		}
+		fprintf(ctx->file_output, "\n");
+
+		fprintf(ctx->file_output, "reseed_counter = ");
+		fprintf(ctx->file_output, "%d", ctx->reseed_counter);
+		fprintf(ctx->file_output, "\n");
+		printf("\n");
+	}
+
+	func_call++;
 }
 
 void Inner_Output_Generation_Function(struct DRBG_SHA3 *ctx, unsigned int rate, unsigned int capacity, unsigned char *input, unsigned long long int inputByteLen, unsigned char delimitedSuffix, unsigned char *output, unsigned long long int outputByteLen){
 	//int length = inputByteLen;
+	static int func_call = 0;
 	int BlockSize = (inputByteLen) / 2;
 
 	BitSequence mod01_before_sha3[BlockSize];
@@ -614,8 +545,19 @@ void Inner_Output_Generation_Function(struct DRBG_SHA3 *ctx, unsigned int rate, 
 	}
 	ctx->Output01_length = outputByteLen * 3;
 
-	printf("\n");
+	if(func_call == 0){
+		fprintf(ctx->file_output, "output1 = "); //512-비트
+	}else {
+		fprintf(ctx->file_output, "output2 = "); //512-비트
+	}
 
+	for(int i=0; i<512/8; i++){ //change
+		fprintf(ctx->file_output, "%02x", ctx->Output01[i]);
+	}
+	fprintf(ctx->file_output, "\n\n");
+
+	printf("\n");
+	func_call++;
 }
 
 void C_DerivedFunction(struct DRBG_SHA3 *ctx,unsigned int rate, unsigned int capacity, unsigned char input[110], unsigned long long int inputByteLen, unsigned char delimitedSuffix, unsigned char *output, unsigned long long int outputByteLen, unsigned char *addinput01) {
@@ -654,6 +596,12 @@ void C_DerivedFunction(struct DRBG_SHA3 *ctx,unsigned int rate, unsigned int cap
 		ctx->dfInput01[i] = Input_data[i];
 		printf("%02x", Input_data[i]);
 	}printf("\n");
+
+	fprintf(ctx->file_output, "dfInput = "); //=0x00||V
+	for(int i=0; i<w; i++){
+		fprintf(ctx->file_output, "%02x", ctx->dfInput01[i]);
+	}
+	fprintf(ctx->file_output, "\n");
 	//*********************buff**************************//
 
 	/*printf("\nInput data: ");
@@ -735,9 +683,31 @@ void C_DerivedFunction(struct DRBG_SHA3 *ctx,unsigned int rate, unsigned int cap
 	}
 	printf("\n");
 
-	ctx->reseed_counter = reseed;
+	fprintf(ctx->file_output, "dfOutput = "); //=C
+	for(int i=0; i<inputByteLen; i++){
+		fprintf(ctx->file_output, "%02x", Final_Key[i]);
+	}
+	fprintf(ctx->file_output, "\n\n");
 
-	//(unsigned int rate, unsigned int capacity, unsigned char *input, unsigned long long int inputByteLen, unsigned char delimitedSuffix, unsigned char *output, unsigned long long int outputByteLen){
+	if(ctx->reseed_counter < 2){
+		//tag kyu
+		fprintf(ctx->file_output, "V = "); //V
+		for(int i=0; i<inputByteLen; i++){
+			fprintf(ctx->file_output, "%02x", ctx->dfOutput[i]);
+		}
+		fprintf(ctx->file_output, "\n");
+
+		fprintf(ctx->file_output, "C = ");
+		for(int i=0; i<inputByteLen; i++){
+			fprintf(ctx->file_output, "%02x", ctx->dfOutput01[i]);
+		}
+		fprintf(ctx->file_output, "\n");
+
+		ctx->reseed_counter = reseed;
+		fprintf(ctx->file_output, "reseed_counter = ");
+		fprintf(ctx->file_output, "%d", ctx->reseed_counter);
+		fprintf(ctx->file_output, "\n");
+	}
 
 	Output_Generation_Func(ctx, rate, capacity, delimitedSuffix, Squeezed, outputByteLen, V, inputByteLen, Final_Key, inputByteLen, addinput01);
 }
@@ -836,11 +806,11 @@ void V_DerivedFunction(struct DRBG_SHA3 *ctx, unsigned int rate, unsigned int ca
     ctx->Vlen = Vlen;
     printf("\n");
 
-	fprintf(ctx->ppp, "dfOutput = ");
+	fprintf(ctx->file_output, "dfOutput = "); //=V
 	for(int i=0; i<Vlen; i++){
-		fprintf(ctx->ppp, "%02x", Final_Key[i]);
+		fprintf(ctx->file_output, "%02x", Final_Key[i]);
 	}
-	fprintf(ctx->ppp, "\n\n");
+	fprintf(ctx->file_output, "\n\n");
 
 
     C_DerivedFunction(ctx, rate, capacity, Final_Key, Vlen, delimitedSuffix, Squeezed, outputByteLen, addinput01);
@@ -889,6 +859,12 @@ void SecondResetFunction(struct DRBG_SHA3 *ctx, unsigned int rate, unsigned int 
 	}
 	ctx->V_secondcall_length = num;
 
+	fprintf(ctx->file_output, "dfInput = "); //=0x01||V||entropy||addInput
+	for(int i=0; i<ctx->V_secondcall_length; i++){
+		fprintf(ctx->file_output, "%02x", ctx->V_secondcall[i]);
+	}
+	fprintf(ctx->file_output, "\n");
+
 	V_DerivedFunction(ctx, rate, capacity, input_data, num, delimitedSuffix, Squeezed, outputByteLen, addinput02);
 }
 
@@ -926,11 +902,11 @@ void ResetFunction(struct DRBG_SHA3 *ctx, unsigned int rate, unsigned int capaci
 
 	printf("\n");
 
-	fprintf(ctx->ppp, "dfInput = ");
+	fprintf(ctx->file_output, "dfInput = "); //=entropy||nonce||perString
 	for(int i=0; i<num; i++){
-		fprintf(ctx->ppp, "%02x", ctx->dfInput[i]);
+		fprintf(ctx->file_output, "%02x", ctx->dfInput[i]);
 	}
-	fprintf(ctx->ppp, "\n");
+	fprintf(ctx->file_output, "\n");
 
 	ctx->reseed_counter = 0x00;
 	printf("reseed: %d\n", ctx->reseed_counter);

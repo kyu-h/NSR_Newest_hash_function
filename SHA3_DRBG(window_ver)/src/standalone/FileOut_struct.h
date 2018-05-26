@@ -25,5 +25,5 @@ struct DRBG_SHA3 {
 	BitSequence V_secondcall[1000];
 	unsigned int V_secondcall_length;
 
-	FILE *ppp;
+	FILE *file_output;
 };
