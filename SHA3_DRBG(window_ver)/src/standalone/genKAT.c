@@ -717,7 +717,7 @@ void V_DerivedFunction(struct DRBG_SHA3 *ctx, unsigned int rate, unsigned int ca
 		Vlen = 111;
 	}
 
-    printf("************V_DerivedFunction start************\n");
+    printf("\n************V_DerivedFunction start************\n");
 
     //*********************buff01**************************//
     for(r = 0, w = 0 ; r < strlen(buff_01) ; r += 2){
@@ -725,11 +725,23 @@ void V_DerivedFunction(struct DRBG_SHA3 *ctx, unsigned int rate, unsigned int ca
         Key_values01[w++] = strtol(temp_arr, NULL, 16);
     } //2 string to hex
 
-    for(r = 0, w; r < strlen(input) ; r += 2){
+    for(int i=0; i<inputByteLen; i++){
+    	Key_values01[w++] = input[i];
+    }
+
+    /*for(r = 0, w; r < inputByteLen ; r += 2){
         unsigned char temp_arr[3] = {input[r], input[r+1], '\0'};
         Key_values01[w++] = strtol(temp_arr, NULL, 16);
-    } //2 string to hex
+    }*/ //2 string to hex
     //*********************buff01**************************//
+
+    Keccak(rate, capacity, Key_values01, w, delimitedSuffix, Squeezed, outputByteLen/8);
+
+    printf("!!!!!!!!!!!!!!!!!!!\n");
+	for (int i=0; i<outputByteLen/8; i++){
+		SHA3_values01[i] = Squeezed[i];
+		printf("%02x", SHA3_values01[i]);
+	}
 
     //*********************buff02**************************//
     for(r = 0, w = 0 ; r < strlen(buff_02) ; r += 2){
@@ -737,19 +749,15 @@ void V_DerivedFunction(struct DRBG_SHA3 *ctx, unsigned int rate, unsigned int ca
         Key_values02[w++] = strtol(temp_arr, NULL, 16);
     } //2 string to hex
 
-    for(r = 0, w; r < strlen(input) ; r += 2){
+    for(int i=0; i<inputByteLen; i++){
+    	Key_values02[w++] = input[i];
+	}
+
+    /*for(r = 0, w; r < inputByteLen ; r += 2){
         unsigned char temp_arr[3] = {input[r], input[r+1], '\0'};
         Key_values02[w++] = strtol(temp_arr, NULL, 16);
-    } //2 string to hex
+    }*/ //2 string to hex
     //*********************buff02**************************//
-
-    j = w;
-
-    Keccak(rate, capacity, Key_values01, w, delimitedSuffix, Squeezed, outputByteLen/8);
-
-	for (int i=0; i<outputByteLen/8; i++){
-		SHA3_values01[i] = Squeezed[i];
-	}
 
 	Keccak(rate, capacity, Key_values02, w, delimitedSuffix, Squeezed, outputByteLen/8);
 
@@ -867,5 +875,5 @@ void ResetFunction(struct DRBG_SHA3 *ctx, unsigned int rate, unsigned int capaci
 
 	ctx->reseed_counter = 0x00;
 
-	V_DerivedFunction(ctx, rate, capacity, input_data, num-1, delimitedSuffix, Squeezed, outputByteLen, addinput01);
+	V_DerivedFunction(ctx, rate, capacity, ctx->dfInput, num, delimitedSuffix, Squeezed, outputByteLen, addinput01);
 }
