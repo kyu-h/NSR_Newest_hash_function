@@ -480,6 +480,7 @@ void Inner_Output_Generation_Function(struct DRBG_SHA3 *ctx, unsigned int rate, 
 	BitSequence Final_SHA3_after_mod[outputByteLen * 3];
 	int num= 0;
 	int j, ModLen=0;
+	int k=0;
 
 	BitSequence Squeezed[SqueezingOutputLength/8];
 
@@ -500,19 +501,27 @@ void Inner_Output_Generation_Function(struct DRBG_SHA3 *ctx, unsigned int rate, 
 
 	printf("************Inner_Output_Generation_Function start************\n");
 
+	/*for(int addinput01=0; addinput01<=512/BlockSize; addinput01++){
+		operation_add(input, ModLen, 0, addinput01);
+		for(int i=0; i<ModLen; i++){
+			printf("%02x", input[i]);
+		}printf("\n");
 
-	/*printf("Output Generation Function: ");
-	for(int i=0; i<length; i++){
-		printf("%02X", input[i]);
-	}
-	printf("\n");*/
+		j=BlockSize / 8;
+
+		for(int i=ModLen; i>=ModLen-j; i--){
+			mod01_before_sha3[j--] = input[i];
+			printf("%d ",j);
+		}
+
+		printf("\n");
+		for(int i=0; i<j; i++){
+			printf("%02x", mod01_before_sha3[i]);
+		}
+		printf("\n");
+	}*/
 
 	operation_add(input, ModLen, 0, 0x01);
-
-	/*for(int i=0; i<length; i++){
-		printf("%02X", input[i]);
-	}
-	printf("\n");*/
 
 	for(int i=0; i<ModLen; i++){
 		printf("%02x", input[i]);
@@ -520,31 +529,17 @@ void Inner_Output_Generation_Function(struct DRBG_SHA3 *ctx, unsigned int rate, 
 
 	printf("mod01_before_sha3: ");
 	j=BlockSize / 8;
-	printf("length: %d\n", ModLen);
-	printf("BlockSize: %d\n", BlockSize);
-	for(int i=ModLen; i>=ModLen-BlockSize/8; i--){
-		mod01_before_sha3[j--] = input[i];
+	for(int i=ModLen-j; k<j; i++){
+		mod01_before_sha3[k++] = input[i];
 	}
-	for(int i=0; i<BlockSize/8; i++){
+	for(int i=0; i<j; i++){
 		printf("%02x", mod01_before_sha3[i]);
 	}
 	printf("\n");
 
-	operation_add(input, ModLen, 0, 0x01);
-	//input[length-1] += 0x01;
-
-	//printf("mod02_before_sha3: ");
-	j=BlockSize / 8;
-	for(int i=ModLen; i>=ModLen-BlockSize/8; i--){
-		mod02_before_sha3[j--] = input[i];
-	}
-	/*for(int i=0; i<BlockSize; i++){
-		printf("%02X", mod02_before_sha3[i]);
-	}
-	printf("\n");*/
-
+	printf("\n 모드01: %02x \n", mod01_before_sha3[31]);
 	printf("SHA3_mod01: ");
-	Keccak(rate, capacity, mod01_before_sha3, BlockSize/8, delimitedSuffix, Squeezed, outputByteLen);
+	Keccak(rate, capacity, mod01_before_sha3, k, delimitedSuffix, Squeezed, outputByteLen);
 	for (int i=0; i<outputByteLen; i++){
 		SHA3_mod01[i] = Squeezed[i];
 		Final_SHA3_after_mod[num++] = SHA3_mod01[i];
@@ -552,25 +547,45 @@ void Inner_Output_Generation_Function(struct DRBG_SHA3 *ctx, unsigned int rate, 
 	}
 	printf("\n");
 
-	//printf("SHA3_mod02: ");
-	Keccak(rate, capacity, mod02_before_sha3, BlockSize/8, delimitedSuffix, Squeezed, outputByteLen);
+	operation_add(input, ModLen, 0, 0x01);
+
+	for(int i=0; i<ModLen; i++){
+		printf("%02x", input[i]);
+	}printf("\n");
+
+	/*for(int i=0; i<k; i++){
+		mod02_before_sha3[i] = mod01_before_sha3[i];
+	}
+	mod02_before_sha3[k] += 0x01;*/
+
+	k=0;
+
+	printf("mod02_before_sha3: ");
+	j=BlockSize / 8;
+	for(int i=ModLen-j; k<j; i++){
+		mod02_before_sha3[k++] = input[i];
+	}
+
+	for(int i=0; i<j; i++){
+		printf("%02x", mod02_before_sha3[i]);
+	}
+	printf("\n");
+
+	printf("k: %d\n",k);
+
+	printf("\n 모드02: %02x \n", mod02_before_sha3[31]);
+
+	printf("SHA3_mod02: ");
+	Keccak(rate, capacity, mod02_before_sha3, k, delimitedSuffix, Squeezed, outputByteLen);
 	for (int i=0; i<outputByteLen; i++){
 		SHA3_mod02[i] = Squeezed[i];
-		SHA3_mod03[i] = Squeezed[i];
 		Final_SHA3_after_mod[num++] = SHA3_mod02[i];
-		//printf("%02x", SHA3_mod02[i]); //write small
+		printf("%02x", SHA3_mod02[i]); //write small
 	}
-	//printf("\n");
-
-	//printf("SHA3_mod03: ");
-	for (int i=0; i<outputByteLen; i++){
-		Final_SHA3_after_mod[num++] = SHA3_mod03[i];
-		//printf("%02x", SHA3_mod03[i]); //write small
-	}
-	//printf("\n");
+	printf("\n");
 
 	printf("Final_SHA3_after_mod: ");
-	for (int i=0; i<outputByteLen * 3; i++){
+	for (int i=0; i<outputByteLen * 2; i++){
 		printf("%02x", Final_SHA3_after_mod[i]); //write small
 		ctx->Output01[i] = Final_SHA3_after_mod[i];
 	}
