@@ -258,7 +258,6 @@ void operation_add(unsigned char *arr, int ary_size, int start_index, unsigned i
 void Output_Generation_Func(struct DRBG_SHA3 *ctx, unsigned int rate, unsigned int capacity, unsigned char delimitedSuffix, unsigned char *output, unsigned long long int outputByteLen, unsigned char *V, unsigned int Vlen, unsigned char *C, unsigned int Clen, unsigned char *addinput01){
 	unsigned int reseed = 0x01;
 	static int func_call = 0;
-	BitSequence buff01[10] = "03";
 	BitSequence First_before_SHA3[10000];
 	BitSequence First_after_SHA3[outputByteLen/8];
 	BitSequence Second_before_SHA3[10000];
@@ -267,69 +266,60 @@ void Output_Generation_Func(struct DRBG_SHA3 *ctx, unsigned int rate, unsigned i
 
 	BitSequence Squeezed[SqueezingOutputLength/8];
 	int r, w, length = 0;
-	int j = Vlen;
 
 	printf("************Output_Generation_Function start************\n");
 	printf("func_call : %d", func_call);
 
 	//*********************buff**************************//
 
-	First_before_SHA3[0] = 0x02;
-
-	for(r = 0, w=1; r < Vlen; r++){ //inputByteLen를 v에 대한 길이로 변경
-		First_before_SHA3[w++] = V[r];
-	} //2 string to hex
-
-	length = strlen(addinput01) / 2;
-	for(r=0; r<length; r++){
-		First_before_SHA3[w++] = addinput01[r];
-	}
-
-	for(int i=0; i<length; i++){
-		ctx->addInput[i] = addinput01[i];
-	}
-	ctx->addInput_length = length;
-
-	//*********************buff**************************//
-	printf("\nFirst before SHA3 data: ");
-	for(int i=0; i<w; i++){
-		printf("%02x", First_before_SHA3[i]);
-	}
-	printf("\n");
-
-	Keccak(rate, capacity, First_before_SHA3, w, delimitedSuffix, Squeezed, outputByteLen/8); //have to check output, input length
-	for (int i=0; i<outputByteLen/8; i++){
-		First_after_SHA3[i] = Squeezed[i];
-	}
-
-	printf("First after SHA3 data: ");
-	for(int i=0; i<outputByteLen/8; i++){
-		printf("%02x", First_after_SHA3[i]);
-	}
-	printf("\n");
-
-	for(int i=0; i<w; i++){
-		ctx->W_VaddInput[i] = First_after_SHA3[i];
-	}
-	ctx->W_VaddInput_length = outputByteLen/8;
-
-	for(int i = outputByteLen/8 - 1, start = 0 ; i > -1 ; i--){ //V + after sha3
-		operation_add(V, Vlen, start++, First_after_SHA3[i]);
-	}
-
-	printf("Middle V: ");
-	for(int i=0; i<Vlen; i++){
-		MiddleV[i] = V[i];
-		printf("%02x", MiddleV[i]);
-		ctx->V_Mod[i] = MiddleV[i];
-	}
-	ctx->V_Mod_length = Vlen;
-	printf("\n");
 
 	if(func_call == 1){
 		ctx->reseed_counter = reseed;
 		fprintf(ctx->file_output, "reseed_counter = %d\n\n", ctx->reseed_counter);
 	}else {
+		First_before_SHA3[0] = 0x02;
+		for(r = 0, w=1; r < Vlen; r++){ //inputByteLen를 v에 대한 길이로 변경
+			First_before_SHA3[w++] = V[r];
+		}
+
+		length = strlen(addinput01) / 2;
+		for(r=0; r<length; r++){
+			First_before_SHA3[w++] = addinput01[r];
+		}
+
+		for(int i=0; i<length; i++){
+			ctx->addInput[i] = addinput01[i];
+		}
+		ctx->addInput_length = length;
+
+		//*********************buff**************************//
+		printf("\nFirst before SHA3 data: ");
+		for(int i=0; i<w; i++){
+			printf("%02x", First_before_SHA3[i]);
+		}
+		printf("\n");
+
+		Keccak(rate, capacity, First_before_SHA3, w, delimitedSuffix, Squeezed, outputByteLen/8); //have to check output, input length
+		for (int i=0; i<outputByteLen/8; i++){
+			First_after_SHA3[i] = Squeezed[i];
+		}
+
+		printf("First after SHA3 data: ");
+		for(int i=0; i<outputByteLen/8; i++){
+			printf("%02x", First_after_SHA3[i]);
+		}
+		printf("\n");
+
+		for(int i=0; i<w; i++){
+			ctx->W_VaddInput[i] = First_after_SHA3[i];
+		}
+		ctx->W_VaddInput_length = outputByteLen/8;
+
+		for(int i = outputByteLen/8 - 1, start = 0 ; i > -1 ; i--){ //V + after sha3
+			operation_add(V, Vlen, start++, First_after_SHA3[i]);
+		}
+
+
 		fprintf(ctx->file_output, "addInput = "); //=addInput1
 		for(int i=0; i<length; i++){
 			fprintf(ctx->file_output, "%02x", ctx->addInput[i]);
@@ -344,11 +334,20 @@ void Output_Generation_Func(struct DRBG_SHA3 *ctx, unsigned int rate, unsigned i
 
 		fprintf(ctx->file_output, "V = "); //=(w + V) mod 2^440
 		for(int i=0; i<Vlen; i++){
-			fprintf(ctx->file_output, "%02x", ctx->V_Mod[i]);
+			fprintf(ctx->file_output, "%02x", V[i]);
 		}
 		fprintf(ctx->file_output, "\n\n");
-
 	}
+
+	printf("Middle V: ");
+	for(int i=0; i<Vlen; i++){
+		MiddleV[i] = V[i];
+		printf("%02x", MiddleV[i]);
+		ctx->V_Mod[i] = MiddleV[i];
+	}
+	ctx->V_Mod_length = Vlen;
+	printf("\n");
+	printf("Vlen : %d\n", Vlen);
 
 	Inner_Output_Generation_Function(ctx, rate, capacity, MiddleV, Vlen, delimitedSuffix, Squeezed, outputByteLen/8); //have to check output, input length
 
