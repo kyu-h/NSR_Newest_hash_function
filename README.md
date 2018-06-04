@@ -12,7 +12,9 @@ If we have some time, we will change that base code on our own. (If possible..)
  ->Reference site of how to set DRBG: https://tls.mbed.org/ctr-drbg-source-code <br>
  ->TTAK.KO-12.0190: http://committee.tta.or.kr/data/standard_view.jsp?nowPage=3&pk_num=TTAK.KO-12.0190&commit_code=TC5 <br>
  ->How to install mbed TLS: https://www.lesstif.com/pages/viewpage.action?pageId=29590494 <br>
+ ->Recommend to use this web site because TTAK.KO-12.0190 is not perfectly matched which has some bugs: https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-90a.pdf <br>
 4. Make a HMAC_DRBG due to MAY 23.
+->Reference site HMAC_DRBG: https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-90a.pdf <br>
 5. Make a PBKDF due to MAY 30.
 6. Make a HMAC_KDF due to June 20.
 
