@@ -357,7 +357,7 @@ void Output_Generation_Func(struct DRBG_SHA3 *ctx, unsigned int rate, unsigned i
 		fprintf(ctx->file_output, "output2 = "); //512-∫Ò∆Æ
 	}
 
-	for(int i=0; i<512/8; i++){ //change
+	for(int i=0; i<ctx->Output01_length; i++){ //change
 		fprintf(ctx->file_output, "%02x", ctx->Output01[i]);
 	}
 	fprintf(ctx->file_output, "\n\n");
@@ -475,6 +475,7 @@ void Inner_Output_Generation_Function(struct DRBG_SHA3 *ctx, unsigned int rate, 
 	BitSequence Final_SHA3_after_mod[outputByteLen * 3];
 	int num= 0;
 	int ModLen=0;
+	int outputLen = 0;
 	double k=0;
 	BitSequence Squeezed[SqueezingOutputLength/8];
 
@@ -492,7 +493,9 @@ void Inner_Output_Generation_Function(struct DRBG_SHA3 *ctx, unsigned int rate, 
 		BlockSize = 512;
 	}
 
-	k = ceil((double)512 / (double) BlockSize);
+	outputLen = BlockSize * 2;
+
+	k = ceil((double)outputLen / (double) BlockSize);
 
 	printf("k: %f", k);
 
