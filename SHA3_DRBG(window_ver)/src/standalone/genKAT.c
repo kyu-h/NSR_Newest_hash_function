@@ -819,7 +819,7 @@ void SecondResetFunction(struct DRBG_SHA3 *ctx, unsigned int rate, unsigned int 
 	int num = 0;
 	BitSequence buff[10] = "01";
 	BitSequence input_data[1000];
-	int entropyLen = outputByteLen/8;
+	int entropyLen = 32;
 	BitSequence Squeezed[SqueezingOutputLength/8];
 	int Vlen, r, w = 0;
 
@@ -828,17 +828,13 @@ void SecondResetFunction(struct DRBG_SHA3 *ctx, unsigned int rate, unsigned int 
 	if(rate == 1152 || rate == 1088){
 		Vlen = 55;
 	}else {
-		Vlen = 111;
+		Vlen = 111; //seed_length
 	}
 
 	for(r = 0, w = 0 ; r < strlen(buff) ; r += 2){
 		unsigned char temp_arr[3] = {buff[r], buff[r+1], '\0'};
 		input_data[num++] = strtol(temp_arr, NULL, 16);
 	} //2 string to hex
-
-	/*for(int i=0; i<num; i++){
-		printf("%02x", input_data[i]);
-	}printf("\n");*/
 
 	for(int i=0; i<Vlen; i++){
 		input_data[num++] = V[i];
@@ -851,6 +847,10 @@ void SecondResetFunction(struct DRBG_SHA3 *ctx, unsigned int rate, unsigned int 
 	for(int i=0; i<entropyLen; i++){
 		input_data[num++] = addinput02[i];
 	}
+
+	for(int i=0; i<num; i++){
+		printf("%02x", input_data[i]);
+	}printf("\n");
 
 	for(int i=0; i<num; i++){
 		ctx->V_secondcall[i] = input_data[i];
