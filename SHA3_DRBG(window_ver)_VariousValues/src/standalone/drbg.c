@@ -459,7 +459,7 @@ void drbg_sha3_output_gen(struct DRBG_SHA3_Context *ctx, const BitSequence *entr
 		fprintf(outf, "\n");
 	}
 
-	ctx->reseed_counter += 1;
+	ctx->reseed_counter++;  ////what?
 
 	{		//***** TEXT OUTPUT - reseed_counter *****//
 		fprintf(outf, "reseed_counter = %d", ctx->reseed_counter);
@@ -476,7 +476,7 @@ void drbg_sha3_digest(unsigned int rate, unsigned int capacity, unsigned char de
 
 	ctx.setting.refreshperiod = cycle;
 
-	if(per_size != 0)
+	/*if(per_size != 0)
 		ctx.setting.usingperstring = true;
 	else
 		ctx.setting.usingperstring = false;
@@ -486,7 +486,11 @@ void drbg_sha3_digest(unsigned int rate, unsigned int capacity, unsigned char de
 	else
 		ctx.setting.usingaddinput = false;
 
-	ctx.setting.predicttolerance = false;
+	ctx.setting.predicttolerance = false;*/
+
+	ctx.setting.predicttolerance = true;   //예측내성
+	ctx.setting.usingperstring = false;      //개별화
+	ctx.setting.usingaddinput = false;      //추가입력
 
 	drbg_sha3_init(&ctx, entropy[0], ent_size, nonce, non_size, per_string, per_size, outf);
 

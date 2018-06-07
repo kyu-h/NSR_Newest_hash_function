@@ -99,7 +99,7 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
 	int add_size = 32;
 
 	int output_bits = 512;
-	int cycle = 1;
+	int cycle = 2;
 
 	if(rate == 1152){
 		output_bits = 448;
@@ -133,20 +133,6 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
 
 	FindMarker(fp_in, "addinput2");
 	fscanf(fp_in, " %c %s", &str, &addinput[1]);
-/*	for(int i=0; i<strlen(entropy[0]); i++){
-		if(entropy[0][i] >='A' && entropy[0][i] <= 'Z'){
-			entropy[0][i] = entropy[0][i] +32;
-		}
-		if(perString[i] >='A' && perString[i] <= 'Z'){
-			perString[i] = perString[i] +32;
-		}
-	}
-
-	for(int i=0; i<strlen(nonce); i++){
-		if(nonce[i] >='A' && nonce[i] <= 'Z'){
-			nonce[i] = nonce[i] +32;
-		}
-	}*/
 
 	fprintf(fp_out, "entropy = %s\n", entropy[0]);
 	fprintf(fp_out, "nonce = %s\n", nonce);
@@ -179,8 +165,6 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
 	}
 
 	drbg_sha3_digest(rate, capacity, delimitedSuffix, entropy, ent_size, nonce, non_size, perString, per_size, addinput, add_size, output_bits, cycle, drbg, fp_out);
-
-
 
     fclose(fp_in);
     fclose(fp_out);
