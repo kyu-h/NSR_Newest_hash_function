@@ -99,7 +99,7 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
 	int add_size = 32;
 
 	int output_bits = 512;
-	int cycle = 2;
+	int cycle = 1;
 
 	if(rate == 1152){
 		output_bits = 448;
