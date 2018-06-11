@@ -7,7 +7,7 @@ If we have some time, we will change that base code on our own. (If possible..)
  ->Can check hash values result in this web site: https://leventozturk.com/engineering/sha3/ <br>
 2. Make a HMAC which is SHA3 version due to May 4. --> Clear(May 14) <br>
  ->Can check HMAC hash values result in this web site: http://www.wolfgang-ehrhardt.de/hmac-sha3-testvectors.html <br>
-3. Make a Hash_DRBG due to MAY 16. <br>
+3. Make a Hash_DRBG due to MAY 16. --> Clear(June 11)<br>
  ->Reference site of how to set DRBG: https://github.com/Chronic-Dev/libgcrypt <br>
  ->Reference site of how to set DRBG: https://tls.mbed.org/ctr-drbg-source-code <br>
  ->TTAK.KO-12.0190: http://committee.tta.or.kr/data/standard_view.jsp?nowPage=3&pk_num=TTAK.KO-12.0190&commit_code=TC5 <br>
