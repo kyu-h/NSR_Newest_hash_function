@@ -83,7 +83,7 @@ void drbg_sha3_inner_reset(struct DRBG_SHA3_HMAC_Context *ctx, BitSequence *V, B
 			input[w++] = V[r];
 	}
 
-	input[w++] = 0x00;
+	input[w++] = 0x01;
 
 	if(ctx->setting.usingaddinput){
 		for(r = 0 ; r < add_size ; r++)
@@ -293,7 +293,7 @@ void drbg_sha3_hmac_output_reset(struct DRBG_SHA3_HMAC_Context *ctx, const BitSe
 		input[w++] = target_state_V[r];
 	}
 
-	input[w++] = 0x00;
+	input[w++] = 0x01;
 
 	for(r=0; r<ent_size; r++){
 		input[w++] = entropy[r];
