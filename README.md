@@ -5,6 +5,7 @@ If we have some time, we will change that base code on our own. (If possible..)
 
 1. We will find SHA3 hash values and matched that values with NSR due to April 27. --> Clear(April 25) <br>
  ->Can check hash values result in this web site: https://leventozturk.com/engineering/sha3/ <br>
+ <a href="https://github.com/kyu-h/NSR_Newest_hash_function/tree/master/SHA3" target="_blank">SHA3 stand alone version</a> <br>
 2. Make a HMAC which is SHA3 version due to May 4. --> Clear(May 14) <br>
  ->Can check HMAC hash values result in this web site: http://www.wolfgang-ehrhardt.de/hmac-sha3-testvectors.html <br>
 3. Make a Hash_DRBG due to MAY 16. --> Clear(June 11)<br>
