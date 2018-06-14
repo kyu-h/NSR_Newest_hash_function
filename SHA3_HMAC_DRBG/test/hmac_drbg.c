@@ -24,15 +24,15 @@ void drbg_ent_non_pers(struct DRBG_SHA3_HMAC_Context *ctx, BitSequence *input, B
 		input[w++] = entropy[r];
 	}
 
-	for(r = 0 ; r < non_size ; r++)
+	for(r = 0 ; r < non_size ; r++){
 		input[w++] = nonce[r];
+	}
 
 	if(ctx->setting.usingperstring){
-		for(r = 0 ; r < per_size ; r++)
+		for(r = 0 ; r < per_size ; r++){
 			input[w++] = per_string[r];
-		input_size += per_size;
+		}
 	}
-	input_size += ent_size + non_size;
 }
 
 void drbg_sha3_inner_output(struct DRBG_SHA3_HMAC_Context *ctx, BitSequence *V, BitSequence *Key, const BitSequence *add_input, int add_size, FILE *outf, int num){
@@ -149,6 +149,7 @@ void drbg_sha3_hmac_init(struct DRBG_SHA3_HMAC_Context *ctx, const BitSequence *
 	BitSequence *target_state_Key;
 	int STATE_MAX_SIZE;
 	int input_size = 0;
+	int r, w =0;
 
 	if(ctx->setting.drbgtype == 1152|| ctx->setting.drbgtype == 1088){
 		target_state_V = ctx->working_state_V256;
@@ -176,7 +177,27 @@ void drbg_sha3_hmac_init(struct DRBG_SHA3_HMAC_Context *ctx, const BitSequence *
 		fprintf(outf, "\n\n");
 	}
 
-	drbg_ent_non_pers(&ctx, input, V, ctx->capacity / 16, entropy, ent_size, nonce, non_size, per_string, per_size);
+	//drbg_ent_non_pers(&ctx, input, V, ctx->capacity / 16, entropy, ent_size, nonce, non_size, per_string, per_size);
+
+	for(r=0, w=0; r<ctx->capacity / 16; r++){
+		input[w++] = V[r];
+	}
+
+	input[w++] = 0x00;
+
+	for(r = 0; r < ent_size ; r++){
+		input[w++] = entropy[r];
+	}
+
+	for(r = 0 ; r < non_size ; r++){
+		input[w++] = nonce[r];
+	}
+
+	if(ctx->setting.usingperstring){
+		for(r = 0 ; r < per_size ; r++){
+			input[w++] = per_string[r];
+		}
+	}
 
 	input_size = ent_size + non_size + per_size + ctx->capacity / 16 + 1;
 
@@ -186,9 +207,33 @@ void drbg_sha3_hmac_init(struct DRBG_SHA3_HMAC_Context *ctx, const BitSequence *
 	hmac_digest(ctx->capacity / 2, ctx->setting.drbgtype, ctx->capacity, target_state_Key, ctx->capacity / 16, V, ctx->capacity / 16, target_state_V);
 	//drbg_sha3_hmac_print(ctx->capacity / 16, target_state_V);
 
-	drbg_ent_non_pers(&ctx, input, target_state_V, ctx->capacity / 16, entropy, ent_size, nonce, non_size, per_string, per_size);
+	for(int i=0; i<1024; i++){
+		input[i] = '\0';
+	}
 
-	hmac_digest(ctx->capacity / 2, ctx->setting.drbgtype, ctx->capacity, target_state_Key, ctx->capacity / 16, target_state_V, ctx->capacity / 16, target_state_Key);
+	//drbg_ent_non_pers(&ctx, input, target_state_V, ctx->capacity / 16, entropy, ent_size, nonce, non_size, per_string, per_size);
+
+	for(r=0, w=0; r<ctx->capacity / 16; r++){
+		input[w++] = V[r];
+	}
+
+	input[w++] = 0x01;
+
+	for(r = 0; r < ent_size ; r++){
+		input[w++] = entropy[r];
+	}
+
+	for(r = 0 ; r < non_size ; r++){
+		input[w++] = nonce[r];
+	}
+
+	if(ctx->setting.usingperstring){
+		for(r = 0 ; r < per_size ; r++){
+			input[w++] = per_string[r];
+		}
+	}
+
+	hmac_digest(ctx->capacity / 2, ctx->setting.drbgtype, ctx->capacity, target_state_Key, ctx->capacity / 16, input, input_size, target_state_Key);
 	//drbg_sha3_hmac_print(ctx->capacity / 16, target_state_Key);
 
 	hmac_digest(ctx->capacity / 2, ctx->setting.drbgtype, ctx->capacity, target_state_Key, ctx->capacity / 16, target_state_V, ctx->capacity / 16, target_state_V);
