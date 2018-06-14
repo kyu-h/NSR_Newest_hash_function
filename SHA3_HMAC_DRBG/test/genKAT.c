@@ -53,13 +53,13 @@ genKAT_main(void)
 		printf("%s", pStr);
 
 		if(!strcmp(pStr, "Alg_ID = Hash_DRBG_SHA3-224\n")){
-			//genShortMsgHash(1152, 448, 0x06, 224, 0,inputFileAddress,outputFileAddress,"Alg_ID = HMAC_DRBG_SHA3-224");
+			genShortMsgHash(1152, 448, 0x06, 224, 0,inputFileAddress,outputFileAddress,"Alg_ID = HMAC_DRBG_SHA3-224");
 		}else if(!strcmp(pStr, "Alg_ID = Hash_DRBG_SHA3-256\n")){
 			genShortMsgHash(1088, 512, 0x06, 256, 0,inputFileAddress,outputFileAddress,"Alg_ID = HMAC_DRBG_SHA3-256");
 		}else if(!strcmp(pStr, "Alg_ID = Hash_DRBG_SHA3-384\n")){
-			//genShortMsgHash(832, 768, 0x06, 384, 0,inputFileAddress,outputFileAddress,"Alg_ID = HMAC_DRBG_SHA3-384");
+			genShortMsgHash(832, 768, 0x06, 384, 0,inputFileAddress,outputFileAddress,"Alg_ID = HMAC_DRBG_SHA3-384");
 		}else if(!strcmp(pStr, "Alg_ID = Hash_DRBG_SHA3-512\n")){
-			//genShortMsgHash(576, 1024, 0x06, 512, 0,inputFileAddress,outputFileAddress,"Alg_ID = HMAC_DRBG_SHA3-512");
+			genShortMsgHash(576, 1024, 0x06, 512, 0,inputFileAddress,outputFileAddress,"Alg_ID = HMAC_DRBG_SHA3-512");
 		}else {
 			printf("Error!\n");
 		}

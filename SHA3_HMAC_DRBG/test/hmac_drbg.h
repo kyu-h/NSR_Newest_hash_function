@@ -46,18 +46,6 @@ struct DRBG_SHA3_HMAC_Context {
 };
 
 /**
- * HMAC drbg V + 0x00 + intput data(entropy, nonce, perString)
- *
- * @param [in] input 최초 호출지로부터 값 저장하는 장소
- * @param [in] V
- * @param [in] entropy 엔트로피
- * @param [in] nonce 논스
- * @param [in] per_string 개별화 문자열
- *
- */
-void drbg_ent_non_pers(struct DRBG_SHA3_HMAC_Context *ctx, BitSequence *input, BitSequence *V, int V_size, const BitSequence *entropy, int ent_size, const BitSequence *nonce, int non_size, const BitSequence *per_string, int per_size);
-
-/**
  * HMAC 출력 함수
  *
  * @param [in] digest_size
