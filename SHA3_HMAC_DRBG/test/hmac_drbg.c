@@ -64,9 +64,11 @@ void drbg_sha3_inner_reset(struct DRBG_SHA3_HMAC_Context *ctx, BitSequence *V, B
 
 	input[w++] = 0x00;
 
-	if(ctx->setting.usingaddinput){
-		for(r = 0 ; r < add_size ; r++)
-			input[w++] = add_input[r];
+	if(!ctx->setting.is_addinput_null) {
+		if(ctx->setting.usingaddinput){
+			for(r = 0 ; r < add_size ; r++)
+				input[w++] = add_input[r];
+		}
 	}
 
 	hmac_digest(ctx->capacity / 2, ctx->setting.drbgtype, ctx->capacity, Key, ctx->capacity / 16, input, w, Key);
@@ -122,6 +124,9 @@ void drbg_sha3_hmac_init(struct DRBG_SHA3_HMAC_Context *ctx, const BitSequence *
 	BitSequence Key[128] = {'\0', };
 	BitSequence *target_state_V;
 	BitSequence *target_state_Key;
+	BitSequence ex_V[128] = {'\0', };
+	BitSequence ex_Key[128] = {'\0', };
+
 	int STATE_MAX_SIZE;
 	int input_size = 0;
 	int r, w =0;
@@ -184,7 +189,7 @@ void drbg_sha3_hmac_init(struct DRBG_SHA3_HMAC_Context *ctx, const BitSequence *
 	}
 
 	for(r=0, w=0; r<ctx->capacity / 16; r++){
-		input[w++] = V[r];
+		input[w++] = target_state_V[r];
 	}
 
 	input[w++] = 0x01;
@@ -279,10 +284,10 @@ void drbg_sha3_hmac_output_reset(struct DRBG_SHA3_HMAC_Context *ctx, const BitSe
 			input[w++] = add_input[r];
 	}
 
-	hmac_digest(ctx->capacity / 2, ctx->setting.drbgtype, ctx->capacity, input, w, target_state_Key, ctx->capacity / 16, target_state_Key);
+	hmac_digest(ctx->capacity / 2, ctx->setting.drbgtype, ctx->capacity, target_state_Key, ctx->capacity / 16, input, w, target_state_Key);
 	//drbg_sha3_hmac_print(ctx->capacity / 16, target_state_Key);
 
-	hmac_digest(ctx->capacity / 2, ctx->setting.drbgtype, ctx->capacity, target_state_V, ctx->capacity / 16, target_state_Key, ctx->capacity / 16, target_state_V);
+	hmac_digest(ctx->capacity / 2, ctx->setting.drbgtype, ctx->capacity, target_state_Key, ctx->capacity / 16, target_state_V, ctx->capacity / 16, target_state_V);
 	//drbg_sha3_hmac_print(ctx->capacity / 16, target_state_V);
 
 	for(int i=0; i<1024; i++){
@@ -304,10 +309,10 @@ void drbg_sha3_hmac_output_reset(struct DRBG_SHA3_HMAC_Context *ctx, const BitSe
 			input[w++] = add_input[r];
 	}
 
-	hmac_digest(ctx->capacity / 2, ctx->setting.drbgtype, ctx->capacity, input, w, target_state_Key, ctx->capacity / 16, target_state_Key);
+	hmac_digest(ctx->capacity / 2, ctx->setting.drbgtype, ctx->capacity, target_state_Key, ctx->capacity / 16, input, w, target_state_Key);
 	//drbg_sha3_hmac_print(ctx->capacity / 16, target_state_Key);
 
-	hmac_digest(ctx->capacity / 2, ctx->setting.drbgtype, ctx->capacity, target_state_V, ctx->capacity / 16, target_state_Key, ctx->capacity / 16, target_state_V);
+	hmac_digest(ctx->capacity / 2, ctx->setting.drbgtype, ctx->capacity, target_state_Key, ctx->capacity / 16, target_state_V, ctx->capacity / 16, target_state_V);
 	//drbg_sha3_hmac_print(ctx->capacity / 16, target_state_V);
 
 	ctx->reseed_counter = 1;
@@ -325,6 +330,7 @@ void drbg_sha3_hmac_output_reset(struct DRBG_SHA3_HMAC_Context *ctx, const BitSe
 		fprintf(outf, "\n\n");
 	}
 
+	ctx->setting.is_addinput_null = true;
 	drbg_sha3_inner_output(ctx, target_state_V, target_state_Key, add_input, add_size, outf, 2);
 }
 

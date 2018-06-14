@@ -26,6 +26,7 @@ struct DRBG_HMAC_Administrative {
 	bool predicttolerance;
 	bool usingperstring;
 	bool usingaddinput;
+	bool is_addinput_null;
 };
 
 
