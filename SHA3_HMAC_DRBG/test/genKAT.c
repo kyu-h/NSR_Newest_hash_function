@@ -89,15 +89,13 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
 
 	fp_out = fopen(outputFileName, "w");
 
-
 	BitSequence drbg[64];
 
 	int ent_size = 32;
 	int non_size = 16;
 	int per_size = 32;
 	int add_size = 32;
-
-	int output_bits = 512;
+	int output_bits = 0;
 	int cycle = 1;
 
 	if(rate == 1152){
@@ -155,7 +153,6 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
 
 		unsigned char temp_arr05[3] = {addinput[1][r], addinput[1][r+1], '\0'};
 		addinput[1][e++] = strtol(temp_arr05, NULL, 16);
-
 	} //2 string to hex
 
 	for(r=0, f=0; f<64; r+=2){
@@ -167,7 +164,6 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
 
     fclose(fp_in);
     fclose(fp_out);
-
     return KAT_SUCCESS;
 }
 

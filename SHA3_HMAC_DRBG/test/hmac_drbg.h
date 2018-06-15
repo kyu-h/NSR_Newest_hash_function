@@ -65,7 +65,7 @@ void drbg_sha3_hmac_print(unsigned int digest_size, unsigned char *digest);
  * @param [in] Key 논스
  *
  */
-void drbg_sha3_inner_output(struct DRBG_SHA3_HMAC_Context *ctx, BitSequence *V, BitSequence *Key, const BitSequence *add_input, int add_size, FILE *outf, int num);
+void drbg_sha3_inner_output(struct DRBG_SHA3_HMAC_Context *ctx, BitSequence *V, BitSequence *Key, const BitSequence *entropy, int ent_size, const BitSequence *add_input, int add_size, FILE *outf, int num);
 
 /**
  * DRBG HMAC 내부초기화함수
@@ -76,7 +76,7 @@ void drbg_sha3_inner_output(struct DRBG_SHA3_HMAC_Context *ctx, BitSequence *V, 
  * @param [in] add input 추가입력
  *
  */
-void drbg_sha3_inner_reset(struct DRBG_SHA3_HMAC_Context *ctx, BitSequence *V, BitSequence *Key, const BitSequence *add_input, int add_size, FILE *outf);
+void drbg_sha3_inner_reset(struct DRBG_SHA3_HMAC_Context *ctx, BitSequence *V, BitSequence *Key, const BitSequence *entropy, int ent_size, const BitSequence *add_input, int add_size, FILE *outf);
 
 /**
  * DRBG 초기화 함수
