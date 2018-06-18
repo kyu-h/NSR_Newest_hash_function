@@ -17,11 +17,12 @@ If we have some time, we will change that base code on our own. (If possible..)
  ->How to install mbed TLS: https://www.lesstif.com/pages/viewpage.action?pageId=29590494 <br>
  ->Recommend to use this web site because TTAK.KO-12.0190 is not perfectly matched which has some bugs: https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-90a.pdf <br>
   <a href="https://github.com/kyu-h/NSR_Newest_hash_function/tree/master/SHA3_DRBG(window_ver)" target="_blank">SHA3 DRBG(Based SHA3 stand alone version)</a> <br>
-4. Make a HMAC_DRBG due to MAY 23. <br>
+4. Make a HMAC_DRBG due to MAY 23. <br> --> Clear(June 18)<br>
 ->Reference site HMAC_DRBG: https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-90a.pdf <br>
 <a href="https://github.com/kyu-h/NSR_Newest_hash_function/tree/master/SHA3_HMAC_DRBG" target="_blank">SHA3 HMAC DRBG(Based SHA3 HMAC)</a> <br>
-5. Make a PBKDF due to MAY 30.
-6. Make a HMAC_KDF due to June 20.
+5. Make a PBKDF due to MAY 30. <br>
+->Reference site PBKDF: https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-132.pdf <br>
+6. Make a HMAC_KDF due to June 20. <br>
 
 <hr>
 Every package have test text input file seems like SHA3-224.txt or HMAC_SHA3-224.txt. <br>
