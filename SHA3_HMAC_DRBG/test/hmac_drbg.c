@@ -49,12 +49,12 @@ void drbg_sha3_inner_output(struct DRBG_SHA3_HMAC_Context *ctx, BitSequence *V, 
 		}
 	}
 
-	/*printf("OUPUT UPDATE FIRST INPUT: ");
+	/*printf("OUPUT UPDATE FIRST INPUT SIZE: %d: \n", w);
 	for(int i = 0 ; i < w ; i++)
 		printf("%02x", input[i]);
-	printf("\n");*/
+	printf("\n");
 
-	printf("update input data1\n");
+	printf("update input data1\n");*/
 	hmac_digest(ctx->capacity / 2, ctx->setting.drbgtype, ctx->capacity, Key, ctx->capacity / 16, input, w, Key);
 	//drbg_sha3_hmac_print(ctx->capacity / 16, Key);
 
@@ -84,7 +84,7 @@ void drbg_sha3_inner_output(struct DRBG_SHA3_HMAC_Context *ctx, BitSequence *V, 
 			printf("%02x", input[i]);
 		printf("\n");*/
 
-		printf("update input data2\n");
+		//printf("update input data2\n");
 		hmac_digest(ctx->capacity / 2, ctx->setting.drbgtype, ctx->capacity, Key, ctx->capacity / 16, input, w, Key);
 		//drbg_sha3_hmac_print(ctx->capacity / 16, Key);
 
@@ -152,12 +152,12 @@ void drbg_sha3_inner_reset(struct DRBG_SHA3_HMAC_Context *ctx, BitSequence *V, B
 				input[w++] = add_input[r];
 		}
 
-		/*printf("INITIAL RESEED FIRST INPUT: ");
+		/*printf("update input data1 size: %d\n", w);
+		printf("INITIAL RESEED FIRST INPUT: ");
 		for(int i = 0 ; i < w ; i++)
 			printf("%02x", input[i]);
 		printf("\n");*/
 
-		printf("update input data1\n");
 		hmac_digest(ctx->capacity / 2, ctx->setting.drbgtype, ctx->capacity, Key, ctx->capacity / 16, input, w, Key);
 		//drbg_sha3_hmac_print(ctx->capacity / 16, Key);
 
@@ -176,12 +176,12 @@ void drbg_sha3_inner_reset(struct DRBG_SHA3_HMAC_Context *ctx, BitSequence *V, B
 				input[w++] = add_input[r];
 		}
 
-		/*printf("INITIAL RESEED SECOND INPUT: ");
+		/*printf("update input data2 size: %d\n", w);
+		printf("INITIAL RESEED SECOND INPUT: ");
 		for(int i = 0 ; i < w ; i++)
 			printf("%02x", input[i]);
-		printf("\n");
-*/
-		printf("update input data2\n");
+		printf("\n");*/
+
 		hmac_digest(ctx->capacity / 2, ctx->setting.drbgtype, ctx->capacity, Key, ctx->capacity / 16, input, w, Key);
 		//drbg_sha3_hmac_print(ctx->capacity / 16, Key);
 
@@ -203,7 +203,7 @@ void drbg_sha3_inner_reset(struct DRBG_SHA3_HMAC_Context *ctx, BitSequence *V, B
 			printf("%02x", input[i]);
 		printf("\n");*/
 
-		printf("update input data1\n");
+		//printf("update input data1\n");
 		hmac_digest(ctx->capacity / 2, ctx->setting.drbgtype, ctx->capacity, Key, ctx->capacity / 16, input, w, Key);
 		//drbg_sha3_hmac_print(ctx->capacity / 16, Key);
 
@@ -232,7 +232,7 @@ void drbg_sha3_inner_reset(struct DRBG_SHA3_HMAC_Context *ctx, BitSequence *V, B
 				printf("%02x", input[i]);
 			printf("\n");*/
 
-			printf("update input data2\n");
+			//printf("update input data2\n");
 			hmac_digest(ctx->capacity / 2, ctx->setting.drbgtype, ctx->capacity, Key, ctx->capacity / 16, input, w, Key);
 			//drbg_sha3_hmac_print(ctx->capacity / 16, Key);
 
@@ -324,9 +324,9 @@ void drbg_sha3_hmac_init(struct DRBG_SHA3_HMAC_Context *ctx, const BitSequence *
 	/*printf("INITIAL INPUT: " );
 	for(int i = 0 ; i < input_size ; i++)
 		printf("%02x", input[i]);
-	printf("\n");*/
+	printf("\n");
 
-	printf("update input data1\n");
+	printf("update input data1\n");*/
 	hmac_digest(ctx->capacity / 2, ctx->setting.drbgtype, ctx->capacity, Key, ctx->capacity / 16, input, input_size, target_state_Key);
 	//drbg_sha3_hmac_print(ctx->capacity / 16, target_state_Key);
 	hmac_digest(ctx->capacity / 2, ctx->setting.drbgtype, ctx->capacity, target_state_Key, ctx->capacity / 16, V, ctx->capacity / 16, target_state_V);
@@ -355,7 +355,13 @@ void drbg_sha3_hmac_init(struct DRBG_SHA3_HMAC_Context *ctx, const BitSequence *
 			input[w++] = per_string[r];
 		}
 	}
-	printf("update input data2\n");
+
+	/*printf("update input data2\n");
+	printf("INITIAL INPUT: " );
+	for(int i = 0 ; i < w ; i++)
+		printf("%02x", input[i]);
+	printf("\n");*/
+
 	hmac_digest(ctx->capacity / 2, ctx->setting.drbgtype, ctx->capacity, target_state_Key, ctx->capacity / 16, input, input_size, target_state_Key);
 	//drbg_sha3_hmac_print(ctx->capacity / 16, target_state_Key);
 	hmac_digest(ctx->capacity / 2, ctx->setting.drbgtype, ctx->capacity, target_state_Key, ctx->capacity / 16, target_state_V, ctx->capacity / 16, target_state_V);
@@ -376,7 +382,7 @@ void drbg_sha3_hmac_init(struct DRBG_SHA3_HMAC_Context *ctx, const BitSequence *
 		fprintf(outf, "\n\n");
 	}
 
-	drbg_sha3_inner_reset(ctx, target_state_V, target_state_Key, entropy, ent_size, add_input, add_size, outf);
+	drbg_sha3_inner_reset(ctx, target_state_V, target_state_Key, entropy + 65, ent_size, add_input, add_size, outf);
 }
 
 void drbg_sha3_hmac_output_reset(struct DRBG_SHA3_HMAC_Context *ctx, const BitSequence *entropy, int ent_size, const BitSequence *add_input, int add_size, int cycle, FILE *outf){
@@ -441,12 +447,12 @@ void drbg_sha3_hmac_output_reset(struct DRBG_SHA3_HMAC_Context *ctx, const BitSe
 				input[w++] = add_input[r];
 		}
 
-		/*printf("RESEED FIRST INPUT: ");
+		/*printf("update input data1\n");
+		printf("RESEED FIRST INPUT: ");
 		for(int i = 0 ; i < w ; i++)
 			printf("%02x", input[i]);
 		printf("\n");*/
 
-		printf("update input data1\n");
 		hmac_digest(ctx->capacity / 2, ctx->setting.drbgtype, ctx->capacity, target_state_Key, ctx->capacity / 16, input, w, target_state_Key);
 		//drbg_sha3_hmac_print(ctx->capacity / 16, Key);
 
@@ -470,7 +476,7 @@ void drbg_sha3_hmac_output_reset(struct DRBG_SHA3_HMAC_Context *ctx, const BitSe
 			printf("%02x", input[i]);
 		printf("\n");*/
 
-		printf("update input data2\n");
+		//printf("update input data2\n");
 		hmac_digest(ctx->capacity / 2, ctx->setting.drbgtype, ctx->capacity, target_state_Key, ctx->capacity / 16, input, w, target_state_Key);
 		//drbg_sha3_hmac_print(ctx->capacity / 16, Key);
 
@@ -552,15 +558,18 @@ void drbg_sha3_hmac_digest(unsigned int rate, unsigned int capacity, unsigned ch
 
 	ctx.setting.refreshperiod = 1;
 
-	ctx.setting.predicttolerance = false;   //예측내성
-	ctx.setting.usingperstring = true;      //개별화
-	ctx.setting.usingaddinput = true;      //추가입력
+	ctx.setting.predicttolerance = true;   //예측내성
+	ctx.setting.usingperstring = false;      //개별화
+	ctx.setting.usingaddinput = false;      //추가입력
 
 	drbg_sha3_hmac_init(&ctx, entropy[0], ent_size, nonce, non_size, per_string, per_size, add_input[0], add_size, outf);
 
 	for(int i = 0 ; i < ctx.setting.refreshperiod; i++){
 		if(ctx.setting.predicttolerance || ctx.setting.refreshperiod == 0){
-			drbg_sha3_hmac_output_reset(&ctx, entropy[i+1], ent_size, add_input[i+1], add_size, cycle, outf);
+			drbg_sha3_hmac_output_reset(&ctx, entropy[i+2], ent_size, add_input[i+1], add_size, cycle, outf);
+			/*for(int k=0; k<ent_size; k++){
+				printf("%02x", entropy[i+2][k]);
+			}printf("\n");*/
 		}else {
 			drbg_sha3_hmac_output_reset(&ctx, entropy[i+1], ent_size, add_input[i+1], add_size, cycle, outf);
 		}
