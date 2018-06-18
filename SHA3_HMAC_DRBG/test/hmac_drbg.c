@@ -558,8 +558,8 @@ void drbg_sha3_hmac_digest(unsigned int rate, unsigned int capacity, unsigned ch
 
 	ctx.setting.refreshperiod = 1;
 
-	ctx.setting.predicttolerance = true;   //예측내성
-	ctx.setting.usingperstring = false;      //개별화
+	ctx.setting.predicttolerance = false;   //예측내성
+	ctx.setting.usingperstring = true;      //개별화
 	ctx.setting.usingaddinput = false;      //추가입력
 
 	drbg_sha3_hmac_init(&ctx, entropy[0], ent_size, nonce, non_size, per_string, per_size, add_input[0], add_size, outf);
