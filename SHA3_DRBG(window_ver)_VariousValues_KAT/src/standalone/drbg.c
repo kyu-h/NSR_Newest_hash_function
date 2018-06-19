@@ -32,7 +32,7 @@ void drbg_derivation_func(struct DRBG_SHA3_Context *ctx, const BitSequence *data
 	int len_seed;
 
 	BitSequence hash_data[512] = {'\0', };
-	BitSequence hash_result[3][128];
+	BitSequence hash_result[3][128]  = {'\0', };;
 
 	int r, w = 0;
 	int flag = 0;
@@ -103,9 +103,9 @@ void drbg_derivation_func(struct DRBG_SHA3_Context *ctx, const BitSequence *data
 		}
 		output[w++] = hash_result[flag][i];
 	}
-	for(int ii=0; ii<w; ii++){
+	/*for(int ii=0; ii<w; ii++){
 		printf("%02x", output[ii]);
-	}printf("\n");
+	}printf("\n");*/
 }
 
 
@@ -282,7 +282,7 @@ void drbg_sha3_output_gen(struct DRBG_SHA3_Context *ctx, const BitSequence *entr
 {
 	BitSequence hash_data[512] = {'\0', };
 	int hash_data_size;
-	BitSequence hash_result[64];
+	BitSequence hash_result[64] = {'\0', };
 	BitSequence *target_state_V;
 	BitSequence *target_state_C;
 	int Block_Byte;
@@ -313,11 +313,14 @@ void drbg_sha3_output_gen(struct DRBG_SHA3_Context *ctx, const BitSequence *entr
 		STATE_MAX_SIZE = STATE_MAX_SIZE_512;
 	}
 
-	if(ctx->reseed_counter > ctx->setting.refreshperiod || ctx->setting.predicttolerance)
+	/*if(ctx->reseed_counter > ctx->setting.refreshperiod || ctx->setting.predicttolerance)
 	{
 		drbg_sha3_reseed(ctx, entropy, ent_size, add_input, add_size, outf);
-	}
-	else if(ctx->setting.usingaddinput)
+	}*/
+
+	drbg_sha3_reseed(ctx, entropy, ent_size, add_input, add_size, outf);
+
+	if(ctx->setting.usingaddinput)
 	{	// ****** inner reseed ****** //
 		hash_data[0] = 0x02;
 		for(r = 0 , w = 1 ; r < STATE_MAX_SIZE ; r++)
@@ -386,18 +389,21 @@ void drbg_sha3_digest(BitSequence predict[5], unsigned int rate, unsigned int ca
 		ctx.setting.predicttolerance = false;   //예측내성
 	}else {
 		ctx.setting.predicttolerance = true;   //예측내성
+		printf("true 1\n");
 	}
 
 	if(per_size == 0){
 		ctx.setting.usingperstring = false;      //개별화
 	}else {
 		ctx.setting.usingperstring = true;      //개별화
+		printf("true 2\n");
 	}
 
 	if(add_size == 0){
 		ctx.setting.usingaddinput = false;      //추가입력
 	}else {
 		ctx.setting.usingaddinput = true;      //추가입력
+		printf("true 3\n");
 	}
 
 	drbg_sha3_init(&ctx, entropy[0], ent_size, nonce, non_size, per_string, per_size, outf);

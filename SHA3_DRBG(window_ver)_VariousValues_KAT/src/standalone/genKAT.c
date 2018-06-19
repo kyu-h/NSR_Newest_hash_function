@@ -39,7 +39,10 @@ genKAT_main(void)
 	char strTemp[255];
 	char *pStr;
 	//char *HashName[4] = {"Hash_DRBG_SHA3-224", "Hash_DRBG_SHA3-256", "Hash_DRBG_SHA3-384", "Hash_DRBG_SHA3-512"};
+
+	//char *HashName[1] = {"1.HASH_DRBG(SHA256(-)(PR))_KAT"};
 	char *HashName[1] = {"2.HASH_DRBG(SHA256(-)(no PR))_KAT"};
+
 	char inputFileAddress[256], outputFileAddress[256];
 
 	//for(int i=0; i<4; i++){
@@ -77,7 +80,7 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
     FILE *fp_in, *fp_out;
     char str;
     BitSequence predict[5];
-    BitSequence entropy[3][65], nonce[64], perString[65], addinput[2][65];
+    BitSequence entropy[3][65], nonce[65], perString[65], addinput[2][65];
     int r, w, a, b, c, d, e, f = 0;
     int num = 0;
 
@@ -120,6 +123,10 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
 	while(!feof(fp_in)){
 		num = 0; //for under while
 
+		for(int i=0; i<5; i++){
+			predict[i] = '\0';
+		}
+
 		FindMarker(fp_in, "PredictionResistance");
 		fscanf(fp_in, " %c %s", &str, &predict);
 		fprintf(fp_out, "PredictionResistance = ");
@@ -159,15 +166,14 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
 				entropy[0][i] = '\0';
 				entropy[1][i] = '\0';
 				entropy[2][i] = '\0';
+				nonce[i] = '\0';
 			}
 			count = 0;
 
-			for(int i=0; i<64; i++){
-				nonce[i] = '\0';
-			}
-
 			FindMarker(fp_in, "COUNT");
 			fscanf(fp_in, " %c %d", &str, &count);
+
+			num = count;
 
 			FindMarker(fp_in, "EntropyInput");
 			fscanf(fp_in, " %c %s", &str, &entropy[0]);
@@ -193,7 +199,11 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
 				fscanf(fp_in, " %c %s", &str, &addinput[0]);
 			}
 
-			FindMarker(fp_in, "EntropyInputReseed");
+			if(predict[0] == 'T'){
+				FindMarker(fp_in, "EntropyInputPR");
+			}else{
+				FindMarker(fp_in, "EntropyInputReseed");
+			}
 			fscanf(fp_in, " %c %s", &str, &entropy[1]);
 
 			if(add_size == 0){
@@ -201,17 +211,26 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
 					addinput[1][i] = '\0';
 				}
 			}else{
-				FindMarker(fp_in, "AdditionalInputReseed");
+				if(predict[0] == 'T'){
+					FindMarker(fp_in, "AdditionalInput");
+				}else{
+					FindMarker(fp_in, "AdditionalInputReseed");
+				}
 				fscanf(fp_in, " %c %s", &str, &addinput[1]);
 			}
 
-			if(add_size == 0){
-				for(int i=0; i<65; i++){
-					entropy[2][i] = '\0';
-				}
-			}else{
-				FindMarker(fp_in, "AdditionalInput");
+			if(predict[0] == 'T'){
+				FindMarker(fp_in, "EntropyInputPR");
 				fscanf(fp_in, " %c %s", &str, &entropy[2]);
+			}else {
+				if(add_size == 0){
+					for(int i=0; i<65; i++){
+						entropy[2][i] = '\0';
+					}
+				}else{
+					FindMarker(fp_in, "AdditionalInput");
+					fscanf(fp_in, " %c %s", &str, &entropy[2]);
+				}
 			}
 
 			fprintf(fp_out, "COUNT = %d\n", count);
@@ -219,9 +238,15 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
 			fprintf(fp_out, "Nonce = %s\n", nonce);
 			fprintf(fp_out, "PersonalizationString = %s\n", perString);
 			fprintf(fp_out, "AdditionalInput = %s\n", addinput[0]);
-			fprintf(fp_out, "EntropyInputReseed = %s\n", entropy[1]);
-			fprintf(fp_out, "AdditionalInputReseed = %s\n", addinput[1]);
-			fprintf(fp_out, "AdditionalInput = %s\n", entropy[2]);
+			if(predict[0] == 'T'){
+				fprintf(fp_out, "EntropyInputPR = %s\n", entropy[1]);
+				fprintf(fp_out, "AdditionalInput = %s\n", addinput[1]);
+				fprintf(fp_out, "EntropyInputPR = %s\n", entropy[2]);
+			}else {
+				fprintf(fp_out, "EntropyInputReseed = %s\n", entropy[1]);
+				fprintf(fp_out, "AdditionalInputReseed = %s\n", addinput[1]);
+				fprintf(fp_out, "AdditionalInput = %s\n", entropy[2]);
+			}
 
 			for(r = 0, w =0, a = 0, b=0, c=0, d=0, e=0; r < 64 ; r += 2){
 				unsigned char temp_arr[3] = {entropy[0][r], entropy[0][r+1], '\0'};
