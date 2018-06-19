@@ -34,7 +34,7 @@ So, If you want to check input files and output files, just go test folder (ever
 
 <table style="width:100%">
   <tr>
-    <th rowspan="3">
+    <th rowspan="4">
     OS: Window<br>
     Compiler: MinGW<br>
     IDE: Eclipse<br></th>
@@ -47,6 +47,9 @@ So, If you want to check input files and output files, just go test folder (ever
   </tr>
  <tr>
     <td>SHA3_DRBG</td>
+  </tr>
+ <tr>
+    <td>SHA3_HMAC_DRBG</td>
   </tr>
 </table>
 <br>
