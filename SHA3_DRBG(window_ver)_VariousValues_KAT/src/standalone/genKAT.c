@@ -76,9 +76,10 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
 {
     FILE *fp_in, *fp_out;
     char str;
-    BitSequence predict[64];
+    BitSequence predict[5];
     BitSequence entropy[3][65], nonce[64], perString[65], addinput[2][65];
     int r, w, a, b, c, d, e, f = 0;
+    int num = 0;
 
     if ((squeezedOutputLength > SqueezingOutputLength) || (hashbitlen > SqueezingOutputLength)) {
 		printf("Requested output length too long.\n");
@@ -102,7 +103,7 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
 	int count = 0;
 
 	int output_bits = 512;
-	int cycle = 2;
+	int cycle = 1;
 
 	if(rate == 1152){
 		output_bits = 448;
@@ -114,109 +115,145 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
 		output_bits = 1024;
 	}
 
-	fprintf(fp_out, "%s\n\n", description);
+	fprintf(fp_out, "%s\n", description);
 
-	FindMarker(fp_in, "PredictionResistance");
-	fscanf(fp_in, " %c %s", &str, &predict);
-	fprintf(fp_out, "PredictionResistance = %s\n", predict);
+	while(!feof(fp_in)){
+		num = 0; //for under while
 
-	FindMarker(fp_in, "EntropyInputLen");
-	fscanf(fp_in, " %c %d", &str, &ent_size);
-	fprintf(fp_out, "EntropyInputLen = %d\n", ent_size);
+		FindMarker(fp_in, "PredictionResistance");
+		fscanf(fp_in, " %c %s", &str, &predict);
+		fprintf(fp_out, "PredictionResistance = ");
 
-	FindMarker(fp_in, "NonceLen");
-	fscanf(fp_in, " %c %d", &str, &non_size);
-	fprintf(fp_out, "NonceLen = %d\n", non_size);
+		if(predict[0] == 'F'){
+			for(int i=0; i<5; i++){
+				fprintf(fp_out, "%c", predict[i]);
+			}
+		}else {
+			for(int i=0; i<4; i++){
+				fprintf(fp_out, "%c", predict[i]);
+			}
+		}
+		fprintf(fp_out, "\n");
 
-	FindMarker(fp_in, "PersonalizationStringLen");
-	fscanf(fp_in, " %c %d", &str, &per_size);
-	fprintf(fp_out, "PersonalizationStringLen = %d\n", per_size);
+		FindMarker(fp_in, "EntropyInputLen");
+		fscanf(fp_in, " %c %d", &str, &ent_size);
+		fprintf(fp_out, "EntropyInputLen = %d\n", ent_size);
 
-	FindMarker(fp_in, "AdditionalInputLen");
-	fscanf(fp_in, " %c %d", &str, &add_size);
-	fprintf(fp_out, "AdditionalInputLen = %d\n\n", add_size);
+		FindMarker(fp_in, "NonceLen");
+		fscanf(fp_in, " %c %d", &str, &non_size);
+		fprintf(fp_out, "NonceLen = %d\n", non_size);
 
-	FindMarker(fp_in, "COUNT");
-	fscanf(fp_in, " %c %d", &str, &count);
-	fprintf(fp_out, "COUNT = %d\n", count);
+		FindMarker(fp_in, "PersonalizationStringLen");
+		fscanf(fp_in, " %c %d", &str, &per_size);
+		fprintf(fp_out, "PersonalizationStringLen = %d\n", per_size);
 
+		FindMarker(fp_in, "AdditionalInputLen");
+		fscanf(fp_in, " %c %d", &str, &add_size);
+		fprintf(fp_out, "AdditionalInputLen = %d\n\n", add_size);
 
-	FindMarker(fp_in, "EntropyInput");
-	fscanf(fp_in, " %c %s", &str, &entropy[0]);
-	fprintf(fp_out, "EntropyInput = %s\n", entropy[0]);
+		while(!(num == 15)) {
+			for(int i=0; i<65; i++){
+				perString[i] = '\0';
+				addinput[0][i] = '\0';
+				addinput[1][i] = '\0';
+				entropy[0][i] = '\0';
+				entropy[1][i] = '\0';
+				entropy[2][i] = '\0';
+			}
+			count = 0;
 
-	FindMarker(fp_in, "Nonce");
-	fscanf(fp_in, " %c %s", &str, &nonce);
-	fprintf(fp_out, "Nonce = %s\n", nonce);
+			for(int i=0; i<64; i++){
+				nonce[i] = '\0';
+			}
 
-	FindMarker(fp_in, "PersonalizationString");
-	fscanf(fp_in, " %c %s", &str, &perString);
-	if(50>strlen(perString)){
-		for(int i=0; i<65; i++){
-			perString[i] = '\0';
+			FindMarker(fp_in, "COUNT");
+			fscanf(fp_in, " %c %d", &str, &count);
+
+			FindMarker(fp_in, "EntropyInput");
+			fscanf(fp_in, " %c %s", &str, &entropy[0]);
+
+			FindMarker(fp_in, "Nonce");
+			fscanf(fp_in, " %c %s", &str, &nonce);
+
+			if(per_size == 0){
+				for(int i=0; i<65; i++){
+					perString[i] = '\0';
+				}
+			}else {
+				FindMarker(fp_in, "PersonalizationString");
+				fscanf(fp_in, " %c %s", &str, &perString);
+			}
+
+			if(add_size == 0){
+				for(int i=0; i<65; i++){
+					addinput[0][i] = '\0';
+				}
+			}else{
+				FindMarker(fp_in, "AdditionalInput");
+				fscanf(fp_in, " %c %s", &str, &addinput[0]);
+			}
+
+			FindMarker(fp_in, "EntropyInputReseed");
+			fscanf(fp_in, " %c %s", &str, &entropy[1]);
+
+			if(add_size == 0){
+				for(int i=0; i<65; i++){
+					addinput[1][i] = '\0';
+				}
+			}else{
+				FindMarker(fp_in, "AdditionalInputReseed");
+				fscanf(fp_in, " %c %s", &str, &addinput[1]);
+			}
+
+			if(add_size == 0){
+				for(int i=0; i<65; i++){
+					entropy[2][i] = '\0';
+				}
+			}else{
+				FindMarker(fp_in, "AdditionalInput");
+				fscanf(fp_in, " %c %s", &str, &entropy[2]);
+			}
+
+			fprintf(fp_out, "COUNT = %d\n", count);
+			fprintf(fp_out, "EntropyInput = %s\n", entropy[0]);
+			fprintf(fp_out, "Nonce = %s\n", nonce);
+			fprintf(fp_out, "PersonalizationString = %s\n", perString);
+			fprintf(fp_out, "AdditionalInput = %s\n", addinput[0]);
+			fprintf(fp_out, "EntropyInputReseed = %s\n", entropy[1]);
+			fprintf(fp_out, "AdditionalInputReseed = %s\n", addinput[1]);
+			fprintf(fp_out, "AdditionalInput = %s\n", entropy[2]);
+
+			for(r = 0, w =0, a = 0, b=0, c=0, d=0, e=0; r < 64 ; r += 2){
+				unsigned char temp_arr[3] = {entropy[0][r], entropy[0][r+1], '\0'};
+				entropy[0][w++] = strtol(temp_arr, NULL, 16);
+
+				unsigned char temp_arr01[3] = {entropy[1][r], entropy[1][r+1], '\0'};
+				entropy[1][a++] = strtol(temp_arr01, NULL, 16);
+
+				unsigned char temp_arr02[3] = {entropy[2][r], entropy[2][r+1], '\0'};
+				entropy[2][b++] = strtol(temp_arr02, NULL, 16);
+
+				unsigned char temp_arr03[3] = {perString[r], perString[r+1], '\0'};
+				perString[c++] = strtol(temp_arr03, NULL, 16);
+
+				unsigned char temp_arr04[3] = {addinput[0][r], addinput[0][r+1], '\0'};
+				addinput[0][d++] = strtol(temp_arr04, NULL, 16);
+
+				unsigned char temp_arr05[3] = {addinput[1][r], addinput[1][r+1], '\0'};
+				addinput[1][e++] = strtol(temp_arr05, NULL, 16);
+
+			} //2 string to hex
+
+			for(r=0, f=0; f<64; r+=2){
+				unsigned char tmp_arr[3] = {nonce[r], nonce[r+1], '\0'};
+				nonce[f++] = strtol(tmp_arr, NULL, 16);
+			}
+
+			drbg_sha3_digest(predict, rate, capacity, delimitedSuffix, entropy, ent_size / 8, nonce, non_size / 8, perString, per_size / 8, addinput, add_size / 8, output_bits, cycle, drbg, fp_out);
+
+			num++;
 		}
 	}
-	fprintf(fp_out, "PersonalizationString = %s\n", perString);
-
-	FindMarker(fp_in, "AdditionalInput");
-	fscanf(fp_in, " %c %s", &str, &addinput[0]);
-	if(50>strlen(addinput)){
-		for(int i=0; i<65; i++){
-			addinput[0][i] = '\0';
-		}
-	}
-	fprintf(fp_out, "AdditionalInput = %s\n", addinput[0]);
-
-	FindMarker(fp_in, "EntropyInputReseed");
-	fscanf(fp_in, " %c %s", &str, &entropy[1]);
-	fprintf(fp_out, "EntropyInputReseed = %s\n", entropy[1]);
-
-	FindMarker(fp_in, "AdditionalInputReseed");
-	fscanf(fp_in, " %c %s", &str, &addinput[1]);
-	if(50>strlen(addinput)){
-		for(int i=0; i<65; i++){
-			addinput[1][i] = '\0';
-		}
-	}
-	fprintf(fp_out, "AdditionalInputReseed = %s\n", addinput[1]);
-
-	FindMarker(fp_in, "AdditionalInput");
-	fscanf(fp_in, " %c %s", &str, &entropy[2]);
-	if(50>strlen(addinput)){
-		for(int i=0; i<65; i++){
-			entropy[2][i] = '\0';
-		}
-	}fprintf(fp_out, "AdditionalInput = %s\n", entropy[2]);
-
-
-	for(r = 0, w =0, a = 0, b=0, c=0, d=0, e=0; r < 64 ; r += 2){
-		unsigned char temp_arr[3] = {entropy[0][r], entropy[0][r+1], '\0'};
-		entropy[0][w++] = strtol(temp_arr, NULL, 16);
-
-		unsigned char temp_arr01[3] = {entropy[1][r], entropy[1][r+1], '\0'};
-		entropy[1][a++] = strtol(temp_arr01, NULL, 16);
-
-		unsigned char temp_arr02[3] = {entropy[2][r], entropy[2][r+1], '\0'};
-		entropy[2][b++] = strtol(temp_arr02, NULL, 16);
-
-		unsigned char temp_arr03[3] = {perString[r], perString[r+1], '\0'};
-		perString[c++] = strtol(temp_arr03, NULL, 16);
-
-		unsigned char temp_arr04[3] = {addinput[0][r], addinput[0][r+1], '\0'};
-		addinput[0][d++] = strtol(temp_arr04, NULL, 16);
-
-		unsigned char temp_arr05[3] = {addinput[1][r], addinput[1][r+1], '\0'};
-		addinput[1][e++] = strtol(temp_arr05, NULL, 16);
-
-	} //2 string to hex
-
-	for(r=0, f=0; f<64; r+=2){
-		unsigned char tmp_arr[3] = {nonce[r], nonce[r+1], '\0'};
-		nonce[f++] = strtol(tmp_arr, NULL, 16);
-	}
-
-	drbg_sha3_digest(rate, capacity, delimitedSuffix, entropy, ent_size, nonce, non_size, perString, per_size, addinput, add_size, output_bits, cycle, drbg, fp_out);
-
     fclose(fp_in);
     fclose(fp_out);
 

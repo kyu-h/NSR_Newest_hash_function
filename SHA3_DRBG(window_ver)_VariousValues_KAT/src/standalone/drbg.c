@@ -90,7 +90,6 @@ void drbg_derivation_func(struct DRBG_SHA3_Context *ctx, const BitSequence *data
 			hash_data[w++] = data[r];
 
 		Keccak(ctx->setting.drbgtype, ctx->capacity, hash_data, (5 + data_size), ctx->delimitedSuffix, hash_result[i], Block_Size / 8);
-
 	}
 
 	w = 0;
@@ -209,16 +208,6 @@ void drbg_sha3_init(struct DRBG_SHA3_Context *ctx, const BitSequence *entropy, i
 
 	drbg_derivation_func(ctx, input, input_size, target_state_V);
 
-	{		//***** TEXT OUTPUT - V *****//
-		fprintf(outf, "dfInput = ");
-		for(int i = 0 ; i < input_size ; i++)
-			fprintf(outf, "%02x", input[i]);
-		fprintf(outf, "\n");
-		fprintf(outf, "dfOutput = ");
-		for(int i = 0 ; i < STATE_MAX_SIZE ; i++)
-			fprintf(outf, "%02x", target_state_V[i]);
-		fprintf(outf, "\n\n");
-	}
 	memset(input, 0x00, 1024);
 
 	input[0] = 0x00;
@@ -226,16 +215,6 @@ void drbg_sha3_init(struct DRBG_SHA3_Context *ctx, const BitSequence *entropy, i
 		input[w++] = target_state_V[r];
 
 	drbg_derivation_func(ctx, input, STATE_MAX_SIZE + 1, target_state_C);
-
-	{		//***** TEXT OUTPUT - C *****//
-		fprintf(outf, "dfInput = ");
-		for(int i = 0 ; i < STATE_MAX_SIZE + 1 ; i++)
-			fprintf(outf, "%02x", input[i]);
-		fprintf(outf, "\n");
-		fprintf(outf, "dfOutput = ");
-		for(int i = 0 ; i < STATE_MAX_SIZE ; i++)
-			fprintf(outf, "%02x", target_state_C[i]);
-	}
 
 	ctx->reseed_counter = 1;
 }
@@ -264,14 +243,6 @@ void drbg_sha3_reseed(struct DRBG_SHA3_Context *ctx, const BitSequence *entropy,
 		STATE_MAX_SIZE = STATE_MAX_SIZE_512;
 	}
 
-	{
-		//***** TEXT OUTPUT - entropy *****//
-		fprintf(outf, "entropy = ");
-		for(int i = 0 ; i < ent_size ; i++)
-			fprintf(outf, "%02x", entropy[i]);
-		fprintf(outf, "\n\n");
-	}
-
 	input[0] = 0x01;
 	for(r = 0, w = 1 ; r < STATE_MAX_SIZE ; r++)
 		input[w++] = target_state_V[r];
@@ -289,18 +260,9 @@ void drbg_sha3_reseed(struct DRBG_SHA3_Context *ctx, const BitSequence *entropy,
 
 	drbg_derivation_func(ctx, input, input_size, target_state_V);
 
-	{		//***** TEXT OUTPUT - V *****//
-		fprintf(outf, "dfInput = ");
-		for(int i = 0 ; i < input_size ; i++)
-			fprintf(outf, "%02x", input[i]);
-		fprintf(outf, "\n");
-		fprintf(outf, "dfOutput = ");
-		for(int i = 0 ; i < STATE_MAX_SIZE ; i++)
-			fprintf(outf, "%02x", target_state_V[i]);
-		fprintf(outf, "\n\n");
+	for(int i=0; i<1024; i++){
+		input[i] = '\0';
 	}
-
-	memset(input, 0x00, 1024);
 
 	input[0] = 0x00;
 	for(r = 0, w = 1 ; r < STATE_MAX_SIZE ; r++)
@@ -308,25 +270,10 @@ void drbg_sha3_reseed(struct DRBG_SHA3_Context *ctx, const BitSequence *entropy,
 
 	drbg_derivation_func(ctx, input, STATE_MAX_SIZE + 1, target_state_C);
 
-	{		//***** TEXT OUTPUT - C *****//
-		fprintf(outf, "dfInput = ");
-		for(int i = 0 ; i < STATE_MAX_SIZE + 1 ; i++)
-			fprintf(outf, "%02x", input[i]);
-		fprintf(outf, "\n");
-		fprintf(outf, "dfOutput = ");
-		for(int i = 0 ; i < STATE_MAX_SIZE ; i++)
-			fprintf(outf, "%02x", target_state_C[i]);
-		fprintf(outf, "\n\n");
-	}
-
 	ctx->reseed_counter = 1;
 
 	if(!ctx->setting.predicttolerance){
 		ctx->setting.usingaddinput = false;
-	}
-
-	{		//***** TEXT OUTPUT - reseed_counter *****//
-		fprintf(outf, "reseed_counter = %d\n\n", ctx->reseed_counter);
 	}
 }
 
@@ -366,32 +313,6 @@ void drbg_sha3_output_gen(struct DRBG_SHA3_Context *ctx, const BitSequence *entr
 		STATE_MAX_SIZE = STATE_MAX_SIZE_512;
 	}
 
-	{		//***** TEXT OUTPUT - V C reseed_counter addInput *****//
-		fprintf(outf, "\n\n");
-		fprintf(outf, "V = ");
-		for(int i = 0 ; i < STATE_MAX_SIZE ; i++)
-			fprintf(outf, "%02x", target_state_V[i]);
-		fprintf(outf, "\n");
-
-		fprintf(outf, "C = ");
-		for(int i = 0 ; i < STATE_MAX_SIZE ; i++){
-			fprintf(outf, "%02x", target_state_C[i]);
-		}
-
-		fprintf(outf, "\n");
-
-		fprintf(outf, "reseed_counter = %d\n", ctx->reseed_counter);
-
-		if(ctx->setting.usingaddinput)
-		{
-			fprintf(outf, "addInput = ");
-			for(int i = 0 ; i < add_size ; i++)
-				fprintf(outf, "%02x", add_input[i]);
-			fprintf(outf, "\n");
-		}
-		fprintf(outf, "\n");
-	}
-
 	if(ctx->reseed_counter > ctx->setting.refreshperiod || ctx->setting.predicttolerance)
 	{
 		drbg_sha3_reseed(ctx, entropy, ent_size, add_input, add_size, outf);
@@ -410,32 +331,17 @@ void drbg_sha3_output_gen(struct DRBG_SHA3_Context *ctx, const BitSequence *entr
 
 		for(int i = Block_Byte / 8 - 1, start = 0 ; i > -1 ; i--)
 			operation_add(target_state_V, STATE_MAX_SIZE, start++, hash_result[i]);
-
-		{		//***** TEXT OUTPUT - w(hash) V *****//
-			fprintf(outf, "w = ");
-			for(int i = 0 ; i < Block_Byte / 8 ; i++)
-				fprintf(outf, "%02x", hash_result[i]);
-			fprintf(outf, "\n");
-			fprintf(outf, "V = ");
-			for(int i = 0 ; i < STATE_MAX_SIZE ; i++)
-				fprintf(outf, "%02x", target_state_V[i]);
-			fprintf(outf, "\n\n");
-		}
-
 	}
 
 	drbg_sha3_inner_output_gen(ctx, target_state_V, drbg, output_bits, outf);
 
-	{		//***** TEXT OUTPUT - output(count) *****//
-			printf("output%d = ", counter); // console output
-			fprintf(outf, "output%d = ", counter++);
-			for(int i = 0 ; i < output_bits / 8 ; i++)
-			{
-				printf("%02x", drbg[i]);	// console output
-				fprintf(outf, "%02x", drbg[i]);
-			}
-			printf("\n");	// console output
-			fprintf(outf, "\n\n");
+	if(counter == 2){
+		fprintf(outf, "ReturnedBits = ");
+		for(int i = 0 ; i < output_bits / 8 ; i++)
+		{
+			fprintf(outf, "%02x", drbg[i]);
+		}
+		fprintf(outf, "\n\n");
 	}
 
 	hash_data[0] = 0x03;
@@ -453,25 +359,10 @@ void drbg_sha3_output_gen(struct DRBG_SHA3_Context *ctx, const BitSequence *entr
 	}
 	operation_add(target_state_V, STATE_MAX_SIZE, 0, ctx->reseed_counter);
 
-	{		//***** TEXT OUTPUT - w(hash) V (after inner reseed) *****//
-		fprintf(outf, "w = ");
-		for(int i = 0 ; i < Block_Byte /8; i++)
-			fprintf(outf, "%02x", hash_result[i]);
-		fprintf(outf, "\n");
-		fprintf(outf, "V = ");
-		for(int i = 0 ; i < STATE_MAX_SIZE ; i++)
-			fprintf(outf, "%02x", target_state_V[i]);
-		fprintf(outf, "\n");
-	}
-
 	ctx->reseed_counter++;  ////what?
-
-	{		//***** TEXT OUTPUT - reseed_counter *****//
-		fprintf(outf, "reseed_counter = %d", ctx->reseed_counter);
-	}
 }
 
-void drbg_sha3_digest(unsigned int rate, unsigned int capacity, unsigned char delimitedSuffix, BitSequence (*entropy)[65], int ent_size, BitSequence *nonce, int non_size, BitSequence *per_string, int per_size, BitSequence (*add_input)[65], int add_size, int output_bits, int cycle, BitSequence *drbg, FILE *outf)
+void drbg_sha3_digest(BitSequence predict[5], unsigned int rate, unsigned int capacity, unsigned char delimitedSuffix, BitSequence (*entropy)[65], int ent_size, BitSequence *nonce, int non_size, BitSequence *per_string, int per_size, BitSequence (*add_input)[65], int add_size, int output_bits, int cycle, BitSequence *drbg, FILE *outf)
 {
 	struct DRBG_SHA3_Context ctx;
 
@@ -491,9 +382,23 @@ void drbg_sha3_digest(unsigned int rate, unsigned int capacity, unsigned char de
 		ctx.setting.usingaddinput = false;
 	ctx.setting.predicttolerance = false;*/
 
-	ctx.setting.predicttolerance = false;   //예측내성
-	ctx.setting.usingperstring = false;      //개별화
-	ctx.setting.usingaddinput = false;      //추가입력
+	if(predict[0] == 'F'){
+		ctx.setting.predicttolerance = false;   //예측내성
+	}else {
+		ctx.setting.predicttolerance = true;   //예측내성
+	}
+
+	if(per_size == 0){
+		ctx.setting.usingperstring = false;      //개별화
+	}else {
+		ctx.setting.usingperstring = true;      //개별화
+	}
+
+	if(add_size == 0){
+		ctx.setting.usingaddinput = false;      //추가입력
+	}else {
+		ctx.setting.usingaddinput = true;      //추가입력
+	}
 
 	drbg_sha3_init(&ctx, entropy[0], ent_size, nonce, non_size, per_string, per_size, outf);
 
