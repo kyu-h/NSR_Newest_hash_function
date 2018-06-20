@@ -157,6 +157,7 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
 		FindMarker(fp_in, "AdditionalInputLen");
 		fscanf(fp_in, " %c %d", &str, &add_size);
 		fprintf(fp_out, "AdditionalInputLen = %d\n\n", add_size);
+		printf("add size : %d\n", add_size);
 
 		while(!(num == 15)) {
 			for(int i=0; i<65; i++){
@@ -182,6 +183,7 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
 			fscanf(fp_in, " %c %s", &str, &nonce);
 
 			if(per_size == 0){
+				printf("per_size = 0\n");
 				for(int i=0; i<65; i++){
 					perString[i] = '\0';
 				}
