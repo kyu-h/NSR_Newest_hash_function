@@ -313,7 +313,7 @@ void drbg_sha3_output_gen(struct DRBG_SHA3_Context *ctx, const BitSequence *entr
 		STATE_MAX_SIZE = STATE_MAX_SIZE_512;
 	}
 
-	if(ctx->setting.predicttolerance){
+	if(ctx->setting.predicttolerance == false){
 		if(ctx->reseed_counter > 1){
 			drbg_sha3_reseed(ctx, entropy, ent_size, add_input, add_size, outf);
 		}
