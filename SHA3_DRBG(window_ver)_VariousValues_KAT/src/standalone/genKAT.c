@@ -40,8 +40,8 @@ genKAT_main(void)
 	char *pStr;
 	//char *HashName[4] = {"Hash_DRBG_SHA3-224", "Hash_DRBG_SHA3-256", "Hash_DRBG_SHA3-384", "Hash_DRBG_SHA3-512"};
 
-	//char *HashName[1] = {"1.HASH_DRBG(SHA256(-)(PR))_KAT"};
-	char *HashName[1] = {"2.HASH_DRBG(SHA256(-)(no PR))_KAT"};
+	char *HashName[1] = {"1.HASH_DRBG(SHA224(-)(PR))_KAT"};
+	//char *HashName[1] = {"2.HASH_DRBG(SHA256(-)(no PR))_KAT"};
 
 	char inputFileAddress[256], outputFileAddress[256];
 
@@ -57,13 +57,13 @@ genKAT_main(void)
 		pStr = fgets(strTemp, sizeof(strTemp), fp_in);
 		printf("%s", pStr);
 
-		if(!strcmp(pStr, "Alg_ID = Hash_DRBG_SHA3-224\n")){
+		if(!strcmp(pStr, "[SHA-224]\n")){
 			genShortMsgHash(1152, 448, 0x06, 224, 0,inputFileAddress,outputFileAddress,"Alg_ID = Hash_DRBG_SHA3-224");
 		}else if(!strcmp(pStr, "[SHA-256]\n")){
 			genShortMsgHash(1088, 512, 0x06, 256, 0,inputFileAddress,outputFileAddress,"Alg_ID = Hash_DRBG_SHA3-256");
-		}else if(!strcmp(pStr, "Alg_ID = Hash_DRBG_SHA3-384\n")){
+		}else if(!strcmp(pStr, "[SHA-384]\n")){
 			genShortMsgHash(832, 768, 0x06, 384, 0,inputFileAddress,outputFileAddress,"Alg_ID = Hash_DRBG_SHA3-384");
-		}else if(!strcmp(pStr, "Alg_ID = Hash_DRBG_SHA3-512\n")){
+		}else if(!strcmp(pStr, "[SHA-512]\n")){
 			genShortMsgHash(576, 1024, 0x06, 512, 0,inputFileAddress,outputFileAddress,"Alg_ID = Hash_DRBG_SHA3-512");
 		}else {
 			printf("Error!\n");

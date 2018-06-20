@@ -1,4 +1,4 @@
-[SHA-256]
+[SHA-224]
 [PredictionResistance = False]
 [EntropyInputLen = 256]
 [NonceLen = 128]
@@ -140,7 +140,7 @@ EntropyInputReseed = 0FED48455197320DAAB98A0AE0CA7B0F8DD080F72D261C8C767CCCA7E81
 AdditionalInputReseed = 
 AdditionalInput = 
 
-[SHA-256]
+[SHA-224]
 [PredictionResistance = False]
 [EntropyInputLen = 256]
 [NonceLen = 128]
@@ -282,7 +282,7 @@ EntropyInputReseed = 0592BFB0A2E96FC14D90C22734CA83D988D97BC48BC12DB5EB4EC3784E5
 AdditionalInputReseed = 2E46164CE7D192C10E0B18DA059F3247CC5A0DD21AEA2D3FADE65F76DE0FEFE4
 AdditionalInput = C449BD4FFB3A661B7E41E32EE662B552EC4283E57EE6C7C712BEC6773AE2C578
 
-[SHA-256]
+[SHA-224]
 [PredictionResistance = False]
 [EntropyInputLen = 256]
 [NonceLen = 128]
@@ -424,7 +424,7 @@ EntropyInputReseed = 676F1FA87259815FF415C2794C5953F689C8D5407DBBD10D1241A986E26
 AdditionalInputReseed = 
 AdditionalInput = 
 
-[SHA-256]
+[SHA-224]
 [PredictionResistance = False]
 [EntropyInputLen = 256]
 [NonceLen = 128]
