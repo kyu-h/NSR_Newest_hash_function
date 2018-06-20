@@ -313,22 +313,43 @@ void drbg_sha3_output_gen(struct DRBG_SHA3_Context *ctx, const BitSequence *entr
 		STATE_MAX_SIZE = STATE_MAX_SIZE_512;
 	}
 
-	if(ctx->reseed_counter > ctx->setting.refreshperiod || ctx->setting.predicttolerance){
-		drbg_sha3_reseed(ctx, entropy, ent_size, add_input, add_size, outf);
-	}else if(ctx->setting.usingaddinput){
-		// ****** inner reseed ****** //
-		hash_data[0] = 0x02;
-		for(r = 0 , w = 1 ; r < STATE_MAX_SIZE ; r++)
-			hash_data[w++] = target_state_V[r];
+	if(ctx->setting.predicttolerance){
+		if(ctx->reseed_counter > 1){
+			drbg_sha3_reseed(ctx, entropy, ent_size, add_input, add_size, outf);
+		}
 
-		for(r = 0 ; r < add_size ; r++)
-			hash_data[w++] = add_input[r];
-		hash_data_size = STATE_MAX_SIZE + add_size + 1;
+		if(add_size){
+			hash_data[0] = 0x02;
+			for(r = 0 , w = 1 ; r < STATE_MAX_SIZE ; r++)
+				hash_data[w++] = target_state_V[r];
 
-		Keccak(ctx->setting.drbgtype, ctx->capacity, hash_data, hash_data_size, ctx->delimitedSuffix, hash_result, Block_Byte / 8);
+			for(r = 0 ; r < add_size ; r++)
+				hash_data[w++] = add_input[r];
+			hash_data_size = STATE_MAX_SIZE + add_size + 1;
 
-		for(int i = Block_Byte / 8 - 1, start = 0 ; i > -1 ; i--)
-			operation_add(target_state_V, STATE_MAX_SIZE, start++, hash_result[i]);
+			Keccak(ctx->setting.drbgtype, ctx->capacity, hash_data, hash_data_size, ctx->delimitedSuffix, hash_result, Block_Byte / 8);
+
+			for(int i = Block_Byte / 8 - 1, start = 0 ; i > -1 ; i--)
+				operation_add(target_state_V, STATE_MAX_SIZE, start++, hash_result[i]);
+		}
+	}else {
+		if(ctx->reseed_counter > ctx->setting.refreshperiod || ctx->setting.predicttolerance){
+			drbg_sha3_reseed(ctx, entropy, ent_size, add_input, add_size, outf);
+		}else if(ctx->setting.usingaddinput){
+			// ****** inner reseed ****** //
+			hash_data[0] = 0x02;
+			for(r = 0 , w = 1 ; r < STATE_MAX_SIZE ; r++)
+				hash_data[w++] = target_state_V[r];
+
+			for(r = 0 ; r < add_size ; r++)
+				hash_data[w++] = add_input[r];
+			hash_data_size = STATE_MAX_SIZE + add_size + 1;
+
+			Keccak(ctx->setting.drbgtype, ctx->capacity, hash_data, hash_data_size, ctx->delimitedSuffix, hash_result, Block_Byte / 8);
+
+			for(int i = Block_Byte / 8 - 1, start = 0 ; i > -1 ; i--)
+				operation_add(target_state_V, STATE_MAX_SIZE, start++, hash_result[i]);
+		}
 	}
 
 	drbg_sha3_inner_output_gen(ctx, target_state_V, drbg, output_bits, outf);
@@ -358,10 +379,6 @@ void drbg_sha3_output_gen(struct DRBG_SHA3_Context *ctx, const BitSequence *entr
 	operation_add(target_state_V, STATE_MAX_SIZE, 0, ctx->reseed_counter);
 
 	ctx->reseed_counter++;  ////what?
-
-	if (ctx->setting.predicttolerance == false){ //only for DRBG_KAT no PR
-		drbg_sha3_reseed(ctx, entropy, ent_size, add_input, add_size, outf);
-	}
 }
 
 void drbg_sha3_digest(BitSequence predict[5], unsigned int rate, unsigned int capacity, unsigned char delimitedSuffix, BitSequence (*entropy)[65], int ent_size, BitSequence *nonce, int non_size, BitSequence *per_string, int per_size, BitSequence (*add_input)[65], int add_size, int output_bits, int cycle, BitSequence *drbg, FILE *outf)
