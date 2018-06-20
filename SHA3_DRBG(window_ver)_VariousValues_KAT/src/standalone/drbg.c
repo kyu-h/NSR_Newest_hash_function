@@ -313,11 +313,9 @@ void drbg_sha3_output_gen(struct DRBG_SHA3_Context *ctx, const BitSequence *entr
 		STATE_MAX_SIZE = STATE_MAX_SIZE_512;
 	}
 
-	/*if(ctx->reseed_counter > ctx->setting.refreshperiod || ctx->setting.predicttolerance){
+	if(ctx->reseed_counter > ctx->setting.refreshperiod || ctx->setting.predicttolerance){
 		drbg_sha3_reseed(ctx, entropy, ent_size, add_input, add_size, outf);
-	}else*/
-
-	if(ctx->setting.usingaddinput){
+	}else if(ctx->setting.usingaddinput){
 		// ****** inner reseed ****** //
 		hash_data[0] = 0x02;
 		for(r = 0 , w = 1 ; r < STATE_MAX_SIZE ; r++)
@@ -361,7 +359,9 @@ void drbg_sha3_output_gen(struct DRBG_SHA3_Context *ctx, const BitSequence *entr
 
 	ctx->reseed_counter++;  ////what?
 
-	drbg_sha3_reseed(ctx, entropy, ent_size, add_input, add_size, outf);
+	if (ctx->setting.predicttolerance == false){ //only for DRBG_KAT no PR
+		drbg_sha3_reseed(ctx, entropy, ent_size, add_input, add_size, outf);
+	}
 }
 
 void drbg_sha3_digest(BitSequence predict[5], unsigned int rate, unsigned int capacity, unsigned char delimitedSuffix, BitSequence (*entropy)[65], int ent_size, BitSequence *nonce, int non_size, BitSequence *per_string, int per_size, BitSequence (*add_input)[65], int add_size, int output_bits, int cycle, BitSequence *drbg, FILE *outf)

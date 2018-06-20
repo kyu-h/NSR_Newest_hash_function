@@ -40,8 +40,8 @@ genKAT_main(void)
 	char *pStr;
 	//char *HashName[4] = {"Hash_DRBG_SHA3-224", "Hash_DRBG_SHA3-256", "Hash_DRBG_SHA3-384", "Hash_DRBG_SHA3-512"};
 
-	char *HashName[1] = {"1.HASH_DRBG(SHA224(-)(PR))_KAT"};
-	//char *HashName[1] = {"2.HASH_DRBG(SHA256(-)(no PR))_KAT"};
+	//char *HashName[1] = {"1.HASH_DRBG(SHA224(-)(PR))_KAT"};
+	char *HashName[1] = {"2.HASH_DRBG(SHA224(-)(no PR))_KAT"};
 
 	char inputFileAddress[256], outputFileAddress[256];
 
