@@ -42,7 +42,7 @@ genKAT_main(void)
 	//char *HashName[4] = {"Hash_DRBG_SHA3-224", "Hash_DRBG_SHA3-256", "Hash_DRBG_SHA3-384", "Hash_DRBG_SHA3-512"};
 
 	//char *HashName[1] = {"1.HASH_DRBG(SHA512(-)(PR))_KAT"};
-	char *HashName[1] = {"2.HASH_DRBG(SHA256(-)(no PR))_KAT"};
+	char *HashName[1] = {"2.HASH_DRBG(SHA512(-)(no PR))_KAT"};
 
 	char inputFileAddress[256], outputFileAddress[256];
 
@@ -60,13 +60,16 @@ genKAT_main(void)
 
 		if(!strcmp(pStr, "[SHA-224]\n")){
 			//genShortMsgHash(1152, 448, 0x06, 224, 0,inputFileAddress,outputFileAddress,"Alg_ID = Hash_DRBG_SHA3-224");
+			//genShortMsgHash_noPR(1152, 448, 0x06, 224, 0,inputFileAddress,outputFileAddress,"Alg_ID = Hash_DRBG_SHA3-224");
 		}else if(!strcmp(pStr, "[SHA-256]\n")){
 			//genShortMsgHash(1088, 512, 0x06, 256, 0,inputFileAddress,outputFileAddress,"Alg_ID = Hash_DRBG_SHA3-256");
-			genShortMsgHash_noPR(1088, 512, 0x06, 256, 0,inputFileAddress,outputFileAddress,"Alg_ID = Hash_DRBG_SHA3-256");
+			//genShortMsgHash_noPR(1088, 512, 0x06, 256, 0,inputFileAddress,outputFileAddress,"Alg_ID = Hash_DRBG_SHA3-256");
 		}else if(!strcmp(pStr, "[SHA-384]\n")){
 			//genShortMsgHash(832, 768, 0x06, 384, 0,inputFileAddress,outputFileAddress,"Alg_ID = Hash_DRBG_SHA3-384");
+			//genShortMsgHash_noPR(832, 768, 0x06, 384, 0,inputFileAddress,outputFileAddress,"Alg_ID = Hash_DRBG_SHA3-384");
 		}else if(!strcmp(pStr, "[SHA-512]\n")){
 			//genShortMsgHash(576, 1024, 0x06, 512, 0,inputFileAddress,outputFileAddress,"Alg_ID = Hash_DRBG_SHA3-512");
+			genShortMsgHash_noPR(576, 1024, 0x06, 512, 0,inputFileAddress,outputFileAddress,"Alg_ID = Hash_DRBG_SHA3-512");
 		}else {
 			printf("Error!\n");
 		}
@@ -319,7 +322,7 @@ genShortMsgHash_noPR(unsigned int rate, unsigned int capacity, unsigned char del
 	fp_out = fopen(outputFileName, "w");
 
 
-	BitSequence drbg[64];
+	BitSequence drbg[128];
 
 	int ent_size = 0; //현재 여기서는 bit 단위로 받고있지만 우리는 byte 단위로 쓰기 때문에 사용할 때는 /8 해야함
 	int non_size = 0;

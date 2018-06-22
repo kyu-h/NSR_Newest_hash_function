@@ -163,13 +163,15 @@ void drbg_sha3_inner_output_gen(struct DRBG_SHA3_Context *ctx, BitSequence *inpu
 		}
 
 		output[w++] = hash_result[flag][i];
+		printf("%02x", hash_result[flag][i]);
 	}
+	printf("\n");
 }
 
 
 void drbg_sha3_init(struct DRBG_SHA3_Context *ctx, const BitSequence *entropy, int ent_size, const BitSequence *nonce, int non_size, const BitSequence *per_string, int per_size, FILE *outf)
 {
-	BitSequence input[1024] = {'\0', };
+	BitSequence input[512] = {'\0', };
 	BitSequence *target_state_V;
 	BitSequence *target_state_C;
 
@@ -208,7 +210,7 @@ void drbg_sha3_init(struct DRBG_SHA3_Context *ctx, const BitSequence *entropy, i
 
 	drbg_derivation_func(ctx, input, input_size, target_state_V);
 
-	memset(input, 0x00, 1024);
+	memset(input, 0x00, 512);
 
 	input[0] = 0x00;
 	for(r = 0, w = 1 ; r < STATE_MAX_SIZE ; r++)
@@ -312,13 +314,9 @@ void drbg_sha3_output_gen(struct DRBG_SHA3_Context *ctx, const BitSequence *entr
 		target_state_C = ctx->working_state_C512;
 		STATE_MAX_SIZE = STATE_MAX_SIZE_512;
 	}
-
 	if(ctx->setting.predicttolerance == false){
 		if(ctx->reseed_counter > 1){
 			printf("tt: %d\n", add_size);
-			for(int i=0; i<add_size; i++){
-				printf("%02x", (add_input + (80))[i]);
-			}printf("\n");
 			drbg_sha3_reseed(ctx, entropy, ent_size, add_input + (80), add_size, outf);
 			if(add_size)
 				ctx->setting.usingaddinput = true;
@@ -329,8 +327,11 @@ void drbg_sha3_output_gen(struct DRBG_SHA3_Context *ctx, const BitSequence *entr
 			for(r = 0 , w = 1 ; r < STATE_MAX_SIZE ; r++)
 				hash_data[w++] = target_state_V[r];
 
-			for(r = 0 ; r < add_size ; r++)
+			for(r = 0 ; r < add_size ; r++){
 				hash_data[w++] = add_input[r];
+				printf("%02x", add_input[r]);
+			}
+			printf("\n");
 			hash_data_size = STATE_MAX_SIZE + add_size + 1;
 
 			Keccak(ctx->setting.drbgtype, ctx->capacity, hash_data, hash_data_size, ctx->delimitedSuffix, hash_result, Block_Byte / 8);
@@ -446,32 +447,33 @@ void drbg_sha3_digest_noPR(BitSequence predict[5], unsigned int rate, unsigned i
 
 	if(predict[0] == 'F'){
 		ctx.setting.predicttolerance = false;   //예측내성
-		printf("predict false\n");
+	//	printf("predict false\n");
 	}else {
 		ctx.setting.predicttolerance = true;   //예측내성
-		printf("predict true\n");
+	//	printf("predict true\n");
 	}
 
 	if(per_size == 0){
 		ctx.setting.usingperstring = false;      //개별화
-		printf("pers false\n");
+	//	printf("pers false\n");
 	}else {
 		ctx.setting.usingperstring = true;      //개별화
-		printf("pers true\n");
+	//	printf("pers true\n");
 	}
 
 	if(add_size == 0){
 		ctx.setting.usingaddinput = false;      //추가입력
-		printf("addinput false\n");
+	//	printf("addinput false\n");
 	}else {
 		ctx.setting.usingaddinput = true;      //추가입력
-		printf("addinput true\n");
+	//	printf("addinput true\n");
 	}
+
+	printf("setting ent: %d / non: %d / per: %d / add: %d \n", ent_size, non_size, per_size, add_size);
 
 	drbg_sha3_init(&ctx, entropy, ent_size, nonce, non_size, per_string, per_size, outf);
 
 	for(int i = 0 ; i < ctx.setting.refreshperiod + 1 ; i++){
-		printf("output\n");
 		drbg_sha3_output_gen(&ctx, entropy_re, ent_size, additional[i], add_size, output_bits, cycle, drbg, outf, i+1);
 	}
 }
