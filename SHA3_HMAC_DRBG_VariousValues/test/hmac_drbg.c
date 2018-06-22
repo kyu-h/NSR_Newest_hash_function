@@ -26,12 +26,18 @@ void drbg_sha3_inner_output(struct DRBG_SHA3_HMAC_Context *ctx, BitSequence *V, 
 	}
 
 	{		//***** TEXT OUTPUT - output1 *****//
-		fprintf(outf, "output%d = ", num);
+		/*fprintf(outf, "output%d = ", num);
 		for(int i=0; i<k; i++){
 			fprintf(outf, "%02x", output[i]);
 			printf("%02x", output[i]);
-		}fprintf(outf, "\n\n");
-	}printf("\n");
+		}fprintf(outf, "\n\n");*/
+		if(num == 2){
+			fprintf(outf, "ReturnedBits = ");
+			for(int i=0; i<k; i++){
+				fprintf(outf, "%02x", output[i]);
+			}fprintf(outf, "\n\n");
+		}
+	}
 
 	ctx->reseed_counter++;
 
@@ -93,7 +99,7 @@ void drbg_sha3_inner_output(struct DRBG_SHA3_HMAC_Context *ctx, BitSequence *V, 
 	}
 
 	{		//***** TEXT OUTPUT - *K, *V *****//
-		fprintf(outf, "*K = ");
+		/*fprintf(outf, "*K = ");
 		for(int i = 0 ; i < ctx->capacity / 16; i++)
 			fprintf(outf, "%02x", Key[i]);
 		fprintf(outf, "\n");
@@ -102,7 +108,7 @@ void drbg_sha3_inner_output(struct DRBG_SHA3_HMAC_Context *ctx, BitSequence *V, 
 			fprintf(outf, "%02x", V[i]);
 		fprintf(outf, "\n");
 		fprintf(outf, "*reseed_counter = %d", ctx->reseed_counter);
-		fprintf(outf, "\n\n");
+		fprintf(outf, "\n\n");*/
 	}
 }
 
@@ -117,7 +123,7 @@ void drbg_sha3_inner_reset(struct DRBG_SHA3_HMAC_Context *ctx, BitSequence *V, B
 
 	if(ctx->reseed_counter == 1){
 		{		//***** TEXT OUTPUT - *K, *V *****//
-			fprintf(outf, "*K = ");
+			/*fprintf(outf, "*K = ");
 			for(int i = 0 ; i < ctx->capacity / 16; i++)
 				fprintf(outf, "%02x", Key[i]);
 			fprintf(outf, "\n");
@@ -133,7 +139,7 @@ void drbg_sha3_inner_reset(struct DRBG_SHA3_HMAC_Context *ctx, BitSequence *V, B
 					fprintf(outf, "%02x", add_input[i]);
 				fprintf(outf, "\n\n");
 			}else
-				fprintf(outf, "\n");
+				fprintf(outf, "\n");*/
 		}
 	}
 
@@ -242,7 +248,7 @@ void drbg_sha3_inner_reset(struct DRBG_SHA3_HMAC_Context *ctx, BitSequence *V, B
 	}
 
 	{		//***** TEXT OUTPUT - *K, *V *****//
-		fprintf(outf, "*K = ");
+		/*fprintf(outf, "*K = ");
 		for(int i = 0 ; i < ctx->capacity / 16; i++)
 			fprintf(outf, "%02x", Key[i]);
 		fprintf(outf, "\n");
@@ -251,7 +257,7 @@ void drbg_sha3_inner_reset(struct DRBG_SHA3_HMAC_Context *ctx, BitSequence *V, B
 			fprintf(outf, "%02x", V[i]);
 		fprintf(outf, "\n");
 		fprintf(outf, "*reseed_counter = %d", ctx->reseed_counter);
-		fprintf(outf, "\n\n");
+		fprintf(outf, "\n\n");*/
 	}
 
 	if(ctx->reseed_counter < 2){
@@ -288,14 +294,14 @@ void drbg_sha3_hmac_init(struct DRBG_SHA3_HMAC_Context *ctx, const BitSequence *
 	}
 
 	{		//***** TEXT OUTPUT - K, V *****//
-		fprintf(outf, "K = ");
+		/*fprintf(outf, "K = ");
 		for(int i = 0 ; i < ctx->capacity / 16; i++)
 			fprintf(outf, "%02x", Key[i]);
 		fprintf(outf, "\n");
 		fprintf(outf, "V = ");
 		for(int i = 0 ; i < ctx->capacity / 16; i++)
 			fprintf(outf, "%02x", V[i]);
-		fprintf(outf, "\n\n");
+		fprintf(outf, "\n\n");*/
 	}
 
 	for(r=0, w=0; r<ctx->capacity / 16; r++){
@@ -370,7 +376,7 @@ void drbg_sha3_hmac_init(struct DRBG_SHA3_HMAC_Context *ctx, const BitSequence *
 	ctx->reseed_counter = 1;
 
 	{		//***** TEXT OUTPUT - *K, *V *****//
-		fprintf(outf, "*K = ");
+		/*fprintf(outf, "*K = ");
 		for(int i = 0 ; i < ctx->capacity / 16; i++)
 			fprintf(outf, "%02x", target_state_Key[i]);
 		fprintf(outf, "\n");
@@ -379,7 +385,7 @@ void drbg_sha3_hmac_init(struct DRBG_SHA3_HMAC_Context *ctx, const BitSequence *
 			fprintf(outf, "%02x", target_state_V[i]);
 		fprintf(outf, "\n");
 		fprintf(outf, "*reseed_counter = %d", ctx->reseed_counter);
-		fprintf(outf, "\n\n");
+		fprintf(outf, "\n\n");*/
 	}
 
 	drbg_sha3_inner_reset(ctx, target_state_V, target_state_Key, entropy + 65, ent_size, add_input, add_size, outf);
@@ -408,7 +414,7 @@ void drbg_sha3_hmac_output_reset(struct DRBG_SHA3_HMAC_Context *ctx, const BitSe
 	}
 
 	{		//***** TEXT OUTPUT - *K, *V *****//
-		fprintf(outf, "*K = ");
+		/*fprintf(outf, "*K = ");
 		for(int i = 0 ; i < ctx->capacity / 16; i++)
 			fprintf(outf, "%02x", target_state_Key[i]);
 		fprintf(outf, "\n");
@@ -428,7 +434,7 @@ void drbg_sha3_hmac_output_reset(struct DRBG_SHA3_HMAC_Context *ctx, const BitSe
 		fprintf(outf, "entropy = ");
 		for(int i=0; i < ent_size; i++)
 			fprintf(outf, "%02x", entropy[i]);
-		fprintf(outf, "\n");
+		fprintf(outf, "\n");*/
 	}
 
 	for(r=0, w=0; r<ctx->capacity / 16; r++){
@@ -534,7 +540,7 @@ void drbg_sha3_hmac_output_reset(struct DRBG_SHA3_HMAC_Context *ctx, const BitSe
 	}
 
 	{		//***** TEXT OUTPUT - *K, *V *****//
-		fprintf(outf, "*K = ");
+		/*fprintf(outf, "*K = ");
 		for(int i = 0 ; i < ctx->capacity / 16; i++)
 			fprintf(outf, "%02x", target_state_Key[i]);
 		fprintf(outf, "\n");
@@ -543,7 +549,7 @@ void drbg_sha3_hmac_output_reset(struct DRBG_SHA3_HMAC_Context *ctx, const BitSe
 			fprintf(outf, "%02x", target_state_V[i]);
 		fprintf(outf, "\n");
 		fprintf(outf, "*reseed_counter = %d", ctx->reseed_counter);
-		fprintf(outf, "\n\n");
+		fprintf(outf, "\n\n");*/
 	}
 
 	drbg_sha3_inner_output(ctx, target_state_V, target_state_Key, entropy, ent_size, add_input, add_size, outf, 2);
