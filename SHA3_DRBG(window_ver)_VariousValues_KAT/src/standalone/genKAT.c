@@ -21,6 +21,7 @@ typedef enum { KAT_SUCCESS = 0, KAT_FILE_OPEN_ERROR = 1, KAT_HEADER_ERROR = 2, K
 #define SqueezingOutputLength 4096
 
 STATUS_CODES    genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimitedSuffix, unsigned int hashbitlen, unsigned int squeezedOutputLength, const char *inputFileName, const char *outputFileName, const char *description);
+STATUS_CODES genShortMsgHash_noPR(unsigned int rate, unsigned int capacity, unsigned char delimitedSuffix, unsigned int hashbitlen, unsigned int squeezedOutputLength, const char *inputFileName, const char *outputFileName, const char *description);
 int     FindMarker(FILE *infile, const char *marker);
 void    fprintBstr(FILE *fp, char *S, BitSequence *A, int L);
 void convertShortMsgToPureLSB(void);
@@ -40,8 +41,8 @@ genKAT_main(void)
 	char *pStr;
 	//char *HashName[4] = {"Hash_DRBG_SHA3-224", "Hash_DRBG_SHA3-256", "Hash_DRBG_SHA3-384", "Hash_DRBG_SHA3-512"};
 
-	char *HashName[1] = {"1.HASH_DRBG(SHA512(-)(PR))_KAT"};
-	//char *HashName[1] = {"2.HASH_DRBG(SHA256(-)(no PR))_KAT"};
+	//char *HashName[1] = {"1.HASH_DRBG(SHA512(-)(PR))_KAT"};
+	char *HashName[1] = {"2.HASH_DRBG(SHA256(-)(no PR))_KAT"};
 
 	char inputFileAddress[256], outputFileAddress[256];
 
@@ -58,13 +59,14 @@ genKAT_main(void)
 		printf("%s", pStr);
 
 		if(!strcmp(pStr, "[SHA-224]\n")){
-			genShortMsgHash(1152, 448, 0x06, 224, 0,inputFileAddress,outputFileAddress,"Alg_ID = Hash_DRBG_SHA3-224");
+			//genShortMsgHash(1152, 448, 0x06, 224, 0,inputFileAddress,outputFileAddress,"Alg_ID = Hash_DRBG_SHA3-224");
 		}else if(!strcmp(pStr, "[SHA-256]\n")){
-			genShortMsgHash(1088, 512, 0x06, 256, 0,inputFileAddress,outputFileAddress,"Alg_ID = Hash_DRBG_SHA3-256");
+			//genShortMsgHash(1088, 512, 0x06, 256, 0,inputFileAddress,outputFileAddress,"Alg_ID = Hash_DRBG_SHA3-256");
+			genShortMsgHash_noPR(1088, 512, 0x06, 256, 0,inputFileAddress,outputFileAddress,"Alg_ID = Hash_DRBG_SHA3-256");
 		}else if(!strcmp(pStr, "[SHA-384]\n")){
-			genShortMsgHash(832, 768, 0x06, 384, 0,inputFileAddress,outputFileAddress,"Alg_ID = Hash_DRBG_SHA3-384");
+			//genShortMsgHash(832, 768, 0x06, 384, 0,inputFileAddress,outputFileAddress,"Alg_ID = Hash_DRBG_SHA3-384");
 		}else if(!strcmp(pStr, "[SHA-512]\n")){
-			genShortMsgHash(576, 1024, 0x06, 512, 0,inputFileAddress,outputFileAddress,"Alg_ID = Hash_DRBG_SHA3-512");
+			//genShortMsgHash(576, 1024, 0x06, 512, 0,inputFileAddress,outputFileAddress,"Alg_ID = Hash_DRBG_SHA3-512");
 		}else {
 			printf("Error!\n");
 		}
@@ -285,6 +287,221 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
     fclose(fp_out);
 
     return KAT_SUCCESS;
+}
+
+STATUS_CODES
+genShortMsgHash_noPR(unsigned int rate, unsigned int capacity, unsigned char delimitedSuffix, unsigned int hashbitlen, unsigned int squeezedOutputLength, const char *inputFileName, const char *outputFileName, const char *description)
+{
+    FILE *fp_in, *fp_out;
+    char str;
+    BitSequence predict[5];
+    BitSequence entropy[65];
+    BitSequence entropy_re[65];
+    BitSequence nonce[65];
+    BitSequence per_string[65];
+	BitSequence add_input01[65];
+	BitSequence add_input_re[65];
+	BitSequence add_input02[65];
+    int r, w, a, b, c, d, e, f = 0;
+    int num = 0;
+
+    if ((squeezedOutputLength > SqueezingOutputLength) || (hashbitlen > SqueezingOutputLength)) {
+		printf("Requested output length too long.\n");
+		return KAT_HASH_ERROR;
+	}
+
+	if ( (fp_in = fopen(inputFileName, "r")) == NULL ) {
+		printf("Couldn't open <ShortMsgKAT.txt> for read\n");
+		return KAT_FILE_OPEN_ERROR;
+	}
+
+	fp_out = fopen(outputFileName, "w");
+
+
+	BitSequence drbg[64];
+
+	int ent_size = 0; //현재 여기서는 bit 단위로 받고있지만 우리는 byte 단위로 쓰기 때문에 사용할 때는 /8 해야함
+	int non_size = 0;
+	int per_size = 0;
+	int add_size = 0;
+	int count = 0;
+
+	int output_bits = 512;
+	int cycle = 1;
+
+	if(rate == 1152){
+		output_bits = 448;
+	}else if(rate == 1088){
+		output_bits = 512;
+	}else if(rate == 832){
+		output_bits = 768;
+	}else{
+		output_bits = 1024;
+	}
+
+	fprintf(fp_out, "%s\n", description);
+
+	while(!feof(fp_in)){
+		num = 0; //for under while
+
+		for(int i=0; i<5; i++){
+			predict[i] = '\0';
+		}
+
+		FindMarker(fp_in, "PredictionResistance");
+		fscanf(fp_in, " %c %s", &str, &predict);
+		fprintf(fp_out, "PredictionResistance = ");
+
+		if(predict[0] == 'F'){
+			for(int i=0; i<5; i++){
+				fprintf(fp_out, "%c", predict[i]);
+			}
+		}else {
+			for(int i=0; i<4; i++){
+				fprintf(fp_out, "%c", predict[i]);
+			}
+		}
+		fprintf(fp_out, "\n");
+
+		FindMarker(fp_in, "EntropyInputLen");
+		fscanf(fp_in, " %c %d", &str, &ent_size);
+		fprintf(fp_out, "EntropyInputLen = %d\n", ent_size);
+
+		FindMarker(fp_in, "NonceLen");
+		fscanf(fp_in, " %c %d", &str, &non_size);
+		fprintf(fp_out, "NonceLen = %d\n", non_size);
+
+		FindMarker(fp_in, "PersonalizationStringLen");
+		fscanf(fp_in, " %c %d", &str, &per_size);
+		fprintf(fp_out, "PersonalizationStringLen = %d\n", per_size);
+
+		FindMarker(fp_in, "AdditionalInputLen");
+		fscanf(fp_in, " %c %d", &str, &add_size);
+		fprintf(fp_out, "AdditionalInputLen = %d\n\n", add_size);
+		printf("add size : %d\n", add_size);
+
+		while(!(num == 15)) {
+			/*for(int i=0; i<64; i++){
+				per_string[i] = '\0';
+				add_input01[i] = '\0';
+				add_input02[i] = '\0';
+				add_input_re[i] = '\0';
+				entropy[i] = '\0';
+				entropy_re[i] = '\0';
+				nonce[i] = '\0';
+			}
+			count = 0;*/
+
+			FindMarker(fp_in, "COUNT");
+			fscanf(fp_in, " %c %d", &str, &count);
+			num = count;
+			fprintf(fp_out, "COUNT = %d\n", count);
+
+			FindMarker(fp_in, "EntropyInput");
+			fscanf(fp_in, " %c %s", &str, &entropy);
+
+			FindMarker(fp_in, "Nonce");
+			fscanf(fp_in, " %c %s", &str, &nonce);
+
+			if(per_size == 0){
+				printf("per_size = 0\n");
+				for(int i=0; i<64; i++){
+					per_string[i] = '\0';
+				}
+			}else {
+				FindMarker(fp_in, "PersonalizationString");
+				fscanf(fp_in, " %c %s", &str, &per_string);
+			}
+
+			if(add_size == 0){
+				for(int i=0; i<64; i++){
+					add_input01[i] = '\0';
+				}
+			}else{
+				FindMarker(fp_in, "AdditionalInput");
+				fscanf(fp_in, " %c %s", &str, &add_input01);
+			}
+
+			if(predict[0] == 'T'){
+				FindMarker(fp_in, "EntropyInputPR");
+			}else{
+				FindMarker(fp_in, "EntropyInputReseed");
+			}
+			fscanf(fp_in, " %c %s", &str, &entropy_re);
+
+			if(add_size == 0){
+				for(int i=0; i<65; i++){
+					add_input_re[i] = '\0';
+				}
+			}else{
+				if(predict[0] == 'T'){
+					FindMarker(fp_in, "AdditionalInput");
+				}else{
+					FindMarker(fp_in, "AdditionalInputReseed");
+				}
+				fscanf(fp_in, " %c %s", &str, &add_input_re);
+			}
+
+			if(predict[0] == 'T'){
+				FindMarker(fp_in, "EntropyInputPR");
+				fscanf(fp_in, " %c %s", &str, &add_input02);
+			}else {
+				if(add_size == 0){
+					for(int i=0; i<65; i++){
+						add_input02[i] = '\0';
+					}
+				}else{
+					FindMarker(fp_in, "AdditionalInput");
+					fscanf(fp_in, " %c %s", &str, &add_input02);
+				}
+			}
+
+			fprintf(fp_out, "EntropyInput = %s\n", entropy);
+			fprintf(fp_out, "Nonce = %s\n", nonce);
+			fprintf(fp_out, "PersonalizationString = %s\n", per_string);
+			fprintf(fp_out, "AdditionalInput = %s\n", add_input01);
+			fprintf(fp_out, "EntropyInputReseed = %s\n", entropy_re);
+			fprintf(fp_out, "AdditionalInputReseed = %s\n", add_input_re);
+			fprintf(fp_out, "AdditionalInput = %s\n", add_input02);
+
+
+			for(r = 0, w =0, a = 0, b=0, c=0, d=0, e=0; r < 65 ; r += 2){
+				unsigned char temp_arr[3] = {entropy[r], entropy[r+1], '\0'};
+				entropy[w++] = strtol(temp_arr, NULL, 16);
+
+				unsigned char temp_arr01[3] = {entropy_re[r], entropy_re[r+1], '\0'};
+				entropy_re[a++] = strtol(temp_arr01, NULL, 16);
+
+				unsigned char temp_arr02[3] = {add_input_re[r], add_input_re[r+1], '\0'};
+				add_input_re[b++] = strtol(temp_arr02, NULL, 16);
+
+				unsigned char temp_arr03[3] = {per_string[r], per_string[r+1], '\0'};
+				per_string[c++] = strtol(temp_arr03, NULL, 16);
+
+				unsigned char temp_arr04[3] = {add_input01[r], add_input01[r+1], '\0'};
+				add_input01[d++] = strtol(temp_arr04, NULL, 16);
+
+				unsigned char temp_arr05[3] = {add_input02[r], add_input02[r+1], '\0'};
+				add_input02[e++] = strtol(temp_arr05, NULL, 16);
+
+			} //2 string to hex
+
+			for(r=0, f=0; f<64; r+=2){
+				unsigned char tmp_arr[3] = {nonce[r], nonce[r+1], '\0'};
+				nonce[f++] = strtol(tmp_arr, NULL, 16);
+			}
+
+			predict[0] = 'F';
+
+			drbg_sha3_digest_noPR(predict, rate, capacity, delimitedSuffix, entropy, entropy_re, ent_size / 8, nonce, non_size / 8, per_string, per_size / 8, add_input01, add_input_re, add_input02, add_size / 8, output_bits, cycle, drbg, fp_out);
+
+			num++;
+		}
+	}
+    fclose(fp_in);
+    fclose(fp_out);
+
+    return 0;
 }
 
 /*  */

@@ -315,10 +315,15 @@ void drbg_sha3_output_gen(struct DRBG_SHA3_Context *ctx, const BitSequence *entr
 
 	if(ctx->setting.predicttolerance == false){
 		if(ctx->reseed_counter > 1){
-			drbg_sha3_reseed(ctx, entropy, ent_size, add_input, add_size, outf);
+			printf("tt: ");
+			for(int i=0; i<add_size; i++){
+				printf("%02x", (add_input + (80))[i]);
+			}printf("\n");
+			drbg_sha3_reseed(ctx, entropy, ent_size, add_input + (80), add_size, outf);
+			ctx->setting.usingaddinput = true;
 		}
 
-		if(add_size){
+		if(ctx->setting.usingaddinput){
 			hash_data[0] = 0x02;
 			for(r = 0 , w = 1 ; r < STATE_MAX_SIZE ; r++)
 				hash_data[w++] = target_state_V[r];
@@ -391,16 +396,6 @@ void drbg_sha3_digest(BitSequence predict[5], unsigned int rate, unsigned int ca
 
 	ctx.setting.refreshperiod = cycle;
 
-	/*if(per_size != 0)
-		ctx.setting.usingperstring = true;
-	else
-		ctx.setting.usingperstring = false;
-	if(add_size != 0)
-		ctx.setting.usingaddinput = true;
-	else
-		ctx.setting.usingaddinput = false;
-	ctx.setting.predicttolerance = false;*/
-
 	if(predict[0] == 'F'){
 		ctx.setting.predicttolerance = false;   //예측내성
 		printf("predict false\n");
@@ -433,5 +428,49 @@ void drbg_sha3_digest(BitSequence predict[5], unsigned int rate, unsigned int ca
 		}else {
 			drbg_sha3_output_gen(&ctx, entropy[i], ent_size, add_input[i], add_size, output_bits, cycle, drbg, outf, i+1);
 		}
+	}
+}
+
+void drbg_sha3_digest_noPR(BitSequence predict[5], unsigned int rate, unsigned int capacity, unsigned char delimitedSuffix, BitSequence *entropy, BitSequence *entropy_re, int ent_size, BitSequence *nonce, int non_size, BitSequence *per_string, int per_size, BitSequence *add_input, BitSequence *add_input_re, BitSequence *add_input02, int add_size, int output_bits, int cycle, BitSequence *drbg, FILE *outf)
+{
+	struct DRBG_SHA3_Context ctx;
+	BitSequence *additional[3] = {add_input, add_input02, add_input_re};
+
+	ctx.setting.drbgtype = rate;
+	ctx.capacity = capacity;
+	ctx.delimitedSuffix = delimitedSuffix;
+	ctx.setting.refreshperiod = cycle;
+
+	printf("%c\n", predict[0]);
+
+	if(predict[0] == 'F'){
+		ctx.setting.predicttolerance = false;   //예측내성
+		printf("predict false\n");
+	}else {
+		ctx.setting.predicttolerance = true;   //예측내성
+		printf("predict true\n");
+	}
+
+	if(per_size == 0){
+		ctx.setting.usingperstring = false;      //개별화
+		printf("pers false\n");
+	}else {
+		ctx.setting.usingperstring = true;      //개별화
+		printf("pers true\n");
+	}
+
+	if(add_size == 0){
+		ctx.setting.usingaddinput = false;      //추가입력
+		printf("addinput false\n");
+	}else {
+		ctx.setting.usingaddinput = true;      //추가입력
+		printf("addinput true\n");
+	}
+
+	drbg_sha3_init(&ctx, entropy, ent_size, nonce, non_size, per_string, per_size, outf);
+
+	for(int i = 0 ; i < ctx.setting.refreshperiod + 1 ; i++){
+		printf("output\n");
+		drbg_sha3_output_gen(&ctx, entropy_re, ent_size, additional[i], add_size, output_bits, cycle, drbg, outf, i+1);
 	}
 }
