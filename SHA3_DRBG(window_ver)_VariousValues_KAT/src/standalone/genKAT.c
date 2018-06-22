@@ -106,6 +106,7 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
 	int per_size = 0;
 	int add_size = 0;
 	int count = 0;
+	int num_count = 0;
 
 	int output_bits = 512;
 	int cycle = 1;
@@ -122,7 +123,7 @@ genShortMsgHash(unsigned int rate, unsigned int capacity, unsigned char delimite
 
 	fprintf(fp_out, "%s\n", description);
 
-	while(!feof(fp_in)){
+	while(!(num_count == 4)){
 		num = 0; //for under while
 
 		for(int i=0; i<5; i++){

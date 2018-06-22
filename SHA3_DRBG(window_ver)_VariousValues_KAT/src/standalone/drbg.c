@@ -315,12 +315,13 @@ void drbg_sha3_output_gen(struct DRBG_SHA3_Context *ctx, const BitSequence *entr
 
 	if(ctx->setting.predicttolerance == false){
 		if(ctx->reseed_counter > 1){
-			printf("tt: ");
+			printf("tt: %d\n", add_size);
 			for(int i=0; i<add_size; i++){
 				printf("%02x", (add_input + (80))[i]);
 			}printf("\n");
 			drbg_sha3_reseed(ctx, entropy, ent_size, add_input + (80), add_size, outf);
-			ctx->setting.usingaddinput = true;
+			if(add_size)
+				ctx->setting.usingaddinput = true;
 		}
 
 		if(ctx->setting.usingaddinput){
