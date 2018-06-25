@@ -25,7 +25,7 @@ If we have some time, we will change that base code on our own. (If possible..)
 <a href="https://github.com/kyu-h/NSR_Newest_hash_function/tree/master/SHA3_HMAC_DRBG_VariousValues" target="_blank">SHA3 HMAC DRBG KAT(Based SHA3 HMAC)</a> <br>
 5. Make a PBKDF due to MAY 30. <br>
 ->Reference site PBKDF: https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-132.pdf <br>
-->Reference site PBKDF(Kor ver: http://www.tta.or.kr/data/ttas_view.jsp?totalSu=758&by=desc&order=publish_date&rn=1&pk_num=TTAK.KO-12.0274&nowSu=336<br>
+->Reference site PBKDF(Korean ver): http://www.tta.or.kr/data/ttas_view.jsp?totalSu=758&by=desc&order=publish_date&rn=1&pk_num=TTAK.KO-12.0274&nowSu=336<br>
 6. Make a HMAC_KDF due to June 20. <br>
 
 <hr>
