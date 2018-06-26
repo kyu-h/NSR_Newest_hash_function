@@ -163,12 +163,26 @@ genShortMsgHash_PBKDF(unsigned int alg_type, unsigned int rate, unsigned int cap
 	for(int j = 0; j < Kl_len ; j += 2){
 		unsigned char temp_arr[3] = {Kl[j], Kl[j+1], '\0'};
 		Kl[a++] = strtol(temp_arr, NULL, 16);
+	} //2 string to hex
 
+	for(int j = 0; j < Label_len ; j += 2){
 		unsigned char temp_arr01[3] = {Label[j], Label[j+1], '\0'};
 		Label[b++] = strtol(temp_arr01, NULL, 16);
+	} //2 string to hex
 
+	for(int j = 0; j < Context_len ; j += 2){
 		unsigned char temp_arr01[3] = {Context[j], Context[j+1], '\0'};
 		Context[c++] = strtol(temp_arr01, NULL, 16);
+	} //2 string to hex
+
+	for(int j = 0; j < 2 ; j += 2){
+		unsigned char temp_arr01[3] = {L[j], L[j+1], '\0'};
+		L[d++] = strtol(temp_arr01, NULL, 16);
+	} //2 string to hex
+
+	for(int j = 0; j < 2 ; j += 2){
+		unsigned char temp_arr01[3] = {L[j], L[j+1], '\0'};
+		h[e++] = strtol(temp_arr01, NULL, 16);
 	} //2 string to hex
 
 	pbkdf_sha3_hmac(alg_type, rate, capacity, delimitedSuffix, Kl, Kl_len, Label, Label_len, Context, Context_len, L, h, r, fp_out);
