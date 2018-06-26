@@ -37,13 +37,13 @@ genKAT_main(void)
 	FILE *fp_in;
 	char strTemp[255];
 	char *pStr;
-	//char *HashName[4] = {"HMAC_DRBG_SHA3-224", "HMAC_DRBG_SHA3-256", "HMAC_DRBG_SHA3-384", "HMAC_DRBG_SHA3-512"};
-	char *HashName[1] = {"PBKDF_SHA3-256"};
+	char *HashName[4] = {"PBKDF_SHA3-224", "PBKDF_SHA3-256", "PBKDF_SHA3-384", "PBKDF_SHA3-512"};
+	//char *HashName[1] = {"PBKDF_SHA3-256"};
 	char inputFileAddress[256], outputFileAddress[256];
 
-	//for(int i=0; i<4; i++){
-		sprintf(inputFileAddress, "PBKDF/%s.txt", HashName[0]);
-		sprintf(outputFileAddress, "PBKDF/%s_rsp.txt", HashName[0]);
+	for(int i=0; i<4; i++){
+		sprintf(inputFileAddress, "PBKDF/%s.txt", HashName[i]);
+		sprintf(outputFileAddress, "PBKDF/%s_rsp.txt", HashName[i]);
 
 		if ( (fp_in = fopen(inputFileAddress, "r")) == NULL ) {
 			printf("Couldn't open <%s> for read\n", inputFileAddress);
@@ -53,18 +53,18 @@ genKAT_main(void)
 		pStr = fgets(strTemp, sizeof(strTemp), fp_in);
 		printf("%s", pStr);
 
-		if(!strcmp(pStr, "Alg_ID = PBKDF_SHA3-224\n")){
-			//genShortMsgHash_PBKDF(1152, 448, 0x06, 224, 0,inputFileAddress,outputFileAddress,"Alg_ID = HMAC_DRBG_SHA3-224");
+		if(!strcmp(pStr, "Algo_ID = PBKDF_SHA3-224\n")){
+			genShortMsgHash_PBKDF(1152, 448, 0x06, 224, 0,inputFileAddress,outputFileAddress,"Alg_ID = PBKDF_SHA3-224");
 		}else if(!strcmp(pStr, "Algo_ID = PBKDF_SHA3-256\n")){
 			genShortMsgHash_PBKDF(1088, 512, 0x06, 256, 0,inputFileAddress,outputFileAddress,"Alg_ID = PBKDF_SHA3-256");
-		}else if(!strcmp(pStr, "Alg_ID = PBKDF_SHA3-384\n")){
-			//genShortMsgHash_PBKDF(832, 768, 0x06, 384, 0,inputFileAddress,outputFileAddress,"Alg_ID = HMAC_DRBG_SHA3-384");
-		}else if(!strcmp(pStr, "Alg_ID = PBKDF_SHA3-512\n")){
-			//genShortMsgHash_PBKDF(576, 1024, 0x06, 512, 0,inputFileAddress,outputFileAddress,"Alg_ID = HMAC_DRBG_SHA3-512");
+		}else if(!strcmp(pStr, "Algo_ID = PBKDF_SHA3-384\n")){
+			genShortMsgHash_PBKDF(832, 768, 0x06, 384, 0,inputFileAddress,outputFileAddress,"Alg_ID = PBKDF_SHA3-384");
+		}else if(!strcmp(pStr, "Algo_ID = PBKDF_SHA3-512\n")){
+			genShortMsgHash_PBKDF(576, 1024, 0x06, 512, 0,inputFileAddress,outputFileAddress,"Alg_ID = PBKDF_SHA3-512");
 		}else {
 			printf("Error!\n");
 		}
-	//}
+	}
 
 	fclose(fp_in);
     return KAT_SUCCESS;
@@ -130,7 +130,7 @@ genShortMsgHash_PBKDF(unsigned int rate, unsigned int capacity, unsigned char de
 	FindMarker(fp_in, "loopCount");
 	fscanf(fp_in, " %c %d", &str, &loopCount);
 	fprintf(fp_out, "loopCount = %d", loopCount);
-	fprintf(fp_out, "\n");
+	fprintf(fp_out, "\n\n");
 
 
 	for(r = 0; r < i ; r += 2){

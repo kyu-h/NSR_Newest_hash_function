@@ -590,8 +590,7 @@ void pbkdf_sha3_hmac(const unsigned int rate, const unsigned int capacity, const
 	if(Klen > ((pow(2,32) - 1) * hlen)){
 		printf("Error !\n");
 	}
-
-	Klen = 768;
+	printf("%d \n", Klen);
 	length = ceil(Klen / hlen);
 	r = Klen - (length - 1) * hlen;
 
@@ -624,7 +623,7 @@ void pbkdf_sha3_hmac(const unsigned int rate, const unsigned int capacity, const
 		for(j=1; j<IterationCount+1; j++){
 			if(j == 1){
 				hmac_digest(capacity / 2, rate, capacity, password, pass_len, salt_inti, salt_leng + 4, U);
-				drbg_sha3_hmac_print(capacity / 16, U);
+				//drbg_sha3_hmac_print(capacity / 16, U);
 			}else {
 				hmac_digest(capacity / 2, rate, capacity, password, pass_len, U, capacity / 16, U);
 				//drbg_sha3_hmac_print(capacity / 16, U);
