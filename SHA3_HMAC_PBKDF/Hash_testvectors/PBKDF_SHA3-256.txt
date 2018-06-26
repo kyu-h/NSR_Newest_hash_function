@@ -1,0 +1,7 @@
+Algo_ID = PBKDF_SHA3-256
+
+Password = HellowWorld!!
+Salt = 101112131415161718191A1B1C1D1E1F2021
+IterationCount = 2048
+kLen = 768
+loopCount = 3
