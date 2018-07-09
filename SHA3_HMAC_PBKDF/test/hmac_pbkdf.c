@@ -49,9 +49,9 @@ void pbkdf_sha3_hmac(const unsigned int rate, const unsigned int capacity, const
 		if(i == 1){
 			salt_inti[w] = 0x01;
 		}else if(i == 2){
-			salt_inti[w] = 0x10;
+			salt_inti[w] = 0x02;
 		}else if(i == 3){
-			salt_inti[w] = 0x11;
+			salt_inti[w] = 0x03;
 		}
 
 		fprintf(outf, "U0 = ");
