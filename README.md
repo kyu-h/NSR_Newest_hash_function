@@ -30,8 +30,7 @@ If we have some time, we will change that base code on our own. (If possible..)
 6. Make a HMAC_KDF due to June 20. --> Clear(June 28)<br>
 ->Reference site HMAC_KDF: https://nvlpubs.nist.gov/nistpubs/legacy/sp/nistspecialpublication800-108.pdf<br>
 ->Reference site HMAC_KDF(Korean ver): https://committee.tta.or.kr/data/standard_view.jsp?commit_code=PG501&firstDepthCode=TC5&nowPage=2&pk_num=TTAK.KO-12.0273&secondDepthCode=PG501<br><br>
-
-<a href="https://github.com/kyu-h/NSR_Newest_hash_function/tree/master/SHA3_HMAC_KDF" target="_blank">SHA3 HMAC PBKDF(Based SHA3 HMAC)</a> <br>
+<a href="https://github.com/kyu-h/NSR_Newest_hash_function/tree/master/SHA3_HMAC_KDF" target="_blank">SHA3 HMAC KDF(Based SHA3 HMAC)</a> <br>
 
 <hr>
 Every package have test text input file seems like SHA3-224.txt or HMAC_SHA3-224.txt. <br>
