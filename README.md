@@ -23,13 +23,15 @@ If we have some time, we will change that base code on our own. (If possible..)
 ->Reference site HMAC_DRBG: https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-90a.pdf <br><br>
 <a href="https://github.com/kyu-h/NSR_Newest_hash_function/tree/master/SHA3_HMAC_DRBG" target="_blank">SHA3 HMAC DRBG include various values(Based SHA3 HMAC)</a> <br>
 <a href="https://github.com/kyu-h/NSR_Newest_hash_function/tree/master/SHA3_HMAC_DRBG_VariousValues" target="_blank">SHA3 HMAC DRBG KAT(Based SHA3 HMAC)</a> <br>
-5. Make a PBKDF due to MAY 30. <br>
+5. Make a PBKDF due to MAY 30. --> Clear(June 26)<br> 
 ->Reference site PBKDF: https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-132.pdf <br>
 ->Reference site PBKDF(Korean ver): http://www.tta.or.kr/data/ttas_view.jsp?totalSu=758&by=desc&order=publish_date&rn=1&pk_num=TTAK.KO-12.0274&nowSu=336<br><br>
 <a href="https://github.com/kyu-h/NSR_Newest_hash_function/tree/master/SHA3_HMAC_PBKDF" target="_blank">SHA3 HMAC PBKDF(Based SHA3 HMAC)</a> <br>
-6. Make a HMAC_KDF due to June 20. <br>
+6. Make a HMAC_KDF due to June 20. --> Clear(June 28)<br>
 ->Reference site HMAC_KDF: https://nvlpubs.nist.gov/nistpubs/legacy/sp/nistspecialpublication800-108.pdf<br>
-->Reference site HMAC_KDF(Korean ver): https://committee.tta.or.kr/data/standard_view.jsp?commit_code=PG501&firstDepthCode=TC5&nowPage=2&pk_num=TTAK.KO-12.0273&secondDepthCode=PG501<br>
+->Reference site HMAC_KDF(Korean ver): https://committee.tta.or.kr/data/standard_view.jsp?commit_code=PG501&firstDepthCode=TC5&nowPage=2&pk_num=TTAK.KO-12.0273&secondDepthCode=PG501<br><br>
+
+<a href="https://github.com/kyu-h/NSR_Newest_hash_function/tree/master/SHA3_HMAC_KDF" target="_blank">SHA3 HMAC PBKDF(Based SHA3 HMAC)</a> <br>
 
 <hr>
 Every package have test text input file seems like SHA3-224.txt or HMAC_SHA3-224.txt. <br>
@@ -40,7 +42,7 @@ So, If you want to check input files and output files, just go test folder (ever
 
 <table style="width:100%">
   <tr>
-    <th rowspan="5">
+    <th rowspan="6">
     OS: Window<br>
     Compiler: MinGW<br>
     IDE: Eclipse<br></th>
@@ -59,6 +61,9 @@ So, If you want to check input files and output files, just go test folder (ever
   </tr>
  <tr>
     <td>SHA3_PBKDF</td>
+ </tr>
+ <tr>
+    <td>SHA3_HMAC_KDF</td>
   </tr>
 </table>
 <br>
