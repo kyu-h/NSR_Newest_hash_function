@@ -20,6 +20,7 @@ typedef enum { KAT_SUCCESS = 0, KAT_FILE_OPEN_ERROR = 1, KAT_HEADER_ERROR = 2, K
 #define SqueezingOutputLength 4096
 
 STATUS_CODES    genShortMsgHash_PBKDF(unsigned int rate, unsigned int capacity, unsigned char delimitedSuffix, unsigned int hashbitlen, unsigned int squeezedOutputLength, const char *inputFileName, const char *outputFileName, const char *description);
+STATUS_CODES    genShortMsgHash_testVector_PBKDF(unsigned int rate, unsigned int capacity, unsigned char delimitedSuffix, unsigned int hashbitlen, unsigned int squeezedOutputLength, const char *inputFileName, const char *outputFileName, const char *description);
 int     FindMarker(FILE *infile, const char *marker);
 void    fprintBstr(FILE *fp, char *S, BitSequence *A, int L);
 void convertShortMsgToPureLSB(void);
@@ -42,8 +43,8 @@ genKAT_main(void)
 	char inputFileAddress[256], outputFileAddress[256];
 
 	for(int i=0; i<4; i++){
-		sprintf(inputFileAddress, "PBKDF/%s.txt", HashName[i]);
-		sprintf(outputFileAddress, "PBKDF/%s_rsp.txt", HashName[i]);
+		sprintf(inputFileAddress, "PBKDF_testvectors/%s.txt", HashName[i]);
+		sprintf(outputFileAddress, "PBKDF_testvectors/%s_rsp.txt", HashName[i]);
 
 		if ( (fp_in = fopen(inputFileAddress, "r")) == NULL ) {
 			printf("Couldn't open <%s> for read\n", inputFileAddress);
@@ -54,19 +55,109 @@ genKAT_main(void)
 		printf("%s", pStr);
 
 		if(!strcmp(pStr, "Algo_ID = PBKDF_SHA3-224\n")){
-			genShortMsgHash_PBKDF(1152, 448, 0x06, 224, 0,inputFileAddress,outputFileAddress,"Alg_ID = PBKDF_SHA3-224");
+			//genShortMsgHash_PBKDF(1152, 448, 0x06, 224, 0,inputFileAddress,outputFileAddress,"Alg_ID = PBKDF_SHA3-224");
+			genShortMsgHash_testVector_PBKDF(1152, 448, 0x06, 224, 0,inputFileAddress,outputFileAddress,"Algo_ID = PBKDF_SHA3-224");
 		}else if(!strcmp(pStr, "Algo_ID = PBKDF_SHA3-256\n")){
-			genShortMsgHash_PBKDF(1088, 512, 0x06, 256, 0,inputFileAddress,outputFileAddress,"Alg_ID = PBKDF_SHA3-256");
+			//genShortMsgHash_PBKDF(1088, 512, 0x06, 256, 0,inputFileAddress,outputFileAddress,"Alg_ID = PBKDF_SHA3-256");
+			//genShortMsgHash_testVector_PBKDF(1088, 512, 0x06, 256, 0,inputFileAddress,outputFileAddress,"Algo_ID = PBKDF_SHA3-256");
 		}else if(!strcmp(pStr, "Algo_ID = PBKDF_SHA3-384\n")){
-			genShortMsgHash_PBKDF(832, 768, 0x06, 384, 0,inputFileAddress,outputFileAddress,"Alg_ID = PBKDF_SHA3-384");
+			//genShortMsgHash_PBKDF(832, 768, 0x06, 384, 0,inputFileAddress,outputFileAddress,"Alg_ID = PBKDF_SHA3-384");
+			//genShortMsgHash_testVector_PBKDF(832, 768, 0x06, 384, 0,inputFileAddress,outputFileAddress,"Algo_ID = PBKDF_SHA3-384");
 		}else if(!strcmp(pStr, "Algo_ID = PBKDF_SHA3-512\n")){
-			genShortMsgHash_PBKDF(576, 1024, 0x06, 512, 0,inputFileAddress,outputFileAddress,"Alg_ID = PBKDF_SHA3-512");
+			//genShortMsgHash_PBKDF(576, 1024, 0x06, 512, 0,inputFileAddress,outputFileAddress,"Alg_ID = PBKDF_SHA3-512");
+			//genShortMsgHash_testVector_PBKDF(576, 1024, 0x06, 512, 0,inputFileAddress,outputFileAddress,"Algo_ID = PBKDF_SHA3-512");
 		}else {
 			printf("Error!\n");
 		}
 	}
 
 	fclose(fp_in);
+    return KAT_SUCCESS;
+}
+
+STATUS_CODES
+genShortMsgHash_testVector_PBKDF(unsigned int rate, unsigned int capacity, unsigned char delimitedSuffix, unsigned int hashbitlen, unsigned int squeezedOutputLength, const char *inputFileName, const char *outputFileName, const char *description)
+{
+    FILE *fp_in, *fp_out;
+    char str;
+    BitSequence password[128];
+    BitSequence salt[128];
+    unsigned int IterationCount = 0;
+    unsigned int Klen = 0;
+    unsigned int loopCount = 0;
+    unsigned int salt_len = 0;
+    unsigned int pass_len = 0;
+
+    int r, w = 0;
+    int i = 0;
+
+    if ((squeezedOutputLength > SqueezingOutputLength) || (hashbitlen > SqueezingOutputLength)) {
+		printf("Requested output length too long.\n");
+		return KAT_HASH_ERROR;
+	}
+
+	if ( (fp_in = fopen(inputFileName, "r")) == NULL ) {
+		printf("Couldn't open <ShortMsgKAT.txt> for read\n");
+		return KAT_FILE_OPEN_ERROR;
+	}
+	fp_out = fopen(outputFileName, "w");
+
+	fprintf(fp_out, "%s\n", description);
+
+	FindMarker(fp_in, "IterationCount");
+	fscanf(fp_in, " %c %d", &str, &IterationCount);
+	fprintf(fp_out, "IterationCount = %d", IterationCount);
+	fprintf(fp_out, "\n\n");
+
+	while(!(loopCount == 15)) {
+		FindMarker(fp_in, "COUNT");
+		fscanf(fp_in, " %c %d", &str, &loopCount);
+		fprintf(fp_out, "COUNT = %d", loopCount);
+		fprintf(fp_out, "\n");
+
+		FindMarker(fp_in, "Password");
+		fscanf(fp_in, " %c %s", &str, &password);
+		fprintf(fp_out, "Password = ");
+		fprintf(fp_out, "%s\n", password);
+		/*while(!(password[i] == '\0')){
+			fprintf(fp_out, "%c", password[i++]);
+		}fprintf(fp_out, "\n");*/
+
+		pass_len = i;
+		i=0;
+
+		FindMarker(fp_in, "Salt");
+		fscanf(fp_in, " %c %s", &str, &salt);
+		fprintf(fp_out, "Salt = ");
+		while(!(salt[i] == '\0')){
+			fprintf(fp_out, "%c", salt[i++]);
+		}fprintf(fp_out, "\n");
+
+
+
+		FindMarker(fp_in, "KLen");
+		fscanf(fp_in, " %c %d", &str, &Klen);
+		fprintf(fp_out, "KLen = %d", Klen);
+		fprintf(fp_out, "\n");
+
+		for(r = 0; r < i ; r += 2){
+			unsigned char temp_arr[3] = {salt[r], salt[r+1], '\0'};
+			salt[w++] = strtol(temp_arr, NULL, 16);
+		} //2 string to hex
+
+		salt_len = i/2;
+
+		pbkdf_testvector_sha3_hmac(rate, capacity, delimitedSuffix, password, pass_len, salt, salt_len, IterationCount, Klen, loopCount, fp_out);
+		//loopCount++;
+
+		for(int i=0; i<128; i++){
+			password[i] = '\0';
+			salt[i] = '\0';
+		}
+	}
+
+    fclose(fp_in);
+    fclose(fp_out);
     return KAT_SUCCESS;
 }
 
