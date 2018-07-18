@@ -160,31 +160,13 @@ void pbkdf_testvector_sha3_hmac(const unsigned int rate, const unsigned int capa
 		salt_inti[w++] = 0x00;
 		salt_inti[w++] = 0x00;
 		salt_inti[w++] = 0x00;
-		if(i == 1){
-			salt_inti[w] = 0x01;
-		}else if(i == 2){
-			salt_inti[w] = 0x02;
-		}else if(i == 3){
-			salt_inti[w] = 0x03;
-		}else if(i == 3){
-			salt_inti[w] = 0x03;
-		}else if(i == 4){
-			salt_inti[w] = 0x04;
-		}else if(i == 5){
-			salt_inti[w] = 0x05;
-		}else if(i == 6){
-			salt_inti[w] = 0x06;
-		}else if(i == 7){
-			salt_inti[w] = 0x07;
-		}else if(i == 8){
-			salt_inti[w] = 0x08;
-		}else if(i == 9){
-			salt_inti[w] = 0x09;
-		}else if(i == 10){
-			salt_inti[w] = 0x10;
-		}else {
-			printf("i is over 10\n");
-		}
+
+		salt_inti[w] = i;
+
+		/*printf("U0 = ");
+		for(int b =0; b<salt_leng + 4; b++){
+			printf("%02x", salt_inti[b]);
+		}printf("\n");*/
 
 		for(j=1; j<IterationCount+1; j++){
 			if(j == 1){
@@ -217,8 +199,9 @@ void pbkdf_testvector_sha3_hmac(const unsigned int rate, const unsigned int capa
 			}//printf("\n");
 		}
 	}
+
 	fprintf(outf, "MK = ");
-	for(int m=0; m<num; m++){
+	for(int m=0; m<Klen / 8; m++){
 		fprintf(outf, "%02x", MK[m]);
 	}fprintf(outf, "\n\n");
 

@@ -59,7 +59,7 @@ genKAT_main(void)
 
 		if(!strcmp(pStr, "Algo_ID = PBKDF_SHA3-224\n")){
 			//genShortMsgHash_PBKDF(1152, 448, 0x06, 224, 0,inputFileAddress,outputFileAddress,"Alg_ID = PBKDF_SHA3-224");
-			//genShortMsgHash_testVector_PBKDF(1152, 448, 0x06, 224, 0,inputFileAddress,outputFileAddress,"Algo_ID = PBKDF_SHA3-224");
+			genShortMsgHash_testVector_PBKDF(1152, 448, 0x06, 224, 0,inputFileAddress,outputFileAddress,"Algo_ID = PBKDF_SHA3-224");
 		}else if(!strcmp(pStr, "Algo_ID = PBKDF_SHA3-256\n")){
 			//genShortMsgHash_PBKDF(1088, 512, 0x06, 256, 0,inputFileAddress,outputFileAddress,"Alg_ID = PBKDF_SHA3-256");
 			genShortMsgHash_testVector_PBKDF(1088, 512, 0x06, 256, 0,inputFileAddress,outputFileAddress,"Algo_ID = PBKDF_SHA3-256");
@@ -133,31 +133,27 @@ genShortMsgHash_testVector_PBKDF(unsigned int rate, unsigned int capacity, unsig
 			fprintf(fp_out, "%c", salt[i++]);
 		}fprintf(fp_out, "\n");
 
+		for(r = 0, w=0; r < i ; r += 2){
+			unsigned char temp_arr[3] = {salt[r], salt[r+1], '\0'};
+			salt[w++] = strtol(temp_arr, NULL, 16);
+		} //2 string to hex
+
 		FindMarker(fp_in, "KLen");
 		fscanf(fp_in, " %c %d", &str, &Klen);
 		fprintf(fp_out, "KLen = %d", Klen);
 		fprintf(fp_out, "\n");
 
-		for(r = 0; r < i ; r += 2){
-			unsigned char temp_arr[3] = {salt[r], salt[r+1], '\0'};
-			salt[w++] = strtol(temp_arr, NULL, 16);
-		} //2 string to hex
-
 		salt_len = i/2;
 
-		/*printf("passlen: %d\n", pass_len);
-
-		for(int z=0; z<pass_len; z++){
-			printf("%02x", password[z]);
+		/*printf("salt: ");
+		for(int z=0; z<salt_len; z++){
+			printf("%02x", salt[z]);
 		}printf("\n");*/
 
 		pbkdf_testvector_sha3_hmac(rate, capacity, delimitedSuffix, password, pass_len, salt, salt_len, IterationCount, Klen, loopCount, fp_out);
-		//loopCount++;
 
-		/*for(int i=0; i<128; i++){
-			password[i] = '\0';
-			salt[i] = '\0';
-		}*/
+		memset(password, 0, 128);
+		memset(salt, 0, 128);
 	}
 
     fclose(fp_in);
