@@ -43,6 +43,9 @@ genKAT_main(void)
 	char inputFileAddress[256], outputFileAddress[256];
 
 	for(int i=0; i<4; i++){
+		/*sprintf(inputFileAddress, "PBKDF/%s.txt", HashName[i]);
+		sprintf(outputFileAddress, "PBKDF/%s_rsp.txt", HashName[i]);*/
+
 		sprintf(inputFileAddress, "PBKDF_testvectors/%s.txt", HashName[i]);
 		sprintf(outputFileAddress, "PBKDF_testvectors/%s_rsp.txt", HashName[i]);
 
@@ -109,21 +112,18 @@ genShortMsgHash_testVector_PBKDF(unsigned int rate, unsigned int capacity, unsig
 	fprintf(fp_out, "IterationCount = %d", IterationCount);
 	fprintf(fp_out, "\n\n");
 
-	while(!(loopCount == 15)) {
+	while(!(loopCount == 3)) {
 		FindMarker(fp_in, "COUNT");
 		fscanf(fp_in, " %c %d", &str, &loopCount);
 		fprintf(fp_out, "COUNT = %d", loopCount);
 		fprintf(fp_out, "\n");
 
-		FindMarker(fp_in, "Password");
-		fscanf(fp_in, " %c %s", &str, &password);
+		FindMarker(fp_in, "Password = ");
 		fprintf(fp_out, "Password = ");
-		fprintf(fp_out, "%s\n", password);
-		/*while(!(password[i] == '\0')){
-			fprintf(fp_out, "%c", password[i++]);
-		}fprintf(fp_out, "\n");*/
+		fgets(password, 40, fp_in);
+		fprintf(fp_out, "%s", password);
 
-		pass_len = i;
+		pass_len = strlen(password) - 1;
 		i=0;
 
 		FindMarker(fp_in, "Salt");
@@ -132,8 +132,6 @@ genShortMsgHash_testVector_PBKDF(unsigned int rate, unsigned int capacity, unsig
 		while(!(salt[i] == '\0')){
 			fprintf(fp_out, "%c", salt[i++]);
 		}fprintf(fp_out, "\n");
-
-
 
 		FindMarker(fp_in, "KLen");
 		fscanf(fp_in, " %c %d", &str, &Klen);
@@ -147,13 +145,19 @@ genShortMsgHash_testVector_PBKDF(unsigned int rate, unsigned int capacity, unsig
 
 		salt_len = i/2;
 
+		printf("passlen: %d\n", pass_len);
+
+		for(int z=0; z<pass_len; z++){
+			printf("%02x", password[z]);
+		}printf("\n");
+
 		pbkdf_testvector_sha3_hmac(rate, capacity, delimitedSuffix, password, pass_len, salt, salt_len, IterationCount, Klen, loopCount, fp_out);
 		//loopCount++;
 
-		for(int i=0; i<128; i++){
+		/*for(int i=0; i<128; i++){
 			password[i] = '\0';
 			salt[i] = '\0';
-		}
+		}*/
 	}
 
     fclose(fp_in);

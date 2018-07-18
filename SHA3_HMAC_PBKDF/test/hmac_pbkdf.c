@@ -23,6 +23,8 @@ void pbkdf_sha3_hmac(const unsigned int rate, const unsigned int capacity, const
 	BitSequence salt_inti[salt_leng + 4];
 	BitSequence tmp[0];
 
+	printf("%d, %d\n", capacity, rate);
+
 	if(rate == 1152){
 		hlen = 224;
 	}else if(rate == 1088){
@@ -68,10 +70,14 @@ void pbkdf_sha3_hmac(const unsigned int rate, const unsigned int capacity, const
 			fprintf(outf, "%02x", salt_inti[b]);
 		}fprintf(outf, "\n\n");
 
+		/*for(int q=0; q<pass_len; q++){
+			printf("%02x", password[q]);
+		}printf("\n");*/
+
 		for(j=1; j<IterationCount+1; j++){
 			if(j == 1){
 				hmac_digest(capacity / 2, rate, capacity, password, pass_len, salt_inti, salt_leng + 4, U);
-				//drbg_sha3_hmac_print(capacity / 16, U);
+				drbg_sha3_hmac_print(capacity / 16, U);
 			}else {
 				hmac_digest(capacity / 2, rate, capacity, password, pass_len, U, capacity / 16, U);
 				//drbg_sha3_hmac_print(capacity / 16, U);
@@ -122,6 +128,8 @@ void pbkdf_testvector_sha3_hmac(const unsigned int rate, const unsigned int capa
 	BitSequence salt_inti[salt_leng + 4];
 	BitSequence tmp[0];
 
+	//printf("%d, %d\n", capacity, rate);
+
 	if(rate == 1152){
 		hlen = 224;
 	}else if(rate == 1088){
@@ -139,7 +147,7 @@ void pbkdf_testvector_sha3_hmac(const unsigned int rate, const unsigned int capa
 	length = ceil(Klen / hlen);
 	r = Klen - (length - 1) * hlen;
 
-	for(int i=1; i<length+1; i++){
+	for(int i=1; i<length+2; i++){
 		//printf("Output start %d \n", i);
 		for(int ii=0; ii<capacity/16; ii++){
 			T[ii] = '\0';
@@ -178,7 +186,6 @@ void pbkdf_testvector_sha3_hmac(const unsigned int rate, const unsigned int capa
 			printf("i is over 10\n");
 		}
 
-
 		for(j=1; j<IterationCount+1; j++){
 			if(j == 1){
 				hmac_digest(capacity / 2, rate, capacity, password, pass_len, salt_inti, salt_leng + 4, U);
@@ -187,6 +194,14 @@ void pbkdf_testvector_sha3_hmac(const unsigned int rate, const unsigned int capa
 				hmac_digest(capacity / 2, rate, capacity, password, pass_len, U, capacity / 16, U);
 				//drbg_sha3_hmac_print(capacity / 16, U);
 			}
+
+			/*if(j == 1 || j == 2 || j ==3 || j == IterationCount-2 || j == IterationCount-1 || j == IterationCount){
+				printf("U%i = ", j);
+				for(int b =0; b<capacity / 16; b++){
+					printf("%02x", U[b]);
+				}printf("\n");
+			}*/
+
 			for(int k=0; k<capacity / 16; k++){
 				T[k] = T[k] ^ U[k];
 			}
