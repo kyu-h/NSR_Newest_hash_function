@@ -201,8 +201,8 @@ Password = QyG,UKQjdk*jQ"QJ
 Salt = 89BF3D9586764D03A13909F97BB1CA80
 KLen = 1600
 
-Algo_ID = PBKDF_SHA3-224
-IterationCount = 4096
+[PRF = HMAC-SHA224]
+[Iteration = 4096]
 
 COUNT = 40
 Password = ItE#q1/8XlJq

@@ -62,13 +62,13 @@ genKAT_main(void)
 			genShortMsgHash_testVector_PBKDF(1152, 448, 0x06, 224, 0,inputFileAddress,outputFileAddress,"Algo_ID = PBKDF_SHA3-224");
 		}else if(!strcmp(pStr, "Algo_ID = PBKDF_SHA3-256\n")){
 			//genShortMsgHash_PBKDF(1088, 512, 0x06, 256, 0,inputFileAddress,outputFileAddress,"Alg_ID = PBKDF_SHA3-256");
-			genShortMsgHash_testVector_PBKDF(1088, 512, 0x06, 256, 0,inputFileAddress,outputFileAddress,"Algo_ID = PBKDF_SHA3-256");
+			//genShortMsgHash_testVector_PBKDF(1088, 512, 0x06, 256, 0,inputFileAddress,outputFileAddress,"Algo_ID = PBKDF_SHA3-256");
 		}else if(!strcmp(pStr, "Algo_ID = PBKDF_SHA3-384\n")){
 			//genShortMsgHash_PBKDF(832, 768, 0x06, 384, 0,inputFileAddress,outputFileAddress,"Alg_ID = PBKDF_SHA3-384");
-			genShortMsgHash_testVector_PBKDF(832, 768, 0x06, 384, 0,inputFileAddress,outputFileAddress,"Algo_ID = PBKDF_SHA3-384");
+			//genShortMsgHash_testVector_PBKDF(832, 768, 0x06, 384, 0,inputFileAddress,outputFileAddress,"Algo_ID = PBKDF_SHA3-384");
 		}else if(!strcmp(pStr, "Algo_ID = PBKDF_SHA3-512\n")){
 			//genShortMsgHash_PBKDF(576, 1024, 0x06, 512, 0,inputFileAddress,outputFileAddress,"Alg_ID = PBKDF_SHA3-512");
-			genShortMsgHash_testVector_PBKDF(576, 1024, 0x06, 512, 0,inputFileAddress,outputFileAddress,"Algo_ID = PBKDF_SHA3-512");
+			//genShortMsgHash_testVector_PBKDF(576, 1024, 0x06, 512, 0,inputFileAddress,outputFileAddress,"Algo_ID = PBKDF_SHA3-512");
 		}else {
 			printf("Error!\n");
 		}
@@ -150,7 +150,7 @@ genShortMsgHash_testVector_PBKDF(unsigned int rate, unsigned int capacity, unsig
 			printf("%02x", salt[z]);
 		}printf("\n");*/
 
-		pbkdf_testvector_sha3_hmac(rate, capacity, delimitedSuffix, password, pass_len, salt, salt_len, IterationCount, Klen, loopCount, fp_out);
+		pbkdf_testvector_sha3_rev(rate, capacity, delimitedSuffix, password, pass_len, salt, salt_len, IterationCount, Klen, loopCount, fp_out);
 
 		memset(password, 0, 128);
 		memset(salt, 0, 128);

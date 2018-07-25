@@ -116,6 +116,80 @@ void pbkdf_sha3_hmac(const unsigned int rate, const unsigned int capacity, const
 	}
 }
 
+void pbkdf_gen(int capacity, int rate, int hash_len, BitSequence *U, int size_u, BitSequence *T, int t_index, BitSequence *password, int pass_size, int iteration_count, FILE *fp)
+{	int index = t_index;
+
+	for(int i = 0 ; i < iteration_count ; i++)
+	{
+		if(!i)
+			hmac_digest(capacity / 2, rate, capacity, password, pass_size, U, size_u, U);
+		else
+			hmac_digest(capacity / 2, rate, capacity, password, pass_size, U, hash_len, U);
+
+		for(int j = 0 ; j < hash_len ; j++)
+			T[index++] ^=  U[j];
+		index = t_index;
+	}
+}
+
+void pbkdf_testvector_sha3_rev(const unsigned int rate, const unsigned int capacity, const unsigned char delimitedSuffix, BitSequence *password, unsigned int pass_len, BitSequence *salt, const unsigned int salt_leng, unsigned int IterationCount, unsigned int Klen, unsigned int loopCount, FILE *outf)
+{
+	unsigned int hlen;
+
+	BitSequence U[128] = {'\0', };
+	BitSequence *T;
+
+	int hash_byte, key_byte;
+
+	double len;
+	int r, w;
+	int size_u, size_t;
+
+	if(rate == 1152){
+		hlen = 224;
+	}else if(rate == 1088){
+		hlen = 256;
+	}else if(rate == 832){
+		hlen = 384;
+	}else {
+		hlen = 512;
+	}
+
+	hash_byte = hlen / 8;
+	key_byte = Klen / 8;
+
+	len = ceil((double) key_byte / (double) hash_byte);
+
+	size_t = hash_byte * len;
+
+	T = (BitSequence*) malloc(sizeof(BitSequence) * size_t);
+
+	for(int i = 0 ; i < size_t ; i++)
+		T[i] = '\0';
+
+	for(int i = 0 ; i < len ; i++)
+	{
+		int t_index = size_t / len * i;
+
+		for(r = 0, w = 0 ; r < salt_leng ; r++)
+			U[w++] = salt[r];
+		U[w++] = 0;
+		U[w++] = 0;
+		U[w++] = 0;
+		U[w] = i + 1;
+		size_u = salt_leng + 4;
+
+		pbkdf_gen(capacity, rate, hash_byte, U, size_u, T, t_index, password, pass_len, IterationCount, outf);
+	}
+
+	fprintf(outf, "MK = ");
+	for(int i = 0 ; i < key_byte ; i++)
+		fprintf(outf, "%02x", T[i]);
+	fprintf(outf, "\n\n");
+
+	free(T);
+}
+
 void pbkdf_testvector_sha3_hmac(const unsigned int rate, const unsigned int capacity, const unsigned char delimitedSuffix, BitSequence *password, unsigned int pass_len, BitSequence *salt, const unsigned int salt_leng, unsigned int IterationCount, unsigned int Klen, unsigned int loopCount, FILE *outf){
 	unsigned int hlen, length = 0;
 	int r, c;
@@ -130,6 +204,9 @@ void pbkdf_testvector_sha3_hmac(const unsigned int rate, const unsigned int capa
 
 	//printf("%d, %d\n", capacity, rate);
 
+	for(int i = 0 ; i < (capacity / 16) * 8 ; i++)
+		MK[i] = '\0';
+
 	if(rate == 1152){
 		hlen = 224;
 	}else if(rate == 1088){
@@ -139,6 +216,8 @@ void pbkdf_testvector_sha3_hmac(const unsigned int rate, const unsigned int capa
 	}else {
 		hlen = 512;
 	}
+
+	int temp = hlen / 8;
 
 	if(Klen > ((pow(2,32) - 1) * hlen)){
 		printf("Error !\n");
@@ -184,19 +263,31 @@ void pbkdf_testvector_sha3_hmac(const unsigned int rate, const unsigned int capa
 				}printf("\n");
 			}*/
 
-			for(int k=0; k<capacity / 16; k++){
+			for(int k=0; k< temp; k++){
 				T[k] = T[k] ^ U[k];
 			}
 		}
+
 		w = 0;
 		if(j == IterationCount+1){
+			/*if(Klen == 2048 && i > 7)
+			{
+				if(i > 7 && Klen == 2048)
+				{
+					printf("current len: %d \n", i);
+					for(int k = 0 ; k < temp ; k++)
+						printf("%02x", T[k]);
+					printf("\n");
+				}
+			}*/
 			/*for(int k=0; k<capacity / 16; k++){
 				printf("%02x", T[k]);
 			}printf("\n");*/
 
-			for(int b =0; b<capacity / 16; b++){
+			for(int b =0; b< temp; b++){
 				MK[num++] = T[b];
 			}//printf("\n");
+			printf("\n");
 		}
 	}
 
