@@ -129,7 +129,7 @@ void hmac_sha512_final(hmac_sha512_ctx *ctx, unsigned char *mac, unsigned int ma
 void hmac_sha512(const unsigned char *key, unsigned int key_size,
                  const unsigned char *message, unsigned int message_len,
                  unsigned char *mac, unsigned mac_size);
-void test(const char *vector, unsigned char *digest, unsigned int digest_size);
+void test(unsigned char *digest, unsigned int digest_size);
 
 #ifdef __cplusplusa
 }

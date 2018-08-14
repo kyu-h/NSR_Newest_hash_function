@@ -658,8 +658,7 @@ void sha384_update(sha384_ctx *ctx, const unsigned char *message,unsigned int le
 
     rem_len = new_len % SHA384_BLOCK_SIZE;
 
-    memcpy(ctx->block, &shifted_message[block_nb << 7],
-           rem_len);
+    memcpy(ctx->block, &shifted_message[block_nb << 7], rem_len);
 
     ctx->len = rem_len;
     ctx->tot_len += (block_nb + 1) << 7;
