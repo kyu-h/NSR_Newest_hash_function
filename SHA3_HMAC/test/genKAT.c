@@ -66,55 +66,58 @@ genKAT_main(void){
 	char inputFileAddress_ReferenceValues[256], inputFileAddress_TestVectors_req[256], outputFileAddress_TestVectors_req[256], outputFileAddress_ReferenceValues[256];
 
 	for(int i=0; i<4; i++){
+		printf("%d, %d: ", i, hashbits[i]);
+
 		sprintf(inputFileAddress_TestVectors_req, "(180430)_HMAC_Vector/TestVectors_req/HMAC_SHA3-%d.txt", hashbits[i]);
 		sprintf(outputFileAddress_TestVectors_req, "(180430)_HMAC_Vector/TestVectors_req/HMAC_SHA3-%d_rsp.txt", hashbits[i]);
 
-		sprintf(inputFileAddress_ReferenceValues, "(180430)_HMAC_Vector/RefereceValues_req/HMAC_SHA3-%d.txt", hashbits[i]);
-		sprintf(outputFileAddress_ReferenceValues, "(180430)_HMAC_Vector/RefereceValues_req/HMAC_SHA3-%d_rsp.txt", hashbits[i]);
+		/*sprintf(inputFileAddress_ReferenceValues, "(180430)_HMAC_Vector/RefereceValues_req/HMAC_SHA3-%d.txt", hashbits[i]);
+		sprintf(outputFileAddress_ReferenceValues, "(180430)_HMAC_Vector/RefereceValues_req/HMAC_SHA3-%d_rsp.txt", hashbits[i]);*/
 
 		fp_in_TestVectors_req = fopen(inputFileAddress_TestVectors_req, "r");
-		fp_in_ReferenceValues = fopen(inputFileAddress_ReferenceValues, "r");
 		fp_out_TestVectors_req = fopen(outputFileAddress_TestVectors_req, "w");
-		fp_out_ReferenceValues = fopen(outputFileAddress_ReferenceValues, "w");
 
-		if (fp_in_ReferenceValues == NULL ) {
+		/*fp_in_ReferenceValues = fopen(inputFileAddress_ReferenceValues, "r");
+		fp_out_ReferenceValues = fopen(outputFileAddress_ReferenceValues, "w");*/
+
+		/*if (fp_in_ReferenceValues == NULL ) {
 			printf("Couldn't open <%s.txt> for read\n", inputFileAddress_ReferenceValues);
 			return KAT_FILE_OPEN_ERROR;
-		}
+		}*/
 
 		if (fp_in_TestVectors_req == NULL ) {
 			printf("Couldn't open <%s.txt> for read\n", inputFileAddress_ReferenceValues);
 			return KAT_FILE_OPEN_ERROR;
 		}
 
-		fgets(pStr_ReferenceValues, sizeof(pStr_ReferenceValues), fp_in_ReferenceValues);
+		/*fgets(pStr_ReferenceValues, sizeof(pStr_ReferenceValues), fp_in_ReferenceValues);
 		pAlg_ReferenceValues = strstr(pStr_ReferenceValues, "HMAC");
-		pAlg_ReferenceValues[strlen(pAlg_ReferenceValues) - 1] = '\0';
+		pAlg_ReferenceValues[strlen(pAlg_ReferenceValues) - 1] = '\0';*/
 
 		fgets(pStr_TestVectors_req, sizeof(pStr_TestVectors_req), fp_in_TestVectors_req);
 		pAlg_TestVectors_req = strstr(pStr_TestVectors_req, "HMAC");
 		pAlg_TestVectors_req[strlen(pAlg_TestVectors_req) - 1] = '\0';
 
 		if((!strcmp(pAlg_ReferenceValues, "HMAC_SHA3-224"))||(!strcmp(pAlg_TestVectors_req, "HMAC_SHA3-224"))){
-			genHmac_ReferenceValues(fp_in_ReferenceValues, fp_out_ReferenceValues, 224);
+			//genHmac_ReferenceValues(fp_in_ReferenceValues, fp_out_ReferenceValues, 224);
 			genHmac_TestVectors(fp_in_TestVectors_req, fp_out_TestVectors_req, 224);
-		}else if((!strcmp(pAlg_ReferenceValues, "HMAC_SHA3-256")) || (!strcmp(pAlg_TestVectors_req, "HMAC_SHA3-224"))){
-			genHmac_ReferenceValues(fp_in_ReferenceValues, fp_out_ReferenceValues, 256);
+		}else if((!strcmp(pAlg_ReferenceValues, "HMAC_SHA3-256")) || (!strcmp(pAlg_TestVectors_req, "HMAC_SHA3-256"))){
+			//genHmac_ReferenceValues(fp_in_ReferenceValues, fp_out_ReferenceValues, 256);
 			genHmac_TestVectors(fp_in_TestVectors_req, fp_out_TestVectors_req, 256);
-		}else if((!strcmp(pAlg_ReferenceValues, "HMAC_SHA3-384")) || (!strcmp(pAlg_TestVectors_req, "HMAC_SHA3-224"))){
-			genHmac_ReferenceValues(fp_in_ReferenceValues, fp_out_ReferenceValues, 384);
+		}else if((!strcmp(pAlg_ReferenceValues, "HMAC_SHA3-384")) || (!strcmp(pAlg_TestVectors_req, "HMAC_SHA3-384"))){
+			//genHmac_ReferenceValues(fp_in_ReferenceValues, fp_out_ReferenceValues, 384);
 			genHmac_TestVectors(fp_in_TestVectors_req, fp_out_TestVectors_req, 384);
-		}else if((!strcmp(pAlg_ReferenceValues, "HMAC_SHA3-512")) || (!strcmp(pAlg_TestVectors_req, "HMAC_SHA3-224"))){
-			genHmac_ReferenceValues(fp_in_ReferenceValues, fp_out_ReferenceValues, 512);
+		}else if((!strcmp(pAlg_ReferenceValues, "HMAC_SHA3-512")) || (!strcmp(pAlg_TestVectors_req, "HMAC_SHA3-512"))){
+			//genHmac_ReferenceValues(fp_in_ReferenceValues, fp_out_ReferenceValues, 512);
 			genHmac_TestVectors(fp_in_TestVectors_req, fp_out_TestVectors_req, 512);
 		}else {
 			printf("Error!\n");
 		}
 
 		fclose(fp_in_TestVectors_req);
-		fclose(fp_in_ReferenceValues);
+		//fclose(fp_in_ReferenceValues);
 		fclose(fp_out_TestVectors_req);
-		fclose(fp_out_ReferenceValues);
+		//fclose(fp_out_ReferenceValues);
 	}
 
     return KAT_SUCCESS;
@@ -203,6 +206,11 @@ void genHmac_ReferenceValues(FILE *fp_in, FILE *fp_out_ReferenceValues, int hash
 			if(hashbits == 224) {
 				rate = 1152;
 				capacity = 448;
+
+				/*for(int i=0; i<keylen/2; i++){
+					printf("%02x", Key_values[i]);
+				}printf("\n")*/
+
 				hmac_digest(hashbits, rate, capacity, Key_values, keylen / 2, Msgstring, msglen, mac);
 				hash_out_ReferenceValues(fp_out_ReferenceValues, SHA3_224, mac);
 			}else if(hashbits == 256) {
