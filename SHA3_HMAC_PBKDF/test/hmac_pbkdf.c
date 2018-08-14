@@ -121,15 +121,22 @@ void pbkdf_gen(int capacity, int rate, int hash_len, BitSequence *U, int size_u,
 
 	for(int i = 0 ; i < iteration_count ; i++)
 	{
-		if(!i)
+		if(!i){
 			hmac_digest(capacity / 2, rate, capacity, password, pass_size, U, size_u, U);
-		else
+
+			for(int z=0; z<size_u; z++){
+				printf("%02x", U[z]);
+			}printf("\n");
+		}else{
 			hmac_digest(capacity / 2, rate, capacity, password, pass_size, U, hash_len, U);
+		}
 
 		for(int j = 0 ; j < hash_len ; j++)
 			T[index++] ^=  U[j];
 		index = t_index;
 	}
+
+
 }
 
 void pbkdf_testvector_sha3_rev(const unsigned int rate, const unsigned int capacity, const unsigned char delimitedSuffix, BitSequence *password, unsigned int pass_len, BitSequence *salt, const unsigned int salt_leng, unsigned int IterationCount, unsigned int Klen, unsigned int loopCount, FILE *outf)
@@ -178,6 +185,10 @@ void pbkdf_testvector_sha3_rev(const unsigned int rate, const unsigned int capac
 		U[w++] = 0;
 		U[w] = i + 1;
 		size_u = salt_leng + 4;
+
+		for(int z=0; z<w+1; z++){
+			printf("%02x", U[z]);
+		}printf("\n");
 
 		pbkdf_gen(capacity, rate, hash_byte, U, size_u, T, t_index, password, pass_len, IterationCount, outf);
 	}

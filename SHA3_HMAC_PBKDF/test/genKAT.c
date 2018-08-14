@@ -58,17 +58,17 @@ genKAT_main(void)
 		printf("%s", pStr);
 
 		if(!strcmp(pStr, "Algo_ID = PBKDF_SHA3-224\n")){
-			//genShortMsgHash_PBKDF(1152, 448, 0x06, 224, 0,inputFileAddress,outputFileAddress,"Alg_ID = PBKDF_SHA3-224");
-			genShortMsgHash_testVector_PBKDF(1152, 448, 0x06, 224, 0,inputFileAddress,outputFileAddress,"Algo_ID = PBKDF_SHA3-224");
+			//genShortMsgHash_PBKDF(1152, 448, 0x06, 224, 0,inputFileAddress,outputFileAddress,"Algo_ID = PBKDF_SHA3-224");
+			//genShortMsgHash_testVector_PBKDF(1152, 448, 0x06, 224, 0,inputFileAddress,outputFileAddress,"Algo_ID = PBKDF_SHA3-224");
 		}else if(!strcmp(pStr, "Algo_ID = PBKDF_SHA3-256\n")){
-			//genShortMsgHash_PBKDF(1088, 512, 0x06, 256, 0,inputFileAddress,outputFileAddress,"Alg_ID = PBKDF_SHA3-256");
+			//genShortMsgHash_PBKDF(1088, 512, 0x06, 256, 0,inputFileAddress,outputFileAddress,"Algo_ID = PBKDF_SHA3-256");
 			//genShortMsgHash_testVector_PBKDF(1088, 512, 0x06, 256, 0,inputFileAddress,outputFileAddress,"Algo_ID = PBKDF_SHA3-256");
 		}else if(!strcmp(pStr, "Algo_ID = PBKDF_SHA3-384\n")){
-			//genShortMsgHash_PBKDF(832, 768, 0x06, 384, 0,inputFileAddress,outputFileAddress,"Alg_ID = PBKDF_SHA3-384");
-			//genShortMsgHash_testVector_PBKDF(832, 768, 0x06, 384, 0,inputFileAddress,outputFileAddress,"Algo_ID = PBKDF_SHA3-384");
+			//genShortMsgHash_PBKDF(832, 768, 0x06, 384, 0,inputFileAddress,outputFileAddress,"Algo_ID = PBKDF_SHA3-384");
+			genShortMsgHash_testVector_PBKDF(832, 768, 0x06, 384, 0,inputFileAddress,outputFileAddress,"Algo_ID = PBKDF_SHA3-384");
 		}else if(!strcmp(pStr, "Algo_ID = PBKDF_SHA3-512\n")){
-			//genShortMsgHash_PBKDF(576, 1024, 0x06, 512, 0,inputFileAddress,outputFileAddress,"Alg_ID = PBKDF_SHA3-512");
-			//genShortMsgHash_testVector_PBKDF(576, 1024, 0x06, 512, 0,inputFileAddress,outputFileAddress,"Algo_ID = PBKDF_SHA3-512");
+			//genShortMsgHash_PBKDF(576, 1024, 0x06, 512, 0,inputFileAddress,outputFileAddress,"Algo_ID = PBKDF_SHA3-512");
+			genShortMsgHash_testVector_PBKDF(576, 1024, 0x06, 512, 0,inputFileAddress,outputFileAddress,"Algo_ID = PBKDF_SHA3-512");
 		}else {
 			printf("Error!\n");
 		}
@@ -112,7 +112,7 @@ genShortMsgHash_testVector_PBKDF(unsigned int rate, unsigned int capacity, unsig
 	fprintf(fp_out, "IterationCount = %d", IterationCount);
 	fprintf(fp_out, "\n\n");
 
-	while(!(loopCount == 79)) {
+	while(!(loopCount == 1)) {
 		FindMarker(fp_in, "COUNT");
 		fscanf(fp_in, " %c %d", &str, &loopCount);
 		fprintf(fp_out, "COUNT = %d", loopCount);
