@@ -2,7 +2,9 @@
 This project is for matched reference log with NSR.
 We will not develope SHA3 base code. We just get original code from Keccak Team.
 If we have some time, we will change that base code on our own. (If possible..)
-
+<hr>
+SHA2 is an auxiliary tool for verifying implementation conformance.
+<hr>
 1. We will find SHA3 hash values and matched that values with NSR due to April 27. --> Clear(April 25) <br>
  ->Can check hash values result in this web site: https://leventozturk.com/engineering/sha3/ <br><br>
  <a href="https://github.com/kyu-h/NSR_Newest_hash_function/tree/master/SHA3" target="_blank">SHA3 stand alone version</a> <br>
