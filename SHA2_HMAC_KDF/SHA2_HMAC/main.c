@@ -124,7 +124,7 @@ void genShortMsgHash_HMAC_KDF_FB()
 			str_to_int = &read_line[4];
 			hash_len = strtol(str_to_int, NULL, 16);
 
-			//hmac_kdf_digest(FB_MODE, rate, capacity, ki, ki_size, iv, iv_size, label, label_size, context, context_size, r, len, hash_len, fp_out);
+			hmac_kdf_digest(FB_MODE, ki, ki_size, iv, iv_size, label, label_size, context, context_size, r, len, hash_len, fp_out);
 
 			fgets(read_line, MAX_READ_LEN, fp_in);	// skip line
 		}
@@ -263,8 +263,6 @@ void genShortMsgHash_HMAC_KDF_CTR()
 {
 	FILE *fp_in, *fp_out;
 	int output_std[4] = {224, 256, 384, 512};
-	unsigned int rate, capacity;
-	const unsigned char delimitedSuffix = 6;
 	char inputFileAddress[256], outputFileAddress[256];
 	unsigned char read_line[256];
 
@@ -297,26 +295,18 @@ void genShortMsgHash_HMAC_KDF_CTR()
 
 		if(std == 0)
 		{
-			rate = 1152;
-			capacity = 448;
 			fprintf(fp_out, "Algo_ID = HMAC_KDF_CTRmode_SHA3-224\n\n");
 		}
 		else if(std == 1)
 		{
-			rate = 1088;
-			capacity = 512;
 			fprintf(fp_out, "Algo_ID = HMAC_KDF_CTRmode_SHA3-256\n\n");
 		}
 		else if(std == 2)
 		{
-			rate = 832;
-			capacity = 768;
 			fprintf(fp_out, "Algo_ID = HMAC_KDF_CTRmode_SHA3-384\n\n");
 		}
 		else if(std == 3)
 		{
-			rate = 576;
-			capacity = 1024;
 			fprintf(fp_out, "Algo_ID = HMAC_KDF_CTRmode_SHA3-512\n\n");
 		}
 
@@ -337,15 +327,6 @@ void genShortMsgHash_HMAC_KDF_CTR()
 				ki[write++] = strtol(temp_arr, NULL, 16);
 				ki_size++;
 			}
-
-			/*fgets(read_line, MAX_READ_LEN, fp_in);	// read iv
-			iv_size = 0;
-			for(read = 5, write = 0 ; read < strlen(read_line) - 1 ; read += 2)
-			{
-				BitSequence temp_arr[3] = {read_line[read], read_line[read + 1], '\0'};
-				iv[write++] = strtol(temp_arr, NULL, 16);
-				iv_size++;
-			}*/
 
 			fgets(read_line, MAX_READ_LEN, fp_in);	// read label
 			label_size = 0;
@@ -373,7 +354,7 @@ void genShortMsgHash_HMAC_KDF_CTR()
 			str_to_int = &read_line[4];
 			hash_len = strtol(str_to_int, NULL, 16);
 
-			//hmac_kdf_digest(CTR_MODE, rate, capacity, ki, ki_size, iv, iv_size, label, label_size, context, context_size, r, len, hash_len, fp_out);
+			hmac_kdf_digest(CTR_MODE, ki, ki_size, iv, iv_size, label, label_size, context, context_size, r, len, hash_len, fp_out);
 
 			fgets(read_line, MAX_READ_LEN, fp_in);	// skip line
 		}
@@ -454,9 +435,9 @@ int main(void){
 	}*/
 
 
-	genShortMsgHash_HMAC_KDF_CTR();
+	//genShortMsgHash_HMAC_KDF_CTR();
 	//genShortMsgHash_HMAC_KDF_DP();
-	//genShortMsgHash_HMAC_KDF_FB();
+	genShortMsgHash_HMAC_KDF_FB();
 
     return 0;
 }

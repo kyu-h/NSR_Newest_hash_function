@@ -727,9 +727,9 @@ void sha224_init(sha224_ctx *ctx)
     ctx->tot_len = 0;
 
 
-    printf("sha224_init tot_len: %d\n", &ctx->tot_len);
+    /*printf("sha224_init tot_len: %d\n", &ctx->tot_len);
     printf("sha224_init len: %d\n", &ctx->len);
-    printf("sha224_init h: %d\n", &ctx->h);
+    printf("sha224_init h: %d\n", &ctx->h);*/
 
 }
 
@@ -763,9 +763,9 @@ void sha224_update(sha224_ctx *ctx, const unsigned char *message,unsigned int le
     ctx->len = rem_len;
     ctx->tot_len += (block_nb + 1) << 6;
 
-    printf("sha224_update tot_len: %d\n", &ctx->tot_len);
+    /*printf("sha224_update tot_len: %d\n", &ctx->tot_len);
 	printf("sha224_update len: %d\n", &ctx->len);
-	printf("sha224_update h: %d\n", &ctx->h);
+	printf("sha224_update h: %d\n", &ctx->h);*/
 
 }
 
@@ -804,9 +804,9 @@ void sha224_final(sha224_ctx *ctx, unsigned char *digest){
    UNPACK32(ctx->h[6], &digest[24]);
 #endif /* !UNROLL_LOOPS */
 
-   	printf("sha224_final tot_len: %d\n", &ctx->tot_len);
+   	/*printf("sha224_final tot_len: %d\n", &ctx->tot_len);
 	printf("sha224_final len: %d\n", &ctx->len);
-	printf("sha224_final h: %d\n", &ctx->h);
+	printf("sha224_final h: %d\n", &ctx->h);*/
 }
 
 #ifdef TEST_VECTORS

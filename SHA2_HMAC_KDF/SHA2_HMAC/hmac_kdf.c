@@ -2,11 +2,18 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#include "hmac_sha2.h"
+#include "sha2.h"
+
 #define CTR_MODE 1
 #define FB_MODE 2
 #define DP_MODE 3
 
 typedef unsigned char BitSequence;
+
+unsigned int mac_224_size = 224/8, mac_256_size = 256/8, mac_384_size = 384/8, mac_512_size = 512/8;
+
+unsigned char mac[SHA512_DIGEST_SIZE];
 
 void drbg_sha3_hmac_print(unsigned int digest_size, BitSequence *digest){
 	for(int i = 0 ; i < digest_size ; i++)
@@ -310,7 +317,7 @@ void pbkdf_testvector_sha3_hmac(const unsigned int rate, const unsigned int capa
 
 /********** hmac pbkdf **********/
 
-void hmac_kdf_ctr_digest(int rate, int capacity , int loop_count, int byte_r, BitSequence *Ki, int Ki_len, BitSequence *label, int label_len, BitSequence *context, int ct_len, unsigned int len, unsigned int hash_len, BitSequence *output, FILE *fp, bool tv)
+void hmac_kdf_ctr_digest(int loop_count, int byte_r, BitSequence *Ki, int Ki_len, BitSequence *label, int label_len, BitSequence *context, int ct_len, unsigned int len, unsigned int hash_len, BitSequence *output, FILE *fp, bool tv)
 {
 	BitSequence *input;
 	BitSequence *k_temp;
@@ -353,6 +360,9 @@ void hmac_kdf_ctr_digest(int rate, int capacity , int loop_count, int byte_r, Bi
 
 		//hmac_digest(capacity / 2, rate, capacity, Ki, Ki_len, input, input_size, k_temp);
 
+		hmac_sha224(Ki, Ki_len, input, input_size, mac, mac_224_size);
+		test(mac, mac_224_size);
+
 		printf("output data number %d: ", i + 1);
 		for(int j = 0 ; j < hash_len ; j++)
 			printf("%02x", k_temp[j]);
@@ -387,7 +397,7 @@ void hmac_kdf_ctr_digest(int rate, int capacity , int loop_count, int byte_r, Bi
 	free(k_temp);
 }
 
-void hmac_kdf_fb_digest(int rate, int capacity, int loop_count, int byte_r, BitSequence *Ki, int Ki_len, BitSequence *iv, int iv_len, BitSequence *label, int label_len, BitSequence *context, int ct_len, unsigned int len, unsigned int hash_len, BitSequence *output, FILE *fp, bool tv)
+void hmac_kdf_fb_digest(int loop_count, int byte_r, BitSequence *Ki, int Ki_len, BitSequence *iv, int iv_len, BitSequence *label, int label_len, BitSequence *context, int ct_len, unsigned int len, unsigned int hash_len, BitSequence *output, FILE *fp, bool tv)
 {
 	BitSequence *input;
 	BitSequence *iv_zero_input;
@@ -468,6 +478,9 @@ void hmac_kdf_fb_digest(int rate, int capacity, int loop_count, int byte_r, BitS
 			printf("\n");
 
 			//hmac_digest(capacity / 2, rate, capacity, Ki, Ki_len, iv_zero_input, iv_zero_input_size, k_temp);
+
+			hmac_sha224(Ki, Ki_len, iv_zero_input, iv_zero_input_size, mac, mac_224_size);
+			//test(mac, mac_224_size);
 		}
 		else
 		{
@@ -477,6 +490,9 @@ void hmac_kdf_fb_digest(int rate, int capacity, int loop_count, int byte_r, BitS
 			printf("\n");
 
 			//hmac_digest(capacity / 2, rate, capacity, Ki, Ki_len, input, input_size, k_temp);
+
+			hmac_sha224(Ki, Ki_len, input, input_size, mac, mac_224_size);
+			//test(mac, mac_224_size);
 		}
 
 		printf("output data number %d: ", i + 1);
@@ -513,7 +529,7 @@ void hmac_kdf_fb_digest(int rate, int capacity, int loop_count, int byte_r, BitS
 	free(k_temp);
 }
 
-void hmac_kdf_dp_digest(int rate, int capacity, int loop_count, int byte_r, BitSequence *Ki, int Ki_len, BitSequence *label, int label_len, BitSequence *context, int ct_len, unsigned int len, unsigned int hash_len, BitSequence *output, FILE *fp, bool tv)
+void hmac_kdf_dp_digest(int loop_count, int byte_r, BitSequence *Ki, int Ki_len, BitSequence *label, int label_len, BitSequence *context, int ct_len, unsigned int len, unsigned int hash_len, BitSequence *output, FILE *fp, bool tv)
 {
 	BitSequence *input;
 	BitSequence *k_temp;
@@ -669,7 +685,7 @@ void hmac_kdf_dp_digest(int rate, int capacity, int loop_count, int byte_r, BitS
 	free(k_saved);
 }
 
-void hmac_kdf_digest(int mode, int rate, int capacity, BitSequence *Ki, int Ki_len, BitSequence *iv, int iv_len, BitSequence *label, int label_len, BitSequence *context, int context_len, unsigned int r, unsigned int len, unsigned int hash_len, FILE *fp, bool tv)
+void hmac_kdf_digest(int mode, BitSequence *Ki, int Ki_len, BitSequence *iv, int iv_len, BitSequence *label, int label_len, BitSequence *context, int context_len, unsigned int r, unsigned int len, unsigned int hash_len, FILE *fp, bool tv)
 {
 	BitSequence *k_output;
 	double n;
@@ -688,11 +704,11 @@ void hmac_kdf_digest(int mode, int rate, int capacity, BitSequence *Ki, int Ki_l
 		fprintf(fp, "n = %d\n\n", (int) n);
 
 	if(mode == CTR_MODE)
-		hmac_kdf_ctr_digest(rate, capacity, (int) n, byte_r, Ki, Ki_len, label, label_len, context, context_len, len_byte, hash_byte, k_output, fp, tv);
+		hmac_kdf_ctr_digest((int) n, byte_r, Ki, Ki_len, label, label_len, context, context_len, len_byte, hash_byte, k_output, fp, tv);
 	else if(mode == FB_MODE)
-		hmac_kdf_fb_digest(rate, capacity, (int) n, byte_r, Ki, Ki_len, iv, iv_len, label, label_len, context, context_len, len_byte, hash_byte, k_output, fp, tv);
+		hmac_kdf_fb_digest((int) n, byte_r, Ki, Ki_len, iv, iv_len, label, label_len, context, context_len, len_byte, hash_byte, k_output, fp, tv);
 	else if(mode == DP_MODE)
-		hmac_kdf_dp_digest(rate, capacity, (int) n, byte_r, Ki, Ki_len, label, label_len, context, context_len, len_byte, hash_byte, k_output, fp, tv);
+		hmac_kdf_dp_digest((int) n, byte_r, Ki, Ki_len, label, label_len, context, context_len, len_byte, hash_byte, k_output, fp, tv);
 	else
 		printf("unknown mode \n");
 
