@@ -556,7 +556,7 @@ void drbg_sha3_hmac_digest(unsigned int rate, unsigned int capacity, unsigned ch
 	ctx.capacity = capacity;
 	ctx.delimitedSuffix = delimitedSuffix;
 
-	ctx.setting.refreshperiod = 1;
+	ctx.setting.refreshperiod = 2;
 
 	ctx.setting.predicttolerance = false;   //예측내성
 	ctx.setting.usingperstring = true;      //개별화
