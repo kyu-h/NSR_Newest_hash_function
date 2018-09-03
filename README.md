@@ -10,6 +10,7 @@ SHA2 is an auxiliary tool for verifying implementation conformance.
  <a href="https://github.com/kyu-h/NSR_Newest_hash_function/tree/master/SHA3" target="_blank">SHA3 stand alone version</a> <br>
  <a href="https://github.com/kyu-h/NSR_Newest_hash_function/tree/master/SHA3_Devide_ver" target="_blank">SHA3 devide version(init, update, final)</a> <br>
 2. Make a HMAC which is SHA3 version due to May 4. --> Clear(May 14) <br>
+ ->Reference site HMAC : https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.198-1.pdf <br>
  ->Can check HMAC hash values result in this web site: http://www.wolfgang-ehrhardt.de/hmac-sha3-testvectors.html <br><br>
  <a href="https://github.com/kyu-h/NSR_Newest_hash_function/tree/master/SHA3_HMAC" target="_blank">SHA3 HMAC(Based SHA3 devide version)</a> <br>
 3. Make a Hash_DRBG due to MAY 16. --> Clear(June 11)<br>
